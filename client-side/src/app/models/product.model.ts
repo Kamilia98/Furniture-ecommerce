@@ -2,9 +2,10 @@ export interface product {
   id: number;
   img: string;
   title: string;
-  discription: string;
+  description: string;
   price: number;
-  category?: string;
-  date?: string;
+  category: string;
+  date: Date;
   sale?: number | false;
+  quantity: number;
 }

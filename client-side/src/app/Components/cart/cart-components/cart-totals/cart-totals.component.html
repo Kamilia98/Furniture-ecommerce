@@ -1,17 +1,19 @@
-<div class="p-6 bg-white shadow-lg rounded-lg text-sm lg:text-lg">
+<div class="p-6 bg-white shadow rounded-lg text-sm lg:text-lg">
   <h2 class="text-lg lg:text-xl font-bold text-black mb-4">Cart Totals</h2>
-  <div class="flex justify-between mb-2 text-gray-500">
+  <div class="flex justify-between mb-2 text-gray">
     <span>Subtotal:</span>
-    <span>Rs. {{ subtotal | number : "1.2-2" }}</span>
+    <span>{{ subtotal | currency }}</span>
   </div>
-  <div class="flex justify-between text-lg font-bold text-dark">
+  <div class="flex justify-between text-lg font-bold text-primary">
     <span>Total:</span>
-    <span>Rs. {{ subtotal | number : "1.2-2" }}</span>
+    <span> {{ subtotal | currency }}</span>
   </div>
-  <button
-  (click)="goToCheckout()" 
-    class="w-full mt-6 py-2 bg-dark text-white font-semibold rounded-md hover:bg-[#8c6d1e]"
+  @if(subtotal>0){
+  <app-button
+    class="flex justify-center items-center mx-auto mt-8"
+    type="primary-fill"
+    (click)="goToCheckout()"
+    >Check Out</app-button
   >
-    Check Out
-  </button>
+  }
 </div>

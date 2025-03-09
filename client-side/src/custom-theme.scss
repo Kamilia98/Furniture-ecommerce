@@ -1,0 +1,26 @@
+// Custom Theming for Angular Material
+// For more information: https://material.angular.io/guide/theming
+@use "@angular/material" as mat;
+
+html {
+  @include mat.theme(
+    (
+      color: (
+        theme-type: light,
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+  @include mat.slider-overrides(
+    (
+      handle-color: var(--color-primary),
+      active-track-color: var(--color-primary),
+      hover-state-layer-color: transparent,
+      focus-state-layer-color: transparent,
+      focus-handle-color:#a87706
+    )
+  );
+}

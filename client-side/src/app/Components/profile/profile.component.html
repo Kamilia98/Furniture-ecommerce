@@ -1,0 +1,120 @@
+<main
+  class="max-w-[1680px] flex flex-col gap-2 items-start px-4 md:px-6 lg:px-8 mx-auto w-full"
+>
+  <div class="w-full">
+    <div class="flex w-full min-h-screen">
+      <aside class="py-4 pr-4 hidden md:block border-r">
+        <div class="flex gap-2 items-center py-2">
+          <span
+            class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8"
+            ><img
+              class="aspect-square h-full w-full"
+              alt="User avatar"
+              src="images/user.png"
+          /></span>
+          <div class="flex flex-col">
+            <p class="text-sm">{{ user.username }}</p>
+            <p class="text-xs">{{ user.email }}</p>
+          </div>
+        </div>
+        <div role="none" class="shrink-0 bg-border h-[1px] w-full mt-4"></div>
+        <ul class="flex flex-col gap-2 py-2">
+          <li
+            class="flex items-center gap-2 text-sm px-4 py-4 rounded-3xl font-medium cursor-pointer {{
+              activeComponent === 'orders' ? 'bg-gray-light' : 'bg-transparent'
+            }} hover:bg-gray-light transition-colors duration-500"
+            (click)="route('orders')"
+          >
+            <div class="w-5 h-5 stroke-gray-300">
+              <img src="/icons/orders.svg" alt="" />
+            </div>
+            Orders
+          </li>
+          <li
+            class="flex items-center gap-2 text-sm px-4 py-4 rounded-3xl font-medium cursor-pointer {{
+              activeComponent === 'favorites' ? 'bg-gray-light' : 'bg-transparent'
+            }} hover:bg-gray-light transition-colors duration-500"
+            (click)="route('favorites')"
+          >
+            <div class="w-5 h-5 stroke-gray-300">
+              <img src="/icons/heart.svg" alt="" />
+            </div>
+            Favorites
+          </li>
+
+          <li
+            class="flex items-center gap-2 text-sm px-4 py-4 rounded-3xl font-medium cursor-pointer {{
+              activeComponent === 'setting' ? 'bg-gray-light' : 'bg-transparent'
+            }}  hover:bg-gray-light transition-colors duration-500"
+            (click)="route('setting')"
+          >
+            <div class="w-5 h-5 stroke-gray-300">
+              <img src="/icons/setting.svg" alt="" />
+            </div>
+            Settings
+          </li>
+          <li
+            class="flex items-center gap-2 text-sm px-4 py-4 rounded-3xl font-medium cursor-pointer bg-transparent hover:bg-gray-light transition-colors duration-500"
+            (click)="logout()"
+          >
+            <div class="w-5 h-5 stroke-gray-300">
+              <img src="/icons/logout.svg" alt="" />
+            </div>
+            Logout
+          </li>
+        </ul>
+      </aside>
+
+      <router-outlet />
+
+      <!-- Navigation in small screen -->
+
+      <div
+        class="fixed bottom-0 px-2 left-0 right-0 border-t border-border bg-white flex md:hidden"
+      >
+        <ul class="flex justify-between w-full items-center">
+          <li
+            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 hover:border-black {{
+              activeComponent === 'orders'
+                ? 'border-black'
+                : 'border-transparent'
+            }}"
+            (click)="route('orders')"
+          >
+            <img src="/icons/orders.svg" alt="" />
+            <p class="text-xs sm:text-sm">Orders</p>
+          </li>
+          <li
+            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 hover:border-black {{
+              activeComponent === 'favorites'
+                ? 'border-black'
+                : 'border-transparent'
+            }}"
+            (click)="route('favorites')"
+          >
+            <img src="/icons/heart.svg" alt="" />
+            <p class="text-xs sm:text-sm">Favorites</p>
+          </li>
+
+          <li
+            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 hover:border-black {{
+              activeComponent === 'setting'
+                ? 'border-black'
+                : 'border-transparent'
+            }}"
+            (click)="route('setting')"
+          >
+            <img src="/icons/setting.svg" alt="" srcset="" />
+            <p class="text-xs sm:text-sm">Settings</p>
+          </li>
+          <li
+            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 border-transparent hover:border-black" (click)="logout()"
+          >
+            <img src="/icons/logout.svg" alt="" />
+            <p class="text-xs sm:text-sm">Logout</p>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</main>

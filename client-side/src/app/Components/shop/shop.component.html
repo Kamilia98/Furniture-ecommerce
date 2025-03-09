@@ -1,7 +1,6 @@
-<!-- shop.component.html -->
 <app-header-banner bannerTitle="Shop"></app-header-banner>
 
-<div class="bg-light px-5">
+<div class="bg-secondary px-5">
   <div
     class="h-[100px] flex items-center justify-between max-w-[1240px] m-auto"
   >
@@ -11,77 +10,115 @@
         <img src="icons/filter.svg" alt="Filter Icon" />
         <p>Filter</p>
       </div>
-
-      <div class="hidden sm:block border border-gray-300 self-stretch"></div>
-
-      <p class="hidden text-sm sm:block">Showing 1-16 of 40 Results</p>
+      <div class="hidden sm:block border border-gray-medium self-stretch"></div>
+      <p class="hidden text-sm sm:block">
+        {{ getDisplayedResultsRange() }}
+      </p>
     </div>
 
     <!-- Right Section: Sorting Dropdown -->
     <div class="flex items-center gap-4">
       <p>Sort By</p>
-      <app-dropdown
-        [items]="menuItems"
-        [selectedValue]="searchValue"
-        (selectedValueChange)="onSortChange($event)"
-      ></app-dropdown>
+      <div class="relative" #sortMenu>
+        <button
+          class="bg-white h-14 flex items-center px-5 cursor-pointer w-full min-w-48 border border-gray-medium rounded-md focus:outline-none"
+          (click)="toggleDropdown(true)"
+        >
+          <span class="text-gray-dark">{{ selectedSortValue }}</span>
+        </button>
+        @if(showSortMenu && sortMenuItems.length > 0){
+        <app-dropdown
+          [items]="sortMenuItems"
+          (selectedValueChange)="onSortChange($event)"
+        ></app-dropdown>
+        }
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Content -->
-<div class="p-5 grid grid-cols-12 gap-6 relative">
-  <!-- overlay -->
+<div #productsContainer class="p-5 sm:p-10 flex relative gap-5">
+  <!-- Overlay -->
+  @if (showFilters) {
   <div
-    class="absolute top-0 left-0 h-full z-1 w-full backdrop-brightness-50 lg:col-span-3 lg:flex-col lg:static lg:w-auto lg:p-0"
-    *ngIf="showFilters"
+    class="fixed lg:absolute top-0 left-0 w-full h-full bg-black-transparent z-[999] lg:hidden"
+    (click)="toggleShowFilter(false)"
+  ></div>
+  <div
+    class="fixed lg:relative top-0 left-0 w-full h-full lg:h-auto bg-white max-w-[300px] lg:max-w-auto lg:min-w-[300px] p-[25px] lg:pl-0 lg:pt-0 flex flex-col gap-[25px] z-[1000] lg:z-0 border-r border-gray-medium"
+    [@slideInOut]="showFilters ? 'in' : 'out'"
   >
-    <div
-      class="w-[300px] bg-white h-full p-4 lg:p-0 lg:w-full flex flex-col gap-3"
-    >
-      <app-filter-option title="Rating">
-        <div>
-          <input type="checkbox" name="rating5" id="rating5" />
-          <label for="rating5">5</label>
+    <app-filter-option title="Category">
+      <div class="flex flex-col gap-2">
+        <div
+          *ngFor="let category of categories"
+          class="flex gap-2 items-center"
+        >
+          <input
+            type="checkbox"
+            [id]="'category' + category"
+            [name]="'category' + category"
+            (change)="onCategoryChange(category, $event)"
+            class="w-[1.2em] h-[1.2em]"
+          />
+          <label [for]="'category' + category">{{
+            category | titlecase
+          }}</label>
         </div>
-        <div>
-          <input type="checkbox" name="rating4" id="rating4" />
-          <label for="rating4">4</label>
-        </div>
-        <div>
-          <input type="checkbox" name="rating3" id="rating3" />
-          <label for="rating3">3</label>
-        </div>
-      </app-filter-option>
-      <app-filter-option title="Another Filter">
-        <!-- Add more filter options here -->
-      </app-filter-option>
-      <div class="self-center lg:hidden">
-        <app-button (click)="toggleShowFilter()">Apply</app-button>
       </div>
-    </div>
+    </app-filter-option>
+    <app-filter-option title="Price Range">
+      <mat-slider min="{{ priceMin }}" max="{{ priceMax }}">
+        <input
+          [value]="minPrice"
+          matSliderStartThumb
+          (change)="priceChange($event, true)"
+        />
+        <input
+          [value]="maxPrice"
+          matSliderEndThumb
+          (change)="priceChange($event, false)"
+        />
+      </mat-slider>
+      <div class="flex justify-between">
+        <span>{{ minPrice }}</span>
+        <span>{{ maxPrice }}</span>
+      </div>
+    </app-filter-option>
   </div>
+  }
+
+  <!-- Product Grid -->
   <div
-    class="bg-white grid col-span-12"
-    [ngClass]="{
-      'lg:col-span-9 ': showFilters
-    }"
+    class="w-full col-span-12 flex flex-col gap-5 justify-center"
+    [ngClass]="{ 'lg:col-span-9': showFilters }"
   >
+    @if (displayedProducts.length > 0) {
     <div
-      class="grid gap-6 w-full grid-cols-2 sm:grid-cols-3 md:grid-cols-4"
+      class="grid gap-6 w-full h-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
       [ngClass]="{
-        'lg:grid-cols-4': showFilters,
+        'lg:grid-cols-3': showFilters,
         'lg:grid-cols-5': !showFilters
       }"
     >
-      @for (item of products; track item.id) {
-      <app-product-item [product]="item"> </app-product-item>
+      @for (item of displayedProducts; track item.id) {
+      <app-product-item [product]="item"></app-product-item>
       }
     </div>
+    <app-pagination
+      [currentPage]="currentPage"
+      [pagesCount]="pagesCount"
+      (currentPageChange)="goToPage($event)"
+    ></app-pagination>
 
-    <div>
-      <app-button class="rounded-5" btnWidth="60px">1</app-button>
+    } @else {
+    <div
+      class="w-full h-full flex justify-center items-center text-center text-gray"
+    >
+      No products found.
     </div>
+    }
   </div>
 </div>
 

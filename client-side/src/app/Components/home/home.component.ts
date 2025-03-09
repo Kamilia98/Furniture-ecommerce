@@ -8,10 +8,12 @@ import {
 } from 'swiper/modules';
 
 import { CommonModule, UpperCasePipe } from '@angular/common';
-import { ButtonComponent } from '../../shared/button/button.component';
-import { ProductItemComponent } from '../../shared/product-item/product-item.component';
-import { product } from '../../models/product.model';
+
 import { Router, RouterModule } from '@angular/router';
+import { ProductService } from '../../Services/product.service';
+import { ButtonComponent } from '../shared/button/button.component';
+import { ProductItemComponent } from '../shared/product-item/product-item.component';
+import { product } from '../../Models/product.model';
 @Component({
   selector: 'app-home',
   imports: [
@@ -25,72 +27,14 @@ import { Router, RouterModule } from '@angular/router';
   styleUrl: './home.component.css',
 })
 export class HomeComponent implements AfterViewInit {
-  constructor(private router: Router) {}
+  constructor(private router: Router, private productService: ProductService) {
+    this.products = this.productService.getProducts().slice(0, 10);
+  }
   @ViewChild('swiperRef', { static: false }) swiperRef!: ElementRef;
   @ViewChild('imageSwiper', { static: false }) imageSwiper!: ElementRef;
   @ViewChild('imageSwiper2', { static: false }) imageSwiper2!: ElementRef;
 
-  products: product[] = [
-    {
-      id: 1,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-      sale: 20,
-    },
-    {
-      id: 2,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-    {
-      id: 3,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-    {
-      id: 4,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-      sale: 20,
-    },
-    {
-      id: 5,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-    {
-      id: 6,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-    {
-      id: 7,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-    {
-      id: 8,
-      img: '/images/product.png',
-      title: 'Syltherine',
-      discription: 'Stylish cafe chair',
-      price: 2500000,
-    },
-
-  ];
+  products: product[] = [];
   ngAfterViewInit() {
     new Swiper(this.swiperRef.nativeElement, {
       modules: [Navigation, EffectCoverflow, Pagination],

@@ -2,65 +2,73 @@
 <app-product-navigation />
 <!-- End product-navigation -->
 
-
 <!-- Product -->
 <div class="w-full bg-white">
-    <div class="w-full max-w-screen-lg mx-auto py-6 flex">
-        <div class="flex flex-col w-1/2 mr-6">
-            <!-- images section -->
-            <div class="flex space-x-4 ">
-                <!-- vertical images -->
-                <div class="flex flex-col">
-                    <app-thumbnail />
-                </div>
-                <!-- end tumbnails -->
-                <!-- main image -->
-                <div class="relative w-[30rem]">
-                    <div class="w-full h-[31.25rem] bg-[#f9f1e7] rounded-lg"></div>
-                    <img class="absolute w-full top-20"
-                        src="images/products/Cloud sofa three seater + ottoman_2 1.png" />
-                </div>
-                <!-- end main image -->
-            </div>
-            <!-- end images section -->
+  <div class="w-full max-w-screen-lg mx-auto py-6 flex">
+    <div class="flex flex-col w-1/2 mr-6">
+      <!-- images section -->
+      <div class="flex space-x-4">
+        <!-- vertical images -->
+        <div class="flex flex-col">
+          <app-thumbnail />
         </div>
-        <div class="w-1/2 space-y-4">
-            <h1 class="text-4xl font-light">Asgaard sofa</h1>
-            <p class="text-gray-500 text-xl font-medium">Rs. 250,000.00</p>
-            <div class="flex items-center space-x-4">
-                <!-- Stars -->
-                <span class="text-gray-500 text-sm">5 Customer Review</span>
-            </div>
-            <p class="text-sm text-black">
-                Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted
-                hero with a well-balanced audio.
-            </p>
-            <div class="space-y-2">
-                <p class="text-gray-500 text-sm">Size</p>
-                <!-- will be a compnenet -->
-                <div class="flex space-x-4">
-                    <div class="w-8 h-8 bg-yellow-600 text-white flex items-center justify-center rounded">L</div>
-                    <div class="w-8 h-8 bg-gray-100 text-black flex items-center justify-center rounded">XL</div>
-                    <div class="w-8 h-8 bg-gray-100 text-black flex items-center justify-center rounded">XS</div>
-                </div>
-            </div>
-            <div class="space-y-2">
-                <p class="text-gray-500 text-sm">Color</p>
-                <!-- will be a component -->
-                <div class="flex space-x-4">
-                    <div class="w-8 h-8 bg-indigo-500 rounded-full"></div>
-                    <div class="w-8 h-8 bg-black rounded-full"></div>
-                    <div class="w-8 h-8 bg-yellow-600 rounded-full"></div>
-                </div>
-            </div>
-            <!-- Buttons -->
+        <!-- end tumbnails -->
+        <!-- main image -->
+        <div class="relative w-[30rem]">
+          <div class="w-full h-[31.25rem] bg-secondary rounded-lg"></div>
+          <img
+            class="absolute w-full top-20"
+            src="images/products/1 (2).png"
+          />
         </div>
+        <!-- end main image -->
+      </div>
+      <!-- end images section -->
     </div>
+    <div class="w-1/2 space-y-4">
+      <h1 class="text-4xl font-light">Asgaard sofa</h1>
+      <p class="text-gray text-xl font-medium">Rs. 250,000.00</p>
+
+      <p class="text-sm text-black">
+        Setting the bar as one of the loudest speakers in its class, the Kilburn
+        is a compact, stout-hearted hero with a well-balanced audio.
+      </p>
+      <div class="space-y-2">
+        <p class="text-gray text-sm">Size</p>
+        <!-- will be a compnenet -->
+        <div class="flex space-x-4">
+          <div
+            class="w-8 h-8 bg-primary text-white flex items-center justify-center rounded"
+          >
+            L
+          </div>
+          <div
+            class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded"
+          >
+            XL
+          </div>
+          <div
+            class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded"
+          >
+            XS
+          </div>
+        </div>
+      </div>
+      <div class="space-y-2">
+        <p class="text-gray text-sm">Color</p>
+        <!-- will be a component -->
+        <div class="flex space-x-4">
+          <div class="w-8 h-8 bg-indigo-500 rounded-full"></div>
+          <div class="w-8 h-8 bg-black rounded-full"></div>
+          <div class="w-8 h-8 bg-primary rounded-full"></div>
+        </div>
+      </div>
+      <!-- Buttons -->
+    </div>
+  </div>
 </div>
 
 <!-- End product -->
-
-
 
 <!-- About the product  -->
 <app-product-description />

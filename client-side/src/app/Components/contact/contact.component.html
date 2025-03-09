@@ -1,101 +1,137 @@
+<!-- Page Header -->
 <app-header-banner bannerTitle="Contact"></app-header-banner>
 
-
-<div class="text-center my-10 px-4 pt-15">
-  <h1 class="text-4xl font-semibold">Get in touch with us</h1>
-  <p class="text-base text-gray-700 mt-6 max-w-2xl mx-auto">
-    For More Information About Our Product & Services. Please Feel Free To Drop
-    Us An Email. Our Staff Are Always here To Help You Out. Do Not Hesitate!
-  </p>
-</div>
-
-<div class="flex flex-col md:flex-row justify-center items-start gap-10 px-4 pb-15">
-  <div class="p-1 max-w-md">
-    <div class="flex items-center gap-3 mb-3">
-      <i class="fas fa-map-marker-alt text-xl text-black"></i>
-      <p class="text-xl font-semibold text-black">Address</p>
-  </div>
-  <p class="text-base text-black pl-8 mb-10">236 5th SE Avenue, New York NY10000, United States</p>
-
-  <div class="flex items-center gap-3 mt-4 mb-3">
-      <i class="fas fa-phone text-xl text-black"></i>
-      <p class="text-xl font-semibold text-black">Phone</p>
-  </div>
-  <p class="text-base text-black pl-8">Mobile: +(84) 546-6789</p>
-  <p class="text-base text-black pl-8 mb-10">Hotline: +(84) 456-6789</p>
-
-  <div class="flex items-center gap-3 mt-4 mb-3">
-      <i class="fas fa-clock text-xl text-black"></i>
-      <p class="text-xl font-semibold text-black">Working Hours</p>
-  </div>
-  <p class="text-sm text-black pl-8">Mon - Fri: 9:00 AM - 10:00 PM</p>
-  <p class="text-sm text-black pl-8 ">Sat - Sun: 10:00 AM - 9:00 PM</p>
+<!-- Contact Section -->
+<section class="p-10 flex flex-col gap-10">
+  <!-- Contact Header -->
+  <div class="text-center flex flex-col items-center gap-4 w-full">
+    <h1 class="text-4xl font-semibold">Get in Touch with Us</h1>
+    <p class="text-base text-gray max-w-2xl">
+      For more information about our products and services, please feel free to
+      drop us an email. Our team is always here to assist you. Don't hesitate to
+      reach out!
+    </p>
   </div>
 
-  <div class="max-w-md w-full rounded-lg p-1 bg-white">
-    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="flex flex-col space-y-4">
-      <label for="name" class="text-base font-medium">Your Name</label>
-      <input
-        id="name"
-        formControlName="name"
-        type="text"
-        class="border-2 border-gray-400 px-4 py-2 rounded-md w-full h-13"
-        placeholder="Enter Your Name"
-      />
-      <p *ngIf="contactForm.get('name')?.invalid && contactForm.get('name')?.touched" class="text-red-500 text-sm">
-        Name is required.
-      </p>
+  <div
+    class="flex flex-col md:flex-row justify-center items-start gap-[50px] md:gap-[80px]"
+  >
+    <!-- Contact Information -->
+    <div class="flex flex-col gap-10 w-[500px]">
+      <!-- Address -->
+      <div class="flex gap-3">
+        <i class="fas fa-map-marker-alt text-xl text-black mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold text-black">Address</p>
+          <p class="text-base text-black">
+            15 Tahrir Square, Downtown, Cairo, Egypt
+          </p>
+        </div>
+      </div>
 
-      <label for="email" class="text-base font-medium">Your Email</label>
-      <input
-        id="email"
-        formControlName="email"
-        type="email"
-        class="border-2 border-gray-400 px-4 py-2 rounded-md w-full h-13"
-        placeholder="Enter Your Email"
-      />
-      <p *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched" class="text-red-500 text-sm">
-        Valid email is required.
-      </p>
+      <!-- Phone -->
+      <div class="flex gap-3">
+        <i class="fas fa-phone text-xl mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold">Phone</p>
+          <p>Mobile: +20 100 123 4567</p>
+          <p>Hotline: 16000</p>
+        </div>
+      </div>
 
-      <label for="subject" class="text-base font-medium">Subjet</label>
-      <input
-        id="subject"
-        formControlName="subject"
-        type="text"
-        class="border-2 border-gray-400 px-4 py-2 rounded-md w-full h-13"
-        placeholder="This is an Optional"
-      />
+      <!-- Working Hours -->
+      <div class="flex gap-3">
+        <i class="fas fa-clock text-xl mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold">Working Hours</p>
+          <p>Mon - Fri: 9:00 AM - 10:00 PM</p>
+          <p>Sat - Sun: 10:00 AM - 9:00 PM</p>
+        </div>
+      </div>
+    </div>
 
-      <label for="message" class="text-base font-medium">Your Message</label>
-      <textarea
-        id="message"
-        formControlName="message"
-        class="border-2 border-gray-400 px-4 py-2 rounded-md w-full h-28"
-        placeholder="Write Your Message"
-      ></textarea>
-      <p *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched" class="text-red-500 text-sm">
-        Message cannot be empty.
-      </p>
-
-      <button
-        type="submit"
-        class="text-white bg-[#B88E2F] text-base w-56 px-4 py-2 rounded-md hover:bg-[#b88f2fc0]"
-        aria-label="Submit Contact Form"
+    <!-- Contact Form -->
+    <div class="max-w-md w-full p-1 bg-white">
+      <form
+        [formGroup]="contactForm"
+        (ngSubmit)="onSubmit()"
+        class="flex flex-col space-y-4"
       >
-        Submit
-      </button>
-    </form>
-    <p *ngIf="message" [ngClass]="{'text-green-500': isSuccess, 'text-red-500': !isSuccess}" class="mt-4 text-sm">{{ message }}</p>
+        <!-- Name Field -->
+        <label for="name" class="text-base font-medium">Your Name</label>
+        <input
+          id="name"
+          formControlName="name"
+          type="text"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter Your Name"
+          required
+        />
+        @if (contactForm.get('name')?.invalid &&
+        contactForm.get('name')?.touched) {
+        <p class="text-red-light text-sm">Name is required.</p>
+        }
 
+        <!-- Email Field -->
+        <label for="email" class="text-base font-medium">Your Email</label>
+        <input
+          id="email"
+          formControlName="email"
+          type="email"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter Your Email"
+          required
+        />
+        @if (contactForm.get('email')?.invalid &&
+        contactForm.get('email')?.touched) {
+        <p class="text-red-light text-sm">Please enter a valid email.</p>
+        }
+
+        <!-- Subject Field -->
+        <label for="subject" class="text-base font-medium"
+          >Subject (Optional)</label
+        >
+        <input
+          id="subject"
+          formControlName="subject"
+          type="text"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter a Subject"
+        />
+
+        <!-- Message Field -->
+        <label for="message" class="text-base font-medium">Your Message</label>
+        <textarea
+          id="message"
+          formControlName="message"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-28"
+          placeholder="Write Your Message"
+          required
+        ></textarea>
+        @if (contactForm.get('message')?.invalid &&
+        contactForm.get('message')?.touched) {
+        <p class="text-red-light text-sm">Message cannot be empty.</p>
+        }
+
+        <!-- Submit Button -->
+        <app-button type="primary-fill">Submit</app-button>
+      </form>
+
+      <!-- Submission Message -->
+      @if (message) {
+      <p
+        [ngClass]="{
+          'text-green-500': isSuccess,
+          'text-red-light': !isSuccess
+        }"
+        class="mt-4 text-sm"
+      >
+        {{ message }}
+      </p>
+      }
+    </div>
   </div>
+</section>
 
-</div>
-
-
+<!-- Feature Banner -->
 <app-feature-banner></app-feature-banner>
-
-
-
-
-

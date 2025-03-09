@@ -1,13 +1,25 @@
 import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, Validators ,ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { HeaderBannerComponent } from '../header-banner/header-banner.component';
-import { FeatureBannerComponent } from '../feature-banner/feature-banner.component';
+import { HeaderBannerComponent } from '../shared/header-banner/header-banner.component';
+import { FeatureBannerComponent } from '../shared/feature-banner/feature-banner.component';
+import { ButtonComponent } from '../shared/button/button.component';
 
 @Component({
   selector: 'app-contact',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,HeaderBannerComponent,FeatureBannerComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    HeaderBannerComponent,
+    FeatureBannerComponent,
+    ButtonComponent,
+  ],
   templateUrl: './contact.component.html',
   styleUrls: ['./contact.component.css'],
 })
@@ -34,6 +46,6 @@ export class ContactComponent {
     } else {
       this.message = 'Please fill all fields correctly.';
       this.isSuccess = false;
-        }
+    }
   }
 }

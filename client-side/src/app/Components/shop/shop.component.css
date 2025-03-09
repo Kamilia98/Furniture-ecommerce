@@ -5,3 +5,7 @@
   -ms-transform: rotate(45deg);
   -o-transform: rotate(45deg);
 }
+.mat-mdc-slider {
+  width: calc(100% - 15px);
+
+}

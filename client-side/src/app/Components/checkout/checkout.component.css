@@ -1,6 +1,5 @@
 * {
   margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
@@ -8,19 +7,11 @@ section {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px;
   margin: auto;
 }
 
-.checkout-container {
-  flex: 1;
-  background-color: #f9f9f9;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
 .billing-form {
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
@@ -29,22 +20,22 @@ section {
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--color-gray-dark);
 }
 
 .billing-form label {
   font-weight: bold;
   margin-top: 10px;
-  color: #444;
+  color: var(--color-gray-dark);
 }
 
 .billing-form input,
 .billing-form select,
 .billing-form textarea {
-  width: 90%;
-  padding: 10px;
+  width: 100%;
+  padding: 15px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--color-gray);
   border-radius: 10px;
   font-size: 16px;
 }
@@ -53,16 +44,16 @@ section {
 .billing-form select:focus,
 .billing-form textarea:focus {
   outline: none;
-  border-color: #3333338c;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  border-color: var(--color-gray-dark);
+  box-shadow: var(--shadow);
 }
 
 .Confirming-payment {
   flex: 1;
-  background-color: #f9f9f9;
-  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   height: max-content;
 }
 
@@ -70,7 +61,7 @@ section {
   font-size: 32px;
   font-weight: 700;
   margin-bottom: 15px;
-  color: #333;
+  color: var(--color-gray-dark);
 }
 
 table {
@@ -83,15 +74,13 @@ th,
 td {
   padding: 10px;
   text-align: left;
-  /* border-bottom: 1px solid #ddd; */
 }
 
 th {
-  background-color: #f3f3f3;
   border-radius: 5px;
 }
 .total {
-  color: #b88e2f;
+  color: var(--color-primary);
   font-weight: bold;
 }
 .payment-method p {
@@ -112,25 +101,12 @@ input[type="radio"] {
 }
 .policy {
   font-weight: bold;
-}
-button {
-  margin: 0 auto;
-  display: block;
-  width: 200px;
-  padding: 12px;
-  margin-top: 20px;
-  /* background-color: #333; */
-  color: rgb(0, 0, 0);
-  font-size: 18px;
-  border: 1px solid #333;
-  border-radius: 8px;
   cursor: pointer;
-  transition: 0.3s ease-in-out;
 }
-
-button:hover {
-  background-color: #333;
-  color: white;
+.error {
+  color: red;
+  font-size: 14px;
+  margin-top: 5px;
 }
 
 /* Responsive Design */

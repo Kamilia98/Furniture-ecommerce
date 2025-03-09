@@ -1,0 +1,57 @@
+<nav
+  class="sticky top-0 z-[999] flex h-[100px] items-center justify-between bg-white px-[10px] shadow lg:px-[30px] gap-[10px]"
+>
+  <!-- Logo -->
+  <div class="flex items-center gap-[5px]" routerLink="/home">
+    <img src="images/logo.png" alt="Logo" class="w-[30px] lg:w-[50px]" />
+    <div class="font-montserrat text-2xl font-bold lg:text-4xl">Furniro</div>
+  </div>
+
+  <!-- Navigation Links -->
+  <div class="hidden flex-1 md:block">
+    <app-navigation></app-navigation>
+  </div>
+
+  <!-- Search Input -->
+  <app-search
+    [items]="productsNames"
+    (onSelect)="goToProduct($event)"
+  ></app-search>
+
+  <!-- Actions -->
+  <div class="hidden md:block">
+    <app-user-actions></app-user-actions>
+  </div>
+
+  <!-- Menu Button -->
+  <button
+    (click)="toggleMenu()"
+    class="cursor-pointer"
+    [ngClass]="{ active: isActive }"
+  >
+    <div
+      class="hamburgerMenu flex h-[40px] w-[40px] flex-col items-center justify-evenly md:hidden"
+    >
+      <span
+        class="menuSign w-[60%] border-2 rounded-[5px] duration-300 ease"
+      ></span>
+      <span
+        class="menuSign w-[90%] border-2 rounded-[5px] duration-300 ease"
+      ></span>
+      <span
+        class="menuSign w-[60%] border-2 rounded-[5px] duration-300 ease"
+      ></span>
+    </div>
+  </button>
+
+  <!-- Mobile Menu -->
+  @if(isActive){
+  <div
+    class="absolute top-[100px] right-0 flex-col w-[250px] bg-white text-center shadow md:hidden"
+    (click)="toggleMenu()"
+  >
+    <app-navigation></app-navigation>
+    <app-user-actions></app-user-actions>
+  </div>
+  }
+</nav>

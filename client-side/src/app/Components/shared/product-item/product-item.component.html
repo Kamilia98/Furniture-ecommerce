@@ -1,0 +1,110 @@
+<div
+  class="bg-gray-light relative overflow-hidden"
+  (mouseenter)="onMouseEnter()"
+  (mouseleave)="onMouseLeave()"
+  aria-labelledby="product-title"
+>
+  @if (product.sale) {
+  <p
+    class="absolute w-[50px] h-[50px] right-[10px] top-[10px] p-[10px] text-white rounded-full bg-red-light flex items-center justify-center"
+    aria-label="Sale discount"
+  >
+    -{{ product.sale }}%
+  </p>
+  } @if(isNewProduct()){
+  <p
+    class="absolute w-[50px] h-[50px] right-[10px] top-[10px] p-[10px] text-white rounded-full bg-green-light flex items-center justify-center"
+    aria-label="Sale discount"
+  >
+    New
+  </p>
+
+  }
+  <div [routerLink]="['/product', product.id]" class="cursor-pointer">
+    <div
+      class="bg-secondary h-[300px] flex justify-center items-center overflow-hidden"
+    >
+      <img
+        [src]="product.img"
+        class="w-full bg-secondary"
+        [alt]="product.title"
+        loading="lazy"
+      />
+    </div>
+
+    <!-- Info -->
+    <div class="p-3">
+      <div class="flex justify-between">
+        <h2 class="font-semibold line-clamp-1" id="product-title">
+          {{ product.title }}
+        </h2>
+      </div>
+      <p class="my-3 text-gray line-clamp-2">{{ product.description }}</p>
+
+      <div
+        class="flex flex-col lg:flex-row gap-1 justify-between lg:items-center overflow-hidden lg:mb-[16px]"
+      >
+        @if (product.sale) {
+        <p class="font-semibold">
+          {{ product.price * (1 - product.sale / 100) | currency }}
+        </p>
+        <p class="line-through text-xs text-gray">
+          {{ product.price | currency }}
+        </p>
+        } @else {
+        <p class="font-semibold">{{ product.price | currency }}</p>
+        <p class="h-[16px]"></p>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div
+    class="hidden bg-black-transparent p-3 w-full flex flex-col items-center justify-center"
+    [ngClass]="{
+      'lg:flex lg:absolute lg:h-full lg:top-0 lg:left-0': !disableAnimation
+    }"
+    [@slideInOut]="isHovered ? 'in' : 'out'"
+    [@.disabled]="disableAnimation"
+  >
+    <app-button type="plainBtn" (click)="addToCart()" btnWidth="200px"
+      >{{ isInCart(product.id) ? "Remove from" : "Add to" }} Cart</app-button
+    >
+    <nav
+      class="flex flex-row flex-wrap justify-center gap-5 text-white mt-3"
+      aria-label="Product actions"
+    >
+      <a
+        class="flex gap-1 cursor-pointer"
+        [routerLink]="['/product', product.id]"
+        aria-label="View product details"
+      >
+        <img src="/icons/view.svg" class="w-[16px]" alt="View icon" />
+        <span>View</span>
+      </a>
+      <a
+        class="flex gap-1 cursor-pointer"
+        [routerLink]="['/comparison']"
+        aria-label="Compare products"
+      >
+        <img src="/icons/compare.svg" class="w-[16px]" alt="Compare icon" />
+        <span>Compare</span>
+      </a>
+      <button
+        class="flex gap-1 cursor-pointer"
+        aria-label="Add to wishlist"
+        (click)="addToFavourites()"
+      >
+        <img
+          src="/icons/heart-white{{
+            isFavorite(product.id) ? '-fill' : ''
+          }}.svg"
+          class="w-[16px]"
+          alt="Like icon"
+        />
+        <span>Like</span>
+      </button>
+    </nav>
+  </div>
+</div>

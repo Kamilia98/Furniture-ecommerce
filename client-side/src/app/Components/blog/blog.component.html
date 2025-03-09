@@ -1,47 +1,65 @@
 <app-header-banner bannerTitle="Blog"></app-header-banner>
 
-<div class="flex p-4 md:p-30 flex-col md:flex-row justify-center items-start gap-10"
->
+<section class="flex flex-col gap-5 my-0 mx-auto max-w-[1240px] p-10">
+  @if(blog){
+  <div class="container mx-auto p-4 max-w-3xl">
+    <img
+      [src]="blog.image"
+      [alt]="blog.title"
+      class="w-180 h-130 object-contain rounded-lg"
+    />
 
-<div *ngIf="post" class="container mx-auto p-4 max-w-3xl">
-  <img [src]="post.image" alt="{{ post.title }}" class="w-180 h-130 object-fit: scale-down rounded-lg">
-  <div class="flex items-center gap-2 md:gap-4 text-gray-500 text-xs md:text-sm mt-2 flex-nowrap overflow-hidden">
-    <p class="flex items-center">
-      <img src="/images/profile.svg" alt="profile" class="w-4 h-4 mr-1 shrink-0">
-      {{ post.users }}
-    </p>
-    <p class="flex items-center">
-      <img src="/images/calender.svg" alt="date" class="w-4 h-4 mr-1 shrink-0">
-      {{ post.date }}
-    </p>
-    <p class="flex items-center">
-      <img src="/images/tag-023bd938.svg" alt="category" class="w-4 h-4 mr-1 shrink-0">
-      {{ post.category }}
-    </p>
-  </div>
-
-  <h2 class="text-lg md:text-xl font-semibold mt-4 max-w-2xl">{{ post.title }}</h2>
-  <p class="text-gray-700 text-sm md:text-base mt-2 max-w-2xl leading-relaxedmax-w-2xl leading-relaxed">{{ post.content }}</p>
-</div>
-
-
-<div class="grid grid-cols-1">
-  <h1 class="text-black font-semibold text-[25px] p-2">Related Posts</h1>
-  <div *ngFor="let post of relatedPosts">
-    <button
-      class="flex items-center gap-4 px-4 py-2 rounded-lg p-2 text-black"
-      [routerLink]="['/blog', post.id]"
-    >
-    <img [src]="post.image" alt="{{ post.title }}" class="w-30 h-28 object-fit: scale-down rounded">
-    <div class="flex flex-col items-start">
-      <h5 class="font-medium text-base">{{ post.title }}</h5>
-      <p class="text-gray-500 text-sm mt-1">{{ post.date }}</p>
+    <div class="flex items-center gap-4 text-gray text-xs md:text-sm mt-2">
+      <p class="flex items-center">
+        <img src="/icons/profile.svg" alt="Profile" class="w-4 h-4 mr-1" />
+        {{ blog.users }}
+      </p>
+      <p class="flex items-center">
+        <img src="/icons/calender.svg" alt="Date" class="w-4 h-4 mr-1" />
+        {{ blog.date }}
+      </p>
+      <p class="flex items-center">
+        <img src="/icons/tag.svg" alt="Category" class="w-4 h-4 mr-1" />
+        {{ blog.category }}
+      </p>
     </div>
 
-
-    </button>
+    <h2 class="text-lg md:text-xl font-semibold mt-4">{{ blog.title }}</h2>
+    <p class="text-gray-dark text-sm md:text-base mt-2 leading-relaxed">
+      {{ blog.content }}
+    </p>
   </div>
-</div>
-</div>
+  }
+
+  <!-- Related Blogs Section -->
+  <div class="flex flex-col gap-2">
+    <h1 class="text-black font-semibold text-[25px] p-2">Related Blogs</h1>
+    @if(relatedBlogs.length>0){
+    <ng-container>
+      <div *ngFor="let blog of relatedBlogs">
+        <div
+          class="flex items-center gap-4 px-4 py-2 rounded-lg text-black cursor-pointer border border-gray-medium hover:shadow duration-200 ease"
+          [routerLink]="['/blog', blog.id]"
+        >
+          <img
+            [src]="blog.image"
+            [alt]="blog.title"
+            class="w-30 h-28 object-contain rounded"
+          />
+          <div class="flex flex-col items-start">
+            <h5 class="font-medium text-base text-start">{{ blog.title }}</h5>
+            <p class="text-gray text-sm mt-1">{{ blog.date }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    } @else{
+    <ng-template>
+      <p class="text-gray-500 p-2">No related blogs found.</p>
+    </ng-template>
+
+    }
+  </div>
+</section>
 
 <app-feature-banner></app-feature-banner>

@@ -5,41 +5,42 @@
 @import "tailwindcss";
 
 @theme {
+  --shadow: 0 0 5px #0000004d;
   --font-poppins: "Poppins";
   --font-montserrat: "Montserrat";
-  --color-light: #fcf8f3;
-  --color-dark: #b88e2f;
+
+  --color-secondary: #f9f1e7;
+  --color-primary: #b88e2f;
 
   --color-gray: #9f9f9f;
-  --color-light2: #f9f1e7;
+  --color-gray-light: #f4f5f7;
+  --color-gray-medium: #d1d5dc;
+  --color-gray-dark: #333333;
 
-  --color-gray-medium: #9f9f9f;
-  --color-gray-light: #acacac80;
   --color-white: #fff;
   --color-black: #3a3a3a;
-  --color-gray: #9f9f9f;
-  --my-color: #fff3e3;
-  --dark-gray: #333333;
-  --light-gray: #f4f5f7;
-  --sale-icon: #e97171;
-  --product-gray: #898989;
+  --color-black-transparent: #00000073;
+
+  --color-red-light: #e97171;
+
+  --color-green-light: #2ec1ac;
 }
 
+
+body{
+  accent-color: var(--color-primary);
+}
 ::-webkit-scrollbar {
   width: 10px;
 }
 
-/* Track */
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--color-gray-light);
 }
-
-/* Handle */
 ::-webkit-scrollbar-thumb {
-  background: #555;
+  background: var(--color-gray-dark);
 }
 
-/* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
-  background: #555;
+  background: var(--color-gray-dark);
 }
