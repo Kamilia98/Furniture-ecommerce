@@ -1,48 +1,117 @@
 <main>
   <div
-    class="bg-[url('/images/hero.png')] bg-cover bg-no-repeat bg-center h-[calc(100vh-100px)] flex justify-center md:justify-end items-center p-10">
-    <div class="content bg-(--my-color) p-15 rounded-md">
-      <p class="tracking-wider font-semibold text-(--dark-gray)">New Arrival</p>
-      <h1 class="text-2xl md:text-5xl md:w-sm md:leading-15 font-extrabold text-(--color-dark) my-3">
+    class="bg-[url('/images/hero.png')] bg-cover bg-no-repeat bg-center h-[calc(100vh-100px)] flex justify-center md:justify-end items-center p-10 bg-fixed"
+  >
+    <div class="content bg-secondary p-15 rounded-md opacity-[0.9]">
+      <p class="tracking-wider font-semibold text-gray-dark">New Arrival</p>
+      <h1
+        class="text-2xl md:text-5xl md:w-sm md:leading-15 font-extrabold text-(--color-dark) my-3"
+      >
         Discover Our New Collection
       </h1>
-      <p class="my-5 md:w-md text-(#333333)">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus,
-        luctus nec ullamcorper mattis.
+      <p class="my-5 md:w-md text-gray-dark">
+        Step in and explore our diverse collection of timeless, versatile
+        furniture designed to blend effortlessly into any space, bringing pure
+        comfort and joy. Experience Furniro's feel-good design and make yourself
+        at home.
       </p>
       <app-button btnPadding="20px">{{ "Buy Now" | uppercase }}</app-button>
     </div>
   </div>
+
   <div class="flex flex-col items-center justify-center p-10">
     <h2 class="text-4xl my-3 font-bold">Browse The Range</h2>
-    <p class="text-(--color-gray)">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    <p class="text-gray text-center max-w-xl">
+      Find beautifully crafted furniture and décor that perfectly complement
+      your space. Discover timeless designs made for comfort and style.
     </p>
-    <div class="flex justify-around flex-col md:flex-row items-center gap-3 my-10">
+    <div
+      class="flex justify-around flex-col md:flex-row items-center gap-3 my-10"
+    >
       <div
-        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;">
-        <img src="/images/category1.png" alt="category1" />
+        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;"
+      >
+        <img src="/images/categories/1.png" alt="category1" />
         <p class="font-bold text-center my-5 text-xl">Dining</p>
       </div>
       <div
-        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;">
-        <img src="/images/category2.png" alt="category1" />
+        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;"
+      >
+        <img src="/images/categories/2.png" alt="category2" />
         <p class="font-bold text-center my-5 text-xl">Living</p>
       </div>
       <div
-        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;">
-        <img src="/images/category3.png" alt="category1" />
+        class="card bg-white rounded-lg overflow-hidden shadow-md transition-all duration-300 hover:shadow-xl hover:scale-110;"
+      >
+        <img src="/images/categories/3.png" alt="category3" />
         <p class="font-bold text-center my-5 text-xl">Bedroom</p>
       </div>
     </div>
   </div>
+
   <div class="flex flex-col items-center justify-center p-10">
     <h2 class="text-4xl my-3 font-bold">Our Products</h2>
-    <div class="grid grid-flow-col grid-rows-2 gap-6">
+    <div
+      class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-10 w-full"
+    >
       @for (item of products; track item.id) {
       <app-product-item [product]="item"> </app-product-item>
       }
     </div>
-    <app-button [type]="'outlinedBtn'" routerLink="/new-page" class="my-3">Show More</app-button>
+
+    <app-button type="primary-outline" routerLink="/shop">Show More</app-button>
+  </div>
+
+  <div
+    class="flex flex-col md:flex-row items-center justify-center gap-5 p-10 bg-secondary"
+  >
+    <div class="md:w-[50%]">
+      <h2 class="text-4xl font-bold my-2">50+ Beautiful rooms inspiration</h2>
+      <p class="my-3 text-gray">
+        Our designer already made a lot of beautiful prototipe of rooms that
+        inspire you
+      </p>
+      <app-button type="primary-fill">Explore More</app-button>
+    </div>
+    <div #swiperRef class="swiper w-full">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let category of products">
+          <div class="relative transform transition-transform duration-300">
+            <img
+              [src]="category.img"
+              class="w-full shadow-lg drop-shadow-3xlg h-100 transition-all duration-300"
+            />
+          </div>
+        </div>
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+
+  <div class="flex flex-col items-center justify-center bg-gray-light p-10">
+    <p class="text-(--color-gray) font-semibold">Share your setup with</p>
+    <h2 class="text-4xl my-3 font-semibold">#FurniroFurniture</h2>
+    <div #imageSwiper class="swiper w-full">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let product of products">
+          <img
+            [src]="product.img"
+            class="w-full max-w-xs rounded-lg shadow-lg h-100"
+          />
+        </div>
+      </div>
+    </div>
+    <div #imageSwiper2 class="swiper w-full my-3">
+      <div class="swiper-wrapper">
+        <div class="swiper-slide" *ngFor="let product of products">
+          <img
+            [src]="product.img"
+            class="w-full max-w-xs rounded-lg shadow-lg h-100"
+          />
+        </div>
+      </div>
+    </div>
   </div>
 </main>

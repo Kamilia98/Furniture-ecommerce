@@ -1,1 +1,192 @@
-<p>checkout works!</p>
+<app-header-banner bannerTitle="Checkout"></app-header-banner>
+<!--**** Checkout Section ****-->
+<section class="flex flex-col md:flex-row p-10 gap-10">
+  <div class="flex-1 p-6 shadow rounded-lg">
+    <form
+      [formGroup]="checkoutForm"
+      (ngSubmit)="onSubmit()"
+      class="billing-form"
+    >
+      <h2>Billing Details</h2>
+
+      <label for="first-name">First Name *</label>
+      <input type="text" id="first-name" formControlName="firstName" />
+      @if (checkoutForm.get('firstName')?.errors?.['required'] && checkoutForm.get('firstName')?.touched) {
+        <div class="error">
+          First Name is required.
+        </div>
+      }
+      @if (checkoutForm.get('firstName')?.errors?.['hasNumber'] && checkoutForm.get('firstName')?.touched) {
+        <div class="error">
+          First Name cannot contain numbers.
+        </div>
+      }
+
+      <label for="last-name">Last Name *</label>
+      <input type="text" id="last-name" formControlName="lastName" />
+      @if (checkoutForm.get('lastName')?.errors?.['required'] && checkoutForm.get('lastName')?.touched) {
+        <div class="error">
+          Last Name is required.
+        </div>
+      }
+      @if (checkoutForm.get('lastName')?.errors?.['hasNumber'] && checkoutForm.get('lastName')?.touched) {
+        <div class="error">
+          Last Name cannot contain numbers.
+        </div>
+      }
+
+      <label for="company-name">Company Name (Optional)</label>
+      <input type="text" id="company-name" formControlName="companyName" />
+
+      <label for="country">Country / Region *</label>
+      <select id="country" formControlName="country" required>
+        <option value="">Select Country</option>
+        <option value="Egypt">Egypt</option>
+        <option value="uk">United Kingdom</option>
+        <option value="qatart">Qatar</option>
+      </select>
+      @if (checkoutForm.get('country')?.errors?.['required'] && checkoutForm.get('country')?.touched) {
+        <div class="error">
+          Country is required.
+        </div>
+      }
+
+      <label for="address">Street Address *</label>
+      <input type="text" id="address" formControlName="address" />
+      @if (checkoutForm.get('address')?.errors?.['required'] && checkoutForm.get('address')?.touched) {
+        <div class="error">
+          Address is required.
+        </div>
+      }
+
+      <label for="city">Town / City *</label>
+      <input type="text" id="city" formControlName="city" />
+      @if (checkoutForm.get('city')?.errors?.['required'] && checkoutForm.get('city')?.touched) {
+        <div class="error">
+          City is required.
+        </div>
+      }
+      @if (checkoutForm.get('city')?.errors?.['hasNumber'] && checkoutForm.get('city')?.touched) {
+        <div class="error">
+          City cannot contain numbers.
+        </div>
+      }
+
+      <label for="zip">Zip Code *</label>
+      <input type="text" id="zip" formControlName="zip" />
+      @if (checkoutForm.get('zip')?.errors?.['required'] && checkoutForm.get('zip')?.touched) {
+        <div class="error">
+          Zip Code is required.
+        </div>
+      }
+      @if (checkoutForm.get('zip')?.errors?.['pattern'] && checkoutForm.get('zip')?.touched) {
+        <div class="error">
+          Zip Code must contain only numbers.
+        </div>
+      }
+
+      <label for="phone">Phone *</label>
+      <input type="tel" id="phone" formControlName="phone" />
+      @if (checkoutForm.get('phone')?.errors?.['required'] && checkoutForm.get('phone')?.touched) {
+        <div class="error">
+          Phone is required.
+        </div>
+      }
+      @if (checkoutForm.get('phone')?.errors?.['pattern'] && checkoutForm.get('phone')?.touched) {
+        <div class="error">
+          Phone must contain only numbers.
+        </div>
+      }
+
+      <label for="email">Email Address *</label>
+      <input type="email" id="email" formControlName="email" />
+      @if (checkoutForm.get('email')?.errors?.['required'] && checkoutForm.get('email')?.touched) {
+        <div class="error">
+          Email is required.
+        </div>
+      }
+      @if (checkoutForm.get('email')?.errors?.['email'] && checkoutForm.get('email')?.touched) {
+        <div class="error">
+          Please enter a valid email address.
+        </div>
+      }
+
+      <label for="additional-info">Additional Information</label>
+      <textarea id="additional-info" rows="4"></textarea>
+    </form>
+  </div>
+
+  <!--***** Confirming payment *****-->
+  <div class="Confirming-payment shadow p-6">
+    <h3>Product</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Subtotal</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of cartItems; track item) {
+          <tr>
+            <td>{{ item.title }} x {{ item.quantity }}</td>
+            <td>{{ item.price * item.quantity | currency }}</td>
+          </tr>
+        }
+        <tr>
+          <td>Total</td>
+          <td class="total">{{ subtotal | currency }}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="payment-method">
+      @if (selectedPayment === 'cod') {
+        <p>
+          You can make your payment when you receive the order at your doorstep.
+          Please keep exact change ready to avoid any inconvenience.
+        </p>
+      }
+      @if (selectedPayment === 'bank') {
+        <p>
+          Make your payment directly into our bank account. Please use your Order
+          ID as the payment reference. Your order will not be shipped until the
+          funds have cleared in our account.
+        </p>
+      }
+
+      <!--***** Payment Options *****-->
+      <label>
+        <input
+          type="radio"
+          name="payment"
+          [(ngModel)]="selectedPayment"
+          value="bank"
+          checked
+        />
+        Direct Bank Transfer
+      </label>
+      <label>
+        <input
+          type="radio"
+          name="payment"
+          [(ngModel)]="selectedPayment"
+          value="cod"
+        />
+        Cash On Delivery
+      </label>
+    </div>
+
+    <p>
+      Your personal data will be used to support your experience throughout this
+      website, to manage access to your account, and for other purposes
+      described in our <span class="policy">privacy policy</span>.
+    </p>
+    <app-button
+      (click)="onSubmit()"
+      class="flex justify-center items-center mx-auto mt-8"
+      [type]="'semi-black-outline'"
+      >Place Order</app-button
+    >
+  </div>
+</section>
+<app-feature-banner></app-feature-banner>

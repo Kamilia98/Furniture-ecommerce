@@ -1,0 +1,79 @@
+<div class="flex flex-col lg:flex-row min-h-screen">
+  <div class="flex-1 flex flex-col justify-center items-center py-5">
+    <div class="flex flex-col gap-4 shadow w-[90%] lg:w-[70%] p-10 rounded-xl">
+      <div class="flex items-center gap-2 w-full">
+        <img src="images/logo.png" alt="Logo" class="w-[30px] lg:w-[40px]" />
+        <div class="font-montserrat text-2xl font-bold">Furniro</div>
+      </div>
+
+      <div class="sign text-4xl font-bold font-poppins">Sign In</div>
+
+      <form [formGroup]="form" class="flex flex-col gap-1">
+        <div class="flex justify-between items-center">
+          <label class="text-gray-700 font-medium">Email</label>
+        </div>
+        <app-input
+          class="mb-5"
+          placeholder="Email"
+          type="email"
+          bgC="secondary"
+          width="full"
+          [control]="form.controls['email']"
+        ></app-input>
+
+        <div class="flex justify-between items-center">
+          <label class="text-gray-700 font-medium">Password</label>
+          <a
+            routerLink="/register/forgot-password"
+            class="text-primary text-sm cursor-pointer hover:underline"
+          >
+            Forgot password?
+          </a>
+        </div>
+        <app-input
+          placeholder="Enter your password"
+          type="password"
+          bgC="secondary"
+          width="full"
+          [control]="form.controls['password']"
+        ></app-input>
+        <div class="flex items-center gap-2 mt-4">
+          <input
+            type="checkbox"
+            id="agree"
+            formControlName="agree"
+            class="w-4 h-4"
+          />
+          <label for="agree" class="text-sm text-gray-600"> Remember me </label>
+        </div>
+
+        <div
+          class="text-red-500 text-center"
+          [@slideUpDown]="errorMessage ? 'in' : 'out'"
+        >
+          {{ errorMessage }}
+        </div>
+
+        <div class="text-center mt-4">
+          <span class="text-gray">Don't have an account?</span>
+          <a
+            class="text-primary font-semibold hover:underline"
+            routerLink="/register/signup"
+          >
+            Sign Up
+          </a>
+        </div>
+
+        <div class="flex justify-center">
+          <app-button (click)="onSubmit()">Sign In</app-button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div
+    class="bg-secondary w-[100%] lg:w-[600px] hidden lg:flex items-start py-4"
+  >
+    <img src="icons/registration.svg" alt="" class="scale-x-[-1] w-[90%]" />
+  </div>
+</div>

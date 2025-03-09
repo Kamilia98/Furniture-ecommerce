@@ -1,1 +1,137 @@
-<p>contact works!</p>
+<!-- Page Header -->
+<app-header-banner bannerTitle="Contact"></app-header-banner>
+
+<!-- Contact Section -->
+<section class="p-10 flex flex-col gap-10">
+  <!-- Contact Header -->
+  <div class="text-center flex flex-col items-center gap-4 w-full">
+    <h1 class="text-4xl font-semibold">Get in Touch with Us</h1>
+    <p class="text-base text-gray max-w-2xl">
+      For more information about our products and services, please feel free to
+      drop us an email. Our team is always here to assist you. Don't hesitate to
+      reach out!
+    </p>
+  </div>
+
+  <div
+    class="flex flex-col md:flex-row justify-center items-start gap-[50px] md:gap-[80px]"
+  >
+    <!-- Contact Information -->
+    <div class="flex flex-col gap-10 w-[500px]">
+      <!-- Address -->
+      <div class="flex gap-3">
+        <i class="fas fa-map-marker-alt text-xl text-black mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold text-black">Address</p>
+          <p class="text-base text-black">
+            15 Tahrir Square, Downtown, Cairo, Egypt
+          </p>
+        </div>
+      </div>
+
+      <!-- Phone -->
+      <div class="flex gap-3">
+        <i class="fas fa-phone text-xl mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold">Phone</p>
+          <p>Mobile: +20 100 123 4567</p>
+          <p>Hotline: 16000</p>
+        </div>
+      </div>
+
+      <!-- Working Hours -->
+      <div class="flex gap-3">
+        <i class="fas fa-clock text-xl mt-1"></i>
+        <div class="flex flex-col gap-4">
+          <p class="text-xl font-semibold">Working Hours</p>
+          <p>Mon - Fri: 9:00 AM - 10:00 PM</p>
+          <p>Sat - Sun: 10:00 AM - 9:00 PM</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Form -->
+    <div class="max-w-md w-full p-1 bg-white">
+      <form
+        [formGroup]="contactForm"
+        (ngSubmit)="onSubmit()"
+        class="flex flex-col space-y-4"
+      >
+        <!-- Name Field -->
+        <label for="name" class="text-base font-medium">Your Name</label>
+        <input
+          id="name"
+          formControlName="name"
+          type="text"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter Your Name"
+          required
+        />
+        @if (contactForm.get('name')?.invalid &&
+        contactForm.get('name')?.touched) {
+        <p class="text-red-light text-sm">Name is required.</p>
+        }
+
+        <!-- Email Field -->
+        <label for="email" class="text-base font-medium">Your Email</label>
+        <input
+          id="email"
+          formControlName="email"
+          type="email"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter Your Email"
+          required
+        />
+        @if (contactForm.get('email')?.invalid &&
+        contactForm.get('email')?.touched) {
+        <p class="text-red-light text-sm">Please enter a valid email.</p>
+        }
+
+        <!-- Subject Field -->
+        <label for="subject" class="text-base font-medium"
+          >Subject (Optional)</label
+        >
+        <input
+          id="subject"
+          formControlName="subject"
+          type="text"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-13"
+          placeholder="Enter a Subject"
+        />
+
+        <!-- Message Field -->
+        <label for="message" class="text-base font-medium">Your Message</label>
+        <textarea
+          id="message"
+          formControlName="message"
+          class="border-2 border-gray px-4 py-2 rounded-md w-full h-28"
+          placeholder="Write Your Message"
+          required
+        ></textarea>
+        @if (contactForm.get('message')?.invalid &&
+        contactForm.get('message')?.touched) {
+        <p class="text-red-light text-sm">Message cannot be empty.</p>
+        }
+
+        <!-- Submit Button -->
+        <app-button type="primary-fill">Submit</app-button>
+      </form>
+
+      <!-- Submission Message -->
+      @if (message) {
+      <p
+        [ngClass]="{
+          'text-green-500': isSuccess,
+          'text-red-light': !isSuccess
+        }"
+        class="mt-4 text-sm"
+      >
+        {{ message }}
+      </p>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Feature Banner -->
+<app-feature-banner></app-feature-banner>

@@ -1,0 +1,133 @@
+<section class="w-full h-full md:px-4 py-4 flex flex-col gap-4">
+  <h3 class="text-lg font-medium">Orders</h3>
+
+  <!-- Orders Status Filters -->
+  <div class="flex gap-4">
+    <div
+      class="flex gap-2 p-2 border border-gray rounded-md hover:bg-gray-light has-checked:bg-gray-light cursor-pointer"
+    >
+      <input
+        type="checkbox"
+        id="pending"
+        [(ngModel)]="pendingChecked"
+        (change)="applyFilters()"
+      />
+      <label for="pending" class="cursor-pointer">Pending</label>
+    </div>
+    <div
+      class="flex gap-2 p-2 border border-gray rounded-md hover:bg-gray-light has-checked:bg-gray-light cursor-pointer"
+    >
+      <input
+        type="checkbox"
+        id="succeeded"
+        [(ngModel)]="succeededChecked"
+        (change)="applyFilters()"
+      />
+      <label for="succeeded" class="cursor-pointer">Succeeded</label>
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="rounded-md border">
+    <div class="relative w-full overflow-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b">
+            <th class="h-12 px-4 text-left font-medium">Order Number</th>
+            <th class="h-12 px-4 text-left font-medium">Status</th>
+            <th class="h-12 px-4 text-left font-medium">Total</th>
+            <th class="h-12 px-4 text-left font-medium">Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if(displayedOrders.length){
+          <tr
+            *ngFor="let order of displayedOrders"
+            class="border-b last:border-none"
+          >
+            <td class="px-4 py-2">{{ order.orderNumber }}</td>
+            <td class="px-4 py-2">{{ order.status }}</td>
+            <td class="px-4 py-2">{{ order.total | currency }}</td>
+            <td class="px-4 py-2">{{ order.createdAt | date }}</td>
+          </tr>
+          } @else{
+          <tr>
+            <td class="p-4 text-center h-24" colspan="4">No data available</td>
+          </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div
+    class="flex items-center justify-center px-4 py-3 bg-white shadow-md rounded-lg"
+  >
+    <!-- Per Page Selection -->
+    <div class="flex items-center space-x-2">
+      <p class="text-sm font-medium text-gray-700">Per page</p>
+
+      <div class="relative">
+        <button
+          class="bg-white h-14 flex items-center px-5 cursor-pointer w-full min-w-48 border border-gray-medium rounded-md focus:outline-none"
+          (click)="togglePageSizesMenuOpen(true)"
+        >
+          <span class="text-gray-dark">{{ itemsPerPage }}</span>
+        </button>
+        @if(pageSizesMenuOpen && pageSizes.length > 0){
+        <app-dropdown
+          [items]="pageSizes"
+          (selectedValueChange)="updatePageSize($event)"
+        ></app-dropdown>
+        }
+      </div>
+    </div>
+
+    <!-- Page Info -->
+    <div class="flex-1 text-sm font-medium text-gray-700 text-center">
+      Page {{ currentPage }} of {{ totalPages }}
+    </div>
+
+    <!-- Pagination Buttons -->
+    <div class="flex items-center space-x-2">
+      <button
+        (click)="goToFirstPage()"
+        [disabled]="currentPage === 1"
+        class="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 flex"
+      >
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
+      </button>
+
+      <button
+        (click)="goToPreviousPage()"
+        [disabled]="currentPage === 1"
+        class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+      >
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
+      </button>
+
+      <button
+        (click)="goToNextPage()"
+        [disabled]="currentPage === totalPages"
+        class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+      >
+        <img src="/icons/arrow.svg" alt="" />
+      </button>
+
+      <button
+        (click)="goToLastPage()"
+        [disabled]="currentPage === totalPages"
+        class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
+      >
+        <img src="/icons/arrow.svg" alt="" />
+        <img src="/icons/arrow.svg" alt="" />
+      </button>
+    </div>
+  </div>
+
+  <!-- pagination -->
+
+  <!--  -->
+</section>

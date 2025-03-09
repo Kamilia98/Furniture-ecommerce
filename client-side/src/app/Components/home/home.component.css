@@ -1,0 +1,35 @@
+.swiper-button-prev {
+  width: 50px;
+  height: 50px;
+  padding: 12px;
+  background-color: var(--color-white);
+  border-radius: 100%;
+  border: 1px solid var(--color-white);
+  color: var(--color-primary);
+  font-size: 24px;
+}
+.swiper-button-next {
+  width: 50px;
+  height: 50px;
+  padding: 12px;
+  background-color: var(--color-white);
+  border-radius: 100%;
+  border: 1px solid var(--color-white);
+  color: var(--color-primary);
+}
+.swiper-button-next::after {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+.swiper-button-prev::after {
+  font-size: 18px !important;
+  font-weight: bold;
+}
+::ng-deep .swiper-pagination-bullet {
+  background-color: var(--color-white) !important;
+  opacity: 1 !important;
+}
+::ng-deep .swiper-pagination-bullet-active {
+  background-color: var(--color-primary) !important;
+  outline: 2px solid var(--color-white);
+}

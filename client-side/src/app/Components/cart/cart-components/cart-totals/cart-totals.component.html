@@ -1,0 +1,19 @@
+<div class="p-6 bg-white shadow rounded-lg text-sm lg:text-lg">
+  <h2 class="text-lg lg:text-xl font-bold text-black mb-4">Cart Totals</h2>
+  <div class="flex justify-between mb-2 text-gray">
+    <span>Subtotal:</span>
+    <span>{{ subtotal | currency }}</span>
+  </div>
+  <div class="flex justify-between text-lg font-bold text-primary">
+    <span>Total:</span>
+    <span> {{ subtotal | currency }}</span>
+  </div>
+  @if(subtotal>0){
+  <app-button
+    class="flex justify-center items-center mx-auto mt-8"
+    type="primary-fill"
+    (click)="goToCheckout()"
+    >Check Out</app-button
+  >
+  }
+</div>

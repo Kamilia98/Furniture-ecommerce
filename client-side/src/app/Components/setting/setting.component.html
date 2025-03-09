@@ -1,0 +1,207 @@
+<section class="w-full h-full md:px-4 py-4 flex flex-col">
+  <div>
+    <div class="block md:hidden mb-4">
+      <div class="flex gap-2 items-center py-2">
+        <span
+          class="relative flex shrink-0 overflow-hidden rounded-full w-8 h-8"
+          ><img
+            class="aspect-square h-full w-full"
+            alt="User avatar"
+            src="/images/user.png"
+        /></span>
+        <div class="flex flex-col">
+          <p class="text-sm">{{ user.username }}</p>
+          <p class="text-xs">{{ user.email }}</p>
+        </div>
+      </div>
+      <div role="none" class="shrink-0 bg-border h-[1px] w-full mt-4"></div>
+    </div>
+    <header class="flex items-center justify-between">
+      <div class="flex flex-col gap-0.5">
+        <h3 class="text-lg font-medium">Settings</h3>
+        <p class="text-sm text-muted-foreground">
+          Manage your account settings
+        </p>
+      </div>
+    </header>
+
+    <div class="max-w-2xl">
+      <div
+        data-orientation="horizontal"
+        role="none"
+        class="shrink-0 bg-border h-[1px] w-full my-4"
+      ></div>
+      <form class="flex flex-col gap-3">
+        <div class="space-y-2">
+          <label
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            for=":r14:-form-item"
+            >Name</label
+          ><input
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+            placeholder="Joe"
+            id=":r14:-form-item"
+            aria-describedby=":r14:-form-item-description"
+            aria-invalid="false"
+            value="{{ user.username }}"
+            name="name"
+          />
+        </div>
+        <div class="space-y-2">
+          <label
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            for=":r15:-form-item"
+            >Avatar</label
+          >
+          <div class="flex items-center gap-2">
+            <img
+              alt="User image"
+              loading="lazy"
+              width="42"
+              height="42"
+              decoding="async"
+              data-nimg="1"
+              class="rounded-full"
+              src="/images/user.png"
+              style="color: transparent"
+            />
+            <div
+              class="flex flex-col items-center justify-center gap-1 scale-75 ut-button:ring-primary ut-button:bg-primary/75 hover:ut-button:bg-primary ut-button:transition-all ut-button:duration-500 ut-label:hidden ut-allowed-content:hidden"
+              data-state="ready"
+            >
+              <app-button>Change Avatar</app-button>
+              <div
+                class="h-[1.25rem] text-xs leading-5 text-gray-600"
+                data-state="ready"
+                data-ut-element="allowed-content"
+              >
+                Image (2MB)
+              </div>
+            </div>
+          </div>
+          <input
+            class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+            placeholder="User image"
+            id=":r15:-form-item"
+            aria-describedby=":r15:-form-item-description"
+            aria-invalid="false"
+            type="hidden"
+            value="https://lh3.googleusercontent.com/a/ACg8ocKAU3ajTghP9ndEoE7JvmOp5AfvzSm2ECb_jcJgcVwJ46rGanFM=s96-c"
+            name="image"
+          />
+        </div>
+        <button data-state="closed">
+          <div class="space-y-2 flex flex-col">
+            <label
+              class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 self-start"
+              for=":r17:-form-item"
+              >Email</label
+            ><input
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
+              placeholder="joedoe"
+              autocomplete="off"
+              disabled=""
+              id=":r17:-form-item"
+              aria-describedby=":r17:-form-item-description"
+              aria-invalid="false"
+              value="{{ user.email }}"
+              name="email"
+            />
+          </div>
+        </button>
+
+        <div class="space-y-2">
+          <label
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            for=":r18:-form-item"
+            >New password</label
+          >
+          <div class="relative">
+            <input
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm hide-password-toggle pr-10"
+              placeholder="********"
+              autocomplete="off"
+              type="password"
+              value=""
+              name="password"
+            /><button
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none hover:text-accent-foreground rounded-md absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              type="button"
+              disabled=""
+            >
+              <img src="/icons/eye-off.svg" alt="" class="w-[16px] h-[16px]" />
+              <span class="sr-only">Show password</span>
+            </button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <label
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            for=":r19:-form-item"
+            >Confirm password</label
+          >
+          <div class="relative">
+            <input
+              class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm hide-password-toggle pr-10"
+              placeholder="********"
+              autocomplete="off"
+              type="password"
+              value=""
+              name="confirmPassword"
+            /><button
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none hover:text-accent-foreground rounded-md absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+              type="button"
+            >
+              <img src="/icons/eye-off.svg" alt="" class="w-[16px] h-[16px]" />
+              <span class="sr-only">Show password</span>
+            </button>
+          </div>
+        </div>
+        <div class="space-y-2">
+          <label
+            class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+            for=":r1a:-form-item"
+            >Two Factor Authentication</label
+          >
+          <p
+            id=":r1a:-form-item-description"
+            class="text-sm text-muted-foreground"
+          >
+            Enable two factor authentication to add an extra layer of security
+            to your account.
+          </p>
+          <button
+            type="button"
+            role="switch"
+            value="on"
+            class="peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background {{
+              isChecked ? 'bg-primary' : 'bg-gray-light'
+            }}"
+          >
+            <span
+              data-state="unchecked"
+              data-disabled=""
+              class="pointer-events-none block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform {{
+                isChecked ? 'translate-x-5' : 'translate-x-0'
+              }}"
+            ></span></button
+          ><input
+            tabindex="-1"
+            type="checkbox"
+            value="on"
+            (input)="toggleCheck()"
+            style="
+              transform: translateX(-100%);
+              position: absolute;
+              opacity: 0;
+              margin: 0px;
+              width: 44px;
+              height: 24px;
+            "
+          />
+        </div>
+        <app-button>Update</app-button>
+      </form>
+    </div>
+  </div>
+</section>

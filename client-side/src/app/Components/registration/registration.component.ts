@@ -1,11 +1,10 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-registration',
-  imports: [],
+  imports: [RouterOutlet],
   templateUrl: './registration.component.html',
-  styleUrl: './registration.component.css'
+  styleUrl: './registration.component.css',
 })
-export class RegistrationComponent {
-
-}
+export class RegistrationComponent {}

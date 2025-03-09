@@ -1,1 +1,65 @@
-<p>blog works!</p>
+<app-header-banner bannerTitle="Blog"></app-header-banner>
+
+<section class="flex flex-col gap-5 my-0 mx-auto max-w-[1240px] p-10">
+  @if(blog){
+  <div class="container mx-auto p-4 max-w-3xl">
+    <img
+      [src]="blog.image"
+      [alt]="blog.title"
+      class="w-180 h-130 object-contain rounded-lg"
+    />
+
+    <div class="flex items-center gap-4 text-gray text-xs md:text-sm mt-2">
+      <p class="flex items-center">
+        <img src="/icons/profile.svg" alt="Profile" class="w-4 h-4 mr-1" />
+        {{ blog.users }}
+      </p>
+      <p class="flex items-center">
+        <img src="/icons/calender.svg" alt="Date" class="w-4 h-4 mr-1" />
+        {{ blog.date }}
+      </p>
+      <p class="flex items-center">
+        <img src="/icons/tag.svg" alt="Category" class="w-4 h-4 mr-1" />
+        {{ blog.category }}
+      </p>
+    </div>
+
+    <h2 class="text-lg md:text-xl font-semibold mt-4">{{ blog.title }}</h2>
+    <p class="text-gray-dark text-sm md:text-base mt-2 leading-relaxed">
+      {{ blog.content }}
+    </p>
+  </div>
+  }
+
+  <!-- Related Blogs Section -->
+  <div class="flex flex-col gap-2">
+    <h1 class="text-black font-semibold text-[25px] p-2">Related Blogs</h1>
+    @if(relatedBlogs.length>0){
+    <ng-container>
+      <div *ngFor="let blog of relatedBlogs">
+        <div
+          class="flex items-center gap-4 px-4 py-2 rounded-lg text-black cursor-pointer border border-gray-medium hover:shadow duration-200 ease"
+          [routerLink]="['/blog', blog.id]"
+        >
+          <img
+            [src]="blog.image"
+            [alt]="blog.title"
+            class="w-30 h-28 object-contain rounded"
+          />
+          <div class="flex flex-col items-start">
+            <h5 class="font-medium text-base text-start">{{ blog.title }}</h5>
+            <p class="text-gray text-sm mt-1">{{ blog.date }}</p>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+    } @else{
+    <ng-template>
+      <p class="text-gray-500 p-2">No related blogs found.</p>
+    </ng-template>
+
+    }
+  </div>
+</section>
+
+<app-feature-banner></app-feature-banner>

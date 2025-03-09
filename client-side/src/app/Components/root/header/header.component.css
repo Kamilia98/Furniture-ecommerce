@@ -1,0 +1,23 @@
+.hamburgerMenu:hover .menuSign:nth-child(odd) {
+  width: 90%;
+}
+
+button.active .hamburgerMenu .menuSign:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+  -webkit-transform: rotate(45deg) translate(5px, 5px);
+  -moz-transform: rotate(45deg) translate(5px, 5px);
+  -ms-transform: rotate(45deg) translate(5px, 5px);
+  -o-transform: rotate(45deg) translate(5px, 5px);
+}
+
+button.active .hamburgerMenu .menuSign:nth-child(2) {
+  display: none;
+}
+
+button.active .hamburgerMenu .menuSign:nth-child(3) {
+  transform: rotate(-45deg) translate(6px, -5px);
+  -webkit-transform: rotate(-45deg) translate(6px, -5px);
+  -moz-transform: rotate(-45deg) translate(6px, -5px);
+  -ms-transform: rotate(-45deg) translate(6px, -5px);
+  -o-transform: rotate(-45deg) translate(6px, -5px);
+}

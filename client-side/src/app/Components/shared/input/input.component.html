@@ -1,0 +1,30 @@
+<div class="">
+  <div class="flex flex-col gap-2">
+    <label class="block font-light" for="">{{ label }}</label>
+    <input
+      [type]="type"
+      class="w-[{{ width }}] outline-0 rounded-md p-2 ps-2  bg-{{ bgC }}"
+      [placeholder]="placeholder"
+      [formControl]="control"
+    />
+  </div>
+  <!-- Error Messages -->
+
+  <div
+    class="text-red-light text-sm mt-1 h-4"
+    [@slideUpDown]="control.invalid && control.touched ? 'in' : 'out'"
+  >
+    @if(control.errors?.['required']){
+    <span>This field is required.</span>
+    }@else if (control.errors?.['email']) {
+    <span>Invalid email format.</span>
+    }@else if (control.errors?.['pattern'] ) {
+    <span>Please Enter A valid {{ label }}.</span>
+    }@else if(control.errors?.['minlength']) {
+    <span
+      >Minimum length is
+      {{ control.errors?.['minlength'].requiredLength }}.</span
+    >
+    }
+  </div>
+</div>
