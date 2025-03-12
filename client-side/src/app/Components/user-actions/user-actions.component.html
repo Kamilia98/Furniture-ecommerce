@@ -1,41 +1,42 @@
-@let cartLength = (cartLength$|async)??10;
-
 <ul class="flex gap-[15px] py-[15px] w-full justify-center">
+  <!-- Favorites Button -->
   <li class="relative h-[20px]">
     <button class="cursor-pointer" (click)="toggleFavModal(true)">
-      <img src="icons/heart.svg" alt="" srcset="" class="w-[20px]" />
+      <img src="icons/heart.svg" alt="Favorites" class="w-[20px]" />
     </button>
-    @if(favorites.length){
+    @if (favoritesLength$ | async) {
     <div
       class="absolute top-0 right-0 bg-primary text-white w-[20px] h-[20px] rounded-[50px] text-xs flex justify-center items-center translate-x-[50%] translate-y-[-50%]"
     >
-      @if(favoritesLength<10){
-      {{ favoritesLength }}
-      } @else{ 9+ }
-    </div>
-    }
-  </li>
-  <li class="relative h-[20px]">
-    <button class="cursor-pointer" (click)="toggleCartModal(true)">
-      <img src="icons/shopping-cart.svg" alt="" srcset="" class="w-[20px]" />
-    </button>
-    @if(cartLength$|async){
-    <div
-      class="absolute top-0 right-0 bg-primary text-white w-[20px] h-[20px] rounded-[50px] text-xs flex justify-center items-center translate-x-[50%] translate-y-[-50%]"
-    >
-      @if((cartLength$|async)&&cartLength<10){
-      {{ cartLength$ | async }}
-      } @else{ 9+ }
+      @if ((favoritesLength$ | async)! < 10) {
+      {{ favoritesLength$ | async }}
+      } @else { 9+ }
     </div>
     }
   </li>
 
+  <!-- Cart Button -->
+  <li class="relative h-[20px]">
+    <button class="cursor-pointer" (click)="toggleCartModal(true)">
+      <img src="icons/shopping-cart.svg" alt="Cart" class="w-[20px]" />
+    </button>
+    @if (cartLength$ | async) {
+    <div
+      class="absolute top-0 right-0 bg-primary text-white w-[20px] h-[20px] rounded-[50px] text-xs flex justify-center items-center translate-x-[50%] translate-y-[-50%]"
+    >
+      @if ((cartLength$ | async)! < 10) {
+      {{ cartLength$ | async }}
+      } @else { 9+ }
+    </div>
+    }
+  </li>
+
+  <!-- Profile Button -->
   <li>
-    <a routerLink="{{ isLoggedIn ? ['/profile'] : '/register' }}">
+    <a [routerLink]="isLoggedIn ? '/profile' : '/register'">
       <img
-        src="{{ isLoggedIn ? 'images/user.png' : 'icons/account-alert.svg' }}"
-        alt=""
-        srcset=""
+        [src]="isLoggedIn ? 'images/user.png' : 'icons/account-alert.svg'"
+        alt="Profile"
         class="w-[20px]"
       />
     </a>
@@ -43,7 +44,7 @@
 </ul>
 
 <!-- Favorites Modal -->
-@if (this.favModalShow) {
+@if (favModalShow) {
 <div
   class="fixed top-0 right-0 w-full h-full bg-black-transparent z-[999]"
   (click)="toggleFavModal(false)"
@@ -59,7 +60,8 @@
     </div>
   </div>
   <div class="border-y border-gray flex-1 flex flex-col gap-[25px] py-[25px]">
-    @if (favorites.length) { @for (item of favorites; track item.id) {
+    @if (favorites$ | async; as favorites) { @if (favorites.length > 0) { @for
+    (item of favorites; track item.id) {
     <div
       class="flex items-center shadow-sm px-2 rounded hover:shadow-xl duration-300 ease"
     >
@@ -68,8 +70,8 @@
         [routerLink]="['/product', item.id]"
       >
         <img
-          src="{{ item.images[0] }}"
-          alt="{{ item.name }}"
+          [src]="item.images[0]"
+          [alt]="item.name"
           class="w-[80px] rounded-[10px]"
         />
         <h3 class="text-base cursor-pointer flex-1">
@@ -84,7 +86,7 @@
     <p class="text-center text-gray text-xl m-auto">
       You don't have any favorites!
     </p>
-    }
+    } }
   </div>
   <div class="flex justify-between">
     <a
@@ -99,7 +101,7 @@
 }
 
 <!-- Shopping Cart Modal -->
-@if (this.cartModalShow) {
+@if (cartModalShow) {
 <div
   class="fixed top-0 right-0 w-full h-full bg-black-transparent z-[999]"
   (click)="toggleCartModal(false)"
@@ -118,9 +120,8 @@
     class="border-y border-gray flex-1 flex flex-col gap-[25px] py-[25px] justify-between"
   >
     <div class="flex flex-col gap-[25px] flex-1">
-      @if (cartLength$|async) {
+      @if (cartLength$ | async) { @for (item of cart$ | async; track item.id) {
       <div
-        *ngFor="let item of cart$ | async"
         class="flex items-center shadow-sm px-2 rounded hover:shadow-xl duration-300 ease"
       >
         <div
@@ -147,7 +148,7 @@
           <img src="icons/close-filled.svg" alt="Remove" />
         </div>
       </div>
-      } @else {
+      } } @else {
       <p class="text-center text-gray text-xl m-auto">
         Your shopping cart is empty. Start adding products to your cart to see
         them here.

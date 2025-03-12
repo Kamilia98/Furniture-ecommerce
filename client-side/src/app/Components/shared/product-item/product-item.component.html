@@ -99,9 +99,11 @@
         (click)="addToFavourites()"
       >
         <img
-          src="/icons/heart-white{{
-            isFavorite(product.id) ? '-fill' : ''
-          }}.svg"
+          [src]="
+            (isFavorite(product.id) | async)
+              ? '/icons/heart-white-fill.svg'
+              : '/icons/heart-white.svg'
+          "
           class="w-[16px]"
           alt="Like icon"
         />

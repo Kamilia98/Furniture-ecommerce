@@ -1,47 +1,68 @@
-@if(favorites.length > 0){
-<div
-  *ngFor="let item of favorites"
-  class="flex flex-col md:flex-row justify-between items-center gap-2 py-4 border-b"
->
-  <div class="flex flex-1 justify-between md:items-center">
-    <div class="flex flex-col sm:flex-row gap-2 flex-1 self-start">
-      <img
-        [src]="item.images[0]"
-        alt="{{ item.name }}"
-        class="w-20 h-20 rounded-md bg-secondary p-2"
-      />
-      <div class="flex flex-col items-start justify-start gap-2">
-        <p class="text-lg">
-          {{ item.name }}
-        </p>
-        <p class="text-gray text-sm max-w-[90%]">
-          {{ item.subTitle }}
-        </p>
+<!-- Display favorites if available -->
+<div *ngIf="favorites$ | async as favorites">
+  <!-- Check if there are favorites -->
+  <div *ngIf="favorites.length > 0; else noFavorites">
+    <!-- Loop through each favorite item -->
+    <div
+      *ngFor="let item of favorites"
+      class="flex flex-col md:flex-row justify-between items-center gap-2 py-4 border-b"
+    >
+      <!-- Product details -->
+      <div class="flex flex-1 justify-between md:items-center">
+        <div class="flex flex-col sm:flex-row gap-2 flex-1 self-start">
+          <!-- Product image -->
+          <img
+            [src]="item.images?.[0]"
+            alt="{{ item.name }}"
+            class="w-20 h-20 rounded-md bg-secondary p-2"
+          />
+          <!-- Product name and subtitle -->
+          <div class="flex flex-col items-start justify-start gap-2">
+            <p class="text-lg">{{ item.name }}</p>
+            <p class="text-gray text-sm max-w-[90%]">{{ item.subTitle }}</p>
+          </div>
+        </div>
+        <!-- View product button -->
+        <app-button [routerLink]="['/product', item.id]" btnWidth="fit">
+          View
+        </app-button>
+      </div>
+
+      <!-- Actions (Add to Cart / Remove from Favorites) -->
+      <div class="flex gap-2 justify-end">
+        <!-- Add to Cart button -->
+        <app-button (click)="addToCart(item)" btnWidth="fit">
+          {{ isInCart(item.id) ? "Remove from" : "Add to" }} Cart
+        </app-button>
+        <!-- Remove from Favorites button -->
+        <app-button
+          (click)="toggleFavorite(item)"
+          type="primary-outline"
+          btnWidth="fit"
+        >
+          Remove
+        </app-button>
       </div>
     </div>
-    <app-button [routerLink]="['/product', item.id]" btnWidth="fit"
-      >View</app-button
-    >
-  </div>
-  <div class="flex gap-2 justify-end">
-    <app-button (click)="addToCart(item)" btnWidth="fit"
-      >{{ isInCart(item.id) ? "Remove from" : "Add to" }} Cart</app-button
-    >
-    <app-button type="primary-outline" btnWidth="fit">Remove</app-button>
   </div>
 </div>
 
-} @else{
-<div
-  class="h-full flex-1 flex flex-col justify-center items-center gap-4 text-center py-10"
->
-  <img src="/icons/heart-broken.svg" alt="" class="w-[80px]" />
-  <p class="text-lg text-gray font-semibold">Your don't have any favorites</p>
-  <p class="text-sm text-gray">
-    You can add products to your favorites by clicking the heart icon on
-    product.
-  </p>
-  <app-button btnWidth="fit">Discover products</app-button>
-</div>
-
-}
+<!-- No favorites template -->
+<ng-template #noFavorites>
+  <div
+    class="h-full flex-1 flex flex-col justify-center items-center gap-4 text-center py-10"
+  >
+    <!-- No favorites icon -->
+    <img src="/icons/heart-broken.svg" alt="No favorites" class="w-[80px]" />
+    <!-- No favorites message -->
+    <p class="text-lg text-gray font-semibold">You don't have any favorites</p>
+    <p class="text-sm text-gray">
+      You can add products to your favorites by clicking the heart icon on a
+      product.
+    </p>
+    <!-- Discover products button -->
+    <app-button btnWidth="fit" [routerLink]="['/products']">
+      Discover products
+    </app-button>
+  </div>
+</ng-template>

@@ -65,11 +65,13 @@ export class ProductItemComponent implements OnInit {
   }
 
   addToFavourites() {
-    if (this.isFavorite(this.product.id)) {
-      this.favoriteService.removeFavorite(this.product.id);
-    } else {
-      this.favoriteService.addFavorite(this.product);
-    }
+    this.favoriteService.toggleFavourite(this.product.id).subscribe({
+      next: () => {
+        console.log('Favorite toggled successfully');
+        this.cdr.detectChanges(); // Trigger change detection
+      },
+      error: (err) => console.error('Error toggling favorite:', err),
+    });
     this.cdr.detectChanges();
   }
 
@@ -90,10 +92,11 @@ export class ProductItemComponent implements OnInit {
     return productDate > oneMonthAgo.getTime();
   }
 
-  isFavorite(productId: string): boolean {
-    return this.favoriteService.getFavorites().some((p) => p.id === productId);
+  isFavorite(productId: string): Observable<boolean> {
+    return this.favoriteService
+      .getFavourites()
+      .pipe(map((favorites) => favorites.some((p) => p.id === productId)));
   }
-
   isInCart(productId: string): boolean {
     return this.cartService.isInCart(productId);
   }

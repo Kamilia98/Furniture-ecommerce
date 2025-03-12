@@ -11,6 +11,7 @@ import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'app-user-actions',
+  standalone: true,
   imports: [CurrencyPipe, RouterModule, CommonModule],
   templateUrl: './user-actions.component.html',
   animations: [
@@ -35,7 +36,8 @@ export class UserActionsComponent implements OnInit {
   cartProductsTotalPrice = 0;
   cartLength$!: Observable<number>;
   cart$!: Observable<product[]>;
-  favoritesLength = 0;
+  favoritesLength$!: Observable<number>;
+  favorites$!: Observable<product[]>;
   favModalShow = false;
   cartModalShow = false;
   isLoggedIn = false;
@@ -47,40 +49,65 @@ export class UserActionsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    // Subscribe to authentication status
     this.authService.isLoggedIn$.subscribe((status) => {
       this.isLoggedIn = status;
-      console.log(status);
     });
 
+    // Initialize cart data
     this.cart$ = this.cartService.cart$;
     this.cartService.getCart().subscribe();
     this.cartLength$ = this.cartService.cart$.pipe(map((cart) => cart.length));
+
+    // Initialize favorites data
+    this.favorites$ = this.favoriteService.getFavourites();
+    this.favoritesLength$ = this.favorites$.pipe(
+      map((favorites) => favorites.length)
+    );
+    this.favoriteService.loadFavorites().subscribe();
   }
 
-  get favorites(): product[] {
-    const favoritesItems = this.favoriteService.getFavorites();
-    this.favoritesLength = favoritesItems.length;
-    return favoritesItems.slice(0, 4);
-  }
-
+  /**
+   * Deletes a favorite product.
+   * @param id - The ID of the product to remove from favorites.
+   */
   deleteFavorite(id: string): void {
-    this.favoriteService.removeFavorite(id);
+    this.favoriteService.toggleFavourite(id).subscribe({
+      next: () => console.log('Favorite removed successfully'),
+      error: (err) => console.error('Error removing favorite:', err),
+    });
   }
 
+  /**
+   * Deletes a product from the cart.
+   * @param id - The ID of the product to remove from the cart.
+   */
   deleteCartProduct(id: string): void {
     this.cartService.removeProduct(id);
   }
 
+  /**
+   * Toggles the favorites modal.
+   * @param open - Whether to open or close the modal.
+   */
   toggleFavModal(open: boolean): void {
     this.favModalShow = open;
     this.toggleBodyScroll(open);
   }
 
+  /**
+   * Toggles the cart modal.
+   * @param open - Whether to open or close the modal.
+   */
   toggleCartModal(open: boolean): void {
     this.cartModalShow = open;
     this.toggleBodyScroll(open);
   }
 
+  /**
+   * Toggles body scroll based on modal state.
+   * @param isOpen - Whether a modal is open.
+   */
   private toggleBodyScroll(isOpen: boolean): void {
     document.body.style.overflowY = isOpen ? 'hidden' : 'auto';
     document.body.style.width = isOpen ? 'calc(100% - 10px)' : '';
