@@ -2,69 +2,93 @@
 <app-product-navigation />
 <!-- End product-navigation -->
 
-<!-- Product -->
-<div class="w-full bg-white">
-  <div class="w-full max-w-screen-lg mx-auto py-6 flex">
-    <div class="flex flex-col w-1/2 mr-6">
-      <!-- images section -->
-      <div class="flex space-x-4">
-        <!-- vertical images -->
-        <div class="flex flex-col">
+<div class="w-full">
+  <div class="w-full max-w-screen-lg px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6 lg:gap-12 mx-auto">
+
+    <!-- Images Section -->
+    <div class="flex-1 lg:w-1/2">
+      <div class="flex flex-col lg:flex-row gap-4 lg:gap-6">
+
+        <!-- Vertical Thumbnails (hidden on mobile) -->
+        <div class="hidden lg:flex flex-col gap-4">
+          <app-thumbnail />
+          <app-thumbnail />
+          <app-thumbnail />
           <app-thumbnail />
         </div>
-        <!-- end tumbnails -->
-        <!-- main image -->
-        <div class="relative w-[30rem]">
-          <div class="w-full h-[31.25rem] bg-secondary rounded-lg"></div>
-          <img
-            class="absolute w-full top-20"
-            src="images/products/1 (2).png"
-          />
-        </div>
-        <!-- end main image -->
-      </div>
-      <!-- end images section -->
-    </div>
-    <div class="w-1/2 space-y-4">
-      <h1 class="text-4xl font-light">Asgaard sofa</h1>
-      <p class="text-gray text-xl font-medium">Rs. 250,000.00</p>
 
-      <p class="text-sm text-black">
-        Setting the bar as one of the loudest speakers in its class, the Kilburn
-        is a compact, stout-hearted hero with a well-balanced audio.
+        <!-- Horizontal Thumbnails for mobile -->
+        <div class="lg:hidden flex gap-4 overflow-x-auto pb-2">
+          <app-thumbnail class="shrink-0" />
+          <app-thumbnail class="shrink-0" />
+          <app-thumbnail class="shrink-0" />
+          <app-thumbnail class="shrink-0" />
+        </div>
+
+        <!-- Main Image -->
+        <div class="w-full">
+          <div class="bg-secondary rounded-lg aspect-square lg:aspect-[3/4]">
+            <img class="w-full h-full object-contain p-4" src="images/products/1 (2).png" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Product Details -->
+    <div class="flex-1 lg:w-1/2 max-w-xl space-y-4 lg:space-y-6">
+      <h1 class="text-3xl lg:text-4xl font-light">Asgaard sofa</h1>
+      <p class="text-gray text-lg lg:text-xl font-medium">Rs. 250,000.00</p>
+
+      <p class="text-sm lg:text-base text-black">
+        Setting the bar as one of the loudest speakers in its class, the Kilburn is a compact, stout-hearted hero with
+        a well-balanced audio.
       </p>
+
+      <!-- Size Selection -->
       <div class="space-y-2">
         <p class="text-gray text-sm">Size</p>
-        <!-- will be a compnenet -->
-        <div class="flex space-x-4">
-          <div
-            class="w-8 h-8 bg-primary text-white flex items-center justify-center rounded"
-          >
-            L
-          </div>
-          <div
-            class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded"
-          >
-            XL
-          </div>
-          <div
-            class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded"
-          >
-            XS
-          </div>
+        <div class="flex gap-3">
+          <div class="w-8 h-8 bg-primary text-white flex items-center justify-center rounded">L</div>
+          <div class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded">XL</div>
+          <div class="w-8 h-8 bg-gray-light text-black flex items-center justify-center rounded">XS</div>
         </div>
       </div>
+
+      <!-- Color Selection -->
       <div class="space-y-2">
         <p class="text-gray text-sm">Color</p>
-        <!-- will be a component -->
-        <div class="flex space-x-4">
+        <div class="flex gap-3">
           <div class="w-8 h-8 bg-indigo-500 rounded-full"></div>
           <div class="w-8 h-8 bg-black rounded-full"></div>
           <div class="w-8 h-8 bg-primary rounded-full"></div>
         </div>
       </div>
-      <!-- Buttons -->
+
+      <!-- Buttons Section -->
+      <div class="flex flex-col sm:flex-row gap-3 lg:gap-4">
+        <!-- Quantity Selector -->
+        <div class="flex w-full sm:w-[140px] p-1 items-center justify-between border rounded-lg">
+          <button class="w-8 h-8 hover:bg-gray-100 rounded" (click)="decrease()">-</button>
+          <span class="text-sm font-semibold">{{ count }}</span>
+          <button class="w-8 h-8 hover:bg-gray-100 rounded" (click)="increase()">+</button>
+        </div>
+
+        <!-- Action Buttons -->
+        <app-button class="flex-1" (click)="onSubmit()" [type]="'semi-black-outline'">Add To Cart</app-button>
+        <app-button class="flex-1" (click)="onSubmit()" [type]="'semi-black-outline'">
+          <span class="flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Comparison
+          </span>
+        </app-button>
+      </div>
     </div>
+
   </div>
 </div>
 
@@ -75,3 +99,14 @@
 <!-- end product-description -->
 
 <!-- related products .. -->
+<div class="flex flex-col items-center justify-center p-10">
+  <h2 class="text-4xl my-3 font-bold">Related Products</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 my-10 w-full">
+    <app-product-item [product]="product" />
+    <app-product-item [product]="product" />
+    <app-product-item [product]="product" />
+    <app-product-item [product]="product" />
+  </div>
+
+  <app-button type="primary-outline" routerLink="/shop">Show More</app-button>
+</div>
