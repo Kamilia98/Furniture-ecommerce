@@ -6,6 +6,7 @@ const asyncWrapper = require("../middlewares/asyncWrapper.middleware");
 const AppError = require("../utils/appError");
 const httpStatusText = require("../utils/httpStatusText");
 const nodemailer = require("nodemailer");
+const passport = require("passport");
 
 // User Signup Route POST (/signup)
 const signup = asyncWrapper(async (req, res, next) => {
@@ -79,6 +80,73 @@ const login = asyncWrapper(async (req, res, next) => {
   });
 });
 //
+
+const google = (req, res, next) => {
+  const token = jwt.sign(
+    {
+      email: req.user.email,
+      username: req.user.username,
+      role: req.user.role,
+      _id: req.user._id,
+    },
+    process.env.JWT_SECRET
+  );
+  res.redirect(`http://localhost:4200/auth/login?token=${token}`);
+};
+// const code = req.query.code;
+// const { tokens } = await googleAuth.verifyIdToken(code);
+// const payload = jwt.decode(tokens.id_token);
+// let user;
+// let foundedUser = await userModel.findOne({ email: payload.email });
+// if (!foundedUser) {
+//   user = await userModel.create({
+//     email: payload.email,
+//     username: payload.name,
+//     role: "user",
+//   });
+// }
+// const token = jwt.sign(
+//   {
+//     email: user.email,
+//     username: user.username,
+//     _id: user._id,
+//     role: user.role,
+//   },
+//   process.env.JWT_SECRET
+// );
+// res.status(201).json({
+//   status: httpStatusText.SUCCESS,
+//   message: "Logged in successfully",
+//   data: { token },
+// });
+
+// const google = asyncWrapper(async (req, res, next) => {
+//   const code = req.query.code;
+//   const { tokens } = await googleAuth.verifyIdToken(code);
+//   const payload = jwt.decode(tokens.id_token);
+//   let user = await userModel.findOne({ email: payload.email });
+//   if (!user) {
+//     user = await userModel.create({
+//       email: payload.email,
+//       username: payload.name,
+//       role: "user",
+//     });
+//   }
+//   const token = jwt.sign(
+//     {
+//       email: user.email,
+//       username: user.username,
+//       _id: user._id,
+//       role: user.role,
+//     },
+//     process.env.JWT_SECRET
+//   );
+//   res.status(201).json({
+//     status: httpStatusText.SUCCESS,
+//     message: "Logged in successfully",
+//     data: { token },
+//   });
+const logout = asyncWrapper(async (req, res, next) => {});
 const transporter = nodemailer.createTransport({
   service: "gmail",
   host: "smtp.gmail.com",
@@ -157,4 +225,6 @@ module.exports = {
   signup,
   forgotPassword,
   resetPassword,
+  google,
+  logout,
 };

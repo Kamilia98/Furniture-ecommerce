@@ -32,7 +32,7 @@ import { StepperComponent } from './Components/shared/stepper/stepper.component'
 
 export const routes: Routes = [
   {
-    path: 'register',
+    path: 'auth',
     component: RegistrationComponent,
     children: [
       { path: '', component: LoginComponent, canActivate: [authGuard] },

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
@@ -6,7 +6,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { InputComponent } from '../../shared/input/input.component';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ButtonComponent } from '../../shared/button/button.component';
 import { AuthService } from '../../../Services/auth.service';
 import { jwtDecode } from 'jwt-decode';
@@ -40,7 +40,19 @@ export class LoginComponent {
     ]),
     agree: new FormControl(false),
   });
-  constructor(private authService: AuthService, private router: Router) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {
+    this.route.queryParams.subscribe((params) => {
+      const token = params['token'];
+      if (token) {
+        this.authService.handleGoogleLogin(token);
+        this.router.navigate(['/']);
+      }
+    });
+  }
   onSubmit() {
     this.form.controls.email.markAsTouched();
     this.form.controls.password.markAsTouched();
@@ -65,5 +77,8 @@ export class LoginComponent {
     } else {
       console.error('Form invalid');
     }
+  }
+  onGoogleSignIn() {
+    this.authService.googleSignIn();
   }
 }

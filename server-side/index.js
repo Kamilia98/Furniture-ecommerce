@@ -2,13 +2,14 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
-
+const passportMW = require("./src/middlewares/passport.middleware");
+const passport = require("passport");
 / * * * * Utils * * * * /;
 const httpStatusText = require("./src/utils/httpStatusText");
 / * * * * End Utils * * * * /;
 
 const PORT = process.env.PORT || 5000;
-
+app.use(passport.initialize());
 / * * * * DB * * * /;
 const connectDB = require("./src/config/db");
 / * * * * End Db * * * * /;
@@ -38,9 +39,8 @@ app.get("/", (req, res) => {
   res.json("You need furniture? Here’s Furniro!");
 });
 
-
 / * * * Routes * * * /;
-app.use("/register", registerationRouter);
+app.use("/auth", registerationRouter);
 app.use("/users", userRouter);
 app.use("/categories", categoreRouter);
 app.use("/products", productRouter);
@@ -49,7 +49,6 @@ app.use("/checkout", checkoutRouter);
 app.use("/cart", cartRouter);
 app.use("/api", galleryRouter);
 app.use("/contact", contactRouter);
-
 
 / * * * Global MiddleWare * * * /;
 // Not found routes
