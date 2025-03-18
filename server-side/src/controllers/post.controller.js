@@ -18,7 +18,7 @@ const getAllPosts = asyncWrapper(async (req, res, next) => {
   const skip = (page - 1) * limit;
   const totalPosts = await Post.countDocuments();
   const posts = await Post.find()
-    .select("_id blogTitle description user image category date adminUser")
+    .select("_id title excerpt content description user img category date adminUser")
     .limit(limit)
     .skip(skip)
     .sort({ date: -1 })
@@ -42,7 +42,43 @@ const getRecentPosts = asyncWrapper(async (req, res, next) => {
     data: { posts },
   });
 });
+
+
+const getPostById = asyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  const post = await Post.findById(id).select("_id title excerpt content description user img category date adminUser content");
+
+  if (!post) return next(new AppError("Post not found.", 404, httpStatusText.FAIL));
+
+  res.status(200).json({ status: httpStatusText.SUCCESS, data: { post } });
+});
+
+const getRelatedPosts = asyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  const post = await Post.findById(id);
+
+  if (!post) return next(new AppError("Post not found.", 404, httpStatusText.FAIL));
+
+  const relatedPosts = await Post.find({
+    _id: { $ne: id }, 
+    $or: [{ category: post.category }, { tags: { $in: post.tags } }],
+  })
+    .limit(3)
+    .select("blogTitle description image category tags");
+
+  res.status(200).json({ status: httpStatusText.SUCCESS, data: { relatedPosts } });
+});
+
+const getCategories = asyncWrapper(async (req, res, next) => {
+  const categories = await Post.distinct("category"); 
+  res.status(200).json({ status: httpStatusText.SUCCESS, data: { categories } });
+});
+
+
 module.exports = {
   getAllPosts,
   getRecentPosts,
+  getPostById,
+  getRelatedPosts,
+  getCategories
 };

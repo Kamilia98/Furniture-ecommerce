@@ -3,14 +3,14 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
-  Input,
   Output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, switchMap } from 'rxjs/operators';
 import { DropdownComponent } from '../shared/dropdown/dropdown.component';
+import { ProductService } from '../../Services/product.service';
 
 @Component({
   selector: 'app-search',
@@ -18,9 +18,8 @@ import { DropdownComponent } from '../shared/dropdown/dropdown.component';
   imports: [CommonModule, FormsModule, DropdownComponent],
   template: `
     <div
-      class="relative flex h-full w-48 cursor-pointer items-center rounded-md border border-gray-medium bg-white p-1"
+      class="relative flex h-full w-full cursor-pointer items-center rounded-md border border-gray-medium bg-white p-1"
     >
-      <!-- Search Input -->
       <input
         type="text"
         class="w-full focus:outline-none"
@@ -29,11 +28,7 @@ import { DropdownComponent } from '../shared/dropdown/dropdown.component';
         (input)="onSearchInput()"
         (keydown)="handleKeyDown($event)"
       />
-
-      <!-- Search Icon -->
       <img src="icons/search.svg" alt="Search" class="w-5" />
-
-      <!-- Dropdown -->
       @if(isMenuOpen && filteredItems.length > 0){
       <app-dropdown
         [items]="filteredItems"
@@ -44,7 +39,6 @@ import { DropdownComponent } from '../shared/dropdown/dropdown.component';
   `,
 })
 export class SearchComponent {
-  @Input() items: { id: string; value: string }[] = [];
   @Output() onSelect = new EventEmitter<string>();
 
   searchValue: string = '';
@@ -54,26 +48,24 @@ export class SearchComponent {
   private searchSubject = new Subject<string>();
   private selectedIndex: number = -1;
 
-  constructor(private elementRef: ElementRef) {
-    this.searchSubject.pipe(debounceTime(300)).subscribe(() => {
-      this.filterSearchResults();
-    });
+  constructor(
+    private elementRef: ElementRef,
+    private productService: ProductService
+  ) {
+    this.searchSubject
+      .pipe(
+        debounceTime(300),
+        switchMap((query) => this.productService.searchProducts(query))
+      )
+      .subscribe((results) => {
+        this.filteredItems = results;
+        this.selectedIndex = -1;
+      });
   }
 
-  /** Handles search input with debounce */
+  /** Triggers the search with debounce */
   onSearchInput(): void {
     this.searchSubject.next(this.searchValue);
-  }
-
-  /** Filters search results based on input */
-  private filterSearchResults(): void {
-    const query = this.searchValue.toLowerCase().trim();
-    this.filteredItems = query
-      ? this.items
-          .filter((item) => item.value.toLowerCase().includes(query))
-          .slice(0, 5)
-      : [];
-    this.selectedIndex = -1;
   }
 
   /** Updates input value and emits selected event */

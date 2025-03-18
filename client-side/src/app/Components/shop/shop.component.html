@@ -1,4 +1,5 @@
-@let displayedProducts = (displayedProducts$ | async) ?? [];
+@let products = (products$ | async) ?? []; @let productsMinPrice = (priceMin$ |
+async); @let productsMaxPrice = (priceMax$ | async);
 
 <app-header-banner bannerTitle="Shop"></app-header-banner>
 
@@ -14,7 +15,7 @@
       </div>
       <div class="hidden sm:block border border-gray-medium self-stretch"></div>
       <p class="hidden text-sm sm:block">
-        {{ getDisplayedResultsRange() | async }}
+        {{ getDisplayedResultsRange() }}
       </p>
     </div>
 
@@ -26,7 +27,7 @@
           class="bg-white h-14 flex items-center px-5 cursor-pointer w-full min-w-48 border border-gray-medium rounded-md focus:outline-none"
           (click)="toggleDropdown(true)"
         >
-          <span class="text-gray-dark">{{ selectedSortValue }}</span>
+          <span class="text-gray-dark">{{ selectedSortValue$ | async }}</span>
         </button>
         @if(showSortMenu && sortMenuItems.length > 0){
         <app-dropdown
@@ -59,31 +60,32 @@
         >
           <input
             type="checkbox"
-            [id]="'category' + category"
-            [name]="'category' + category"
+            [id]="'category' + category.name"
+            [name]="'category' + category.name"
             (change)="onCategoryChange(category, $event)"
             class="w-[1.2em] h-[1.2em]"
           />
-          <label [for]="'category' + category">{{
-            category | titlecase
+          <label [for]="'category' + category.name">{{
+            category.name | titlecase
           }}</label>
         </div>
       </div>
     </app-filter-option>
 
     <app-filter-option title="Price Range">
-      <mat-slider min="{{ priceMin$ | async }}" max="{{ priceMax$ | async }}">
+      <mat-slider [min]="productsMinPrice" [max]="productsMaxPrice">
         <input
           [value]="minPrice"
           matSliderStartThumb
-          (change)="priceChange($event, true)"
+          (change)="onPriceChange($event, true)"
         />
         <input
           [value]="maxPrice"
           matSliderEndThumb
-          (change)="priceChange($event, false)"
+          (change)="onPriceChange($event, false)"
         />
       </mat-slider>
+
       <div class="flex justify-between">
         <span>{{ minPrice }}</span>
         <span>{{ maxPrice }}</span>
@@ -97,7 +99,7 @@
     class="w-full col-span-12 flex flex-col gap-5 justify-center"
     [ngClass]="{ 'lg:col-span-9': showFilters }"
   >
-    @if (displayedProducts.length>0) {
+    @if (!loading&&products.length>0) {
     <div
       class="grid gap-6 w-full h-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
       [ngClass]="{
@@ -105,21 +107,40 @@
         'lg:grid-cols-5': !showFilters
       }"
     >
-      @for (item of (displayedProducts$ | async) ?? []; track item?.id) {
+      @for (item of (products$ | async) ?? []; track item?.id) {
       <app-product-item [product]="item"></app-product-item>
       }
     </div>
 
     <app-pagination
       [currentPage]="currentPage"
-      [pagesCount]="(pagesCount$ | async) ?? 1"
+      [pagesCount]="pagesCount"
       (currentPageChange)="goToPage($event)"
     ></app-pagination>
-    } @else {
+    } @else if (loading) {
+
+    <div
+      class="grid gap-6 w-full h-full grid-cols-1 sm:grid-cols-2 md:grid-cols-3"
+      [ngClass]="{
+        'lg:grid-cols-3': showFilters,
+        'lg:grid-cols-5': !showFilters
+      }"
+    >
+      <div *ngFor="let item of skeletonArr">
+        <app-product-item-skeleton></app-product-item-skeleton>
+      </div>
+    </div>
+    <div class="flex justify-center py-3 gap-5">
+      <div *ngFor="let item of [1, 2, 3]">
+        <ngx-skeleton-loader [theme]="{ 'width.px': 60, 'height.px': 45 }" />
+      </div>
+    </div>
+
+    }@else {
     <div
       class="w-full h-full flex justify-center items-center text-center text-gray"
     >
-      No products found.
+      No products matches this filter.
     </div>
     }
   </div>

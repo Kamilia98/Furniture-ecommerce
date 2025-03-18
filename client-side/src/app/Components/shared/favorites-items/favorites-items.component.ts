@@ -5,7 +5,7 @@ import { CartService } from '../../../Services/cart.service';
 import { RouterModule } from '@angular/router';
 import { ButtonComponent } from '../button/button.component';
 import { Observable, map } from 'rxjs';
-
+import { FavoriteService } from '../../../Services/favorite.service';
 @Component({
   selector: 'app-favorites-items',
   imports: [ButtonComponent, CommonModule, RouterModule],
@@ -18,12 +18,14 @@ export class FavoritesItemsComponent implements OnInit {
 
   constructor(
     private cdr: ChangeDetectorRef,
-    private cartService: CartService
+    private cartService: CartService,
+    private favouriteService: FavoriteService
   ) {}
 
   ngOnInit(): void {
     this.cart$ = this.cartService.cart$;
     this.cartService.getCart().subscribe();
+    this.favorites = this.favouriteService.getFavorites();
   }
 
   isInCart(productId: string): boolean {

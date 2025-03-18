@@ -1,13 +1,17 @@
 import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute, RouterModule, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+
 import { HeaderBannerComponent } from '../shared/header-banner/header-banner.component';
 import { FeatureBannerComponent } from '../shared/feature-banner/feature-banner.component';
 import { DropdownComponent } from '../shared/dropdown/dropdown.component';
-import { BlogService } from '../../Services/blog.service';
 import { PaginationComponent } from '../shared/pagination/pagination.component';
+
+import { BlogService } from '../../Services/blog.service';
 import { BlogPost } from '../../Models/blog.model';
+
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-blogs',
@@ -21,27 +25,14 @@ import { BlogPost } from '../../Models/blog.model';
     PaginationComponent,
   ],
   templateUrl: './blogs.component.html',
-  styleUrl: './blogs.component.css',
+  styleUrls: ['./blogs.component.css'],
 })
 export class BlogsComponent implements OnInit {
   @ViewChild('blogsContainer') blogsContainer!: ElementRef;
-  categories: string[] = [
-    'All',
-    'Furniture & Decor',
-    'office',
-    'smart home',
-    'Home Decor',
-    'Dining Furniture',
-    'Bedroom Furniture',
-    'Vintage',
-    'Small Spaces',
-    'Outdoor Living',
-    'Wooden',
-  ];
+  categories: string[] = [];
   selectedCategory: string = 'All';
   isMenuOpen: boolean = false;
   searchQuery: string = '';
-  post?: BlogPost;
   posts: BlogPost[] = [];
   currentPage: number = 1;
   postsPerPage: number = 3;
@@ -52,7 +43,20 @@ export class BlogsComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    this.posts = this.blogService.getBlogs();
+    this.loadCategories();
+    this.loadPosts();
+  }
+
+  loadCategories() {
+    this.blogService.getCategories().subscribe((data) => {
+      this.categories = ['All', ...data];
+    });
+  }
+
+  loadPosts() {
+    this.blogService.getAllPosts().subscribe((data) => {
+      this.posts = data.posts;
+    });
   }
 
   get totalPages(): number {
@@ -61,9 +65,7 @@ export class BlogsComponent implements OnInit {
 
   get currentPosts(): BlogPost[] {
     const start = (this.currentPage - 1) * this.postsPerPage;
-    const end = start + this.postsPerPage;
-
-    return this.filteredPosts.slice(start, end);
+    return this.filteredPosts.slice(start, start + this.postsPerPage);
   }
 
   get filteredPosts(): BlogPost[] {
@@ -79,23 +81,21 @@ export class BlogsComponent implements OnInit {
   goToPage(page: number): void {
     this.currentPage = page;
 
-    if (this.blogsContainer) {
+    if (this.blogsContainer?.nativeElement) {
       const offset = 100;
-      const topPosition =
-        this.blogsContainer.nativeElement.getBoundingClientRect().top +
-        window.scrollY -
-        offset;
-
       window.scrollTo({
-        top: topPosition,
+        top:
+          this.blogsContainer.nativeElement.getBoundingClientRect().top +
+          window.scrollY -
+          offset,
         behavior: 'smooth',
       });
     }
   }
 
   filterByCategory(selectedItem: { id: string; value: string } | string) {
-    if (typeof selectedItem == 'string') this.selectedCategory = selectedItem;
-    else this.selectedCategory = selectedItem.value;
+    this.selectedCategory =
+      typeof selectedItem === 'string' ? selectedItem : selectedItem.value;
     this.currentPage = 1;
     this.toggleDropdown(false);
   }

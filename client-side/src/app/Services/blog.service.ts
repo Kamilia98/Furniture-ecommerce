@@ -1,126 +1,67 @@
 import { Injectable } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { BlogPost } from '../Models/blog.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class BlogService {
-  private blogs: BlogPost[] = [
-    {
-      id: '1',
-      title: 'Transform Your Living Room with Elegant Furniture',
-      excerpt:
-        'Discover how to refresh your living space with stylish and comfortable furniture choices.',
-      content:
-        "Are you tired of the same old living room setup, longing for a refreshing change? It's time to embark on a journey of transformation with our meticulously curated selection of stylish furniture. We understand the importance of creating a living space that not only exudes comfort but also captivates with its aesthetic allure...",
-      image: '/images/blogs/1.jpg',
-      category: 'Furniture & Decor',
-      date: '2024-02-18',
-      users: 'InteriorDesignPro',
-    },
-    {
-      id: '2',
-      title: 'Dining Room Makeover: The Perfect Table & Chairs',
-      excerpt:
-        'Your dining space is more than just a place to eat; it’s a hub for connection and style. Learn how to choose the perfect furniture.',
-      content:
-        'The dining room is a multifaceted space that serves various purposes beyond just a place to eat; it’s a central hub for gathering, entertaining, and creating enduring memories. Selecting the right dining furniture is paramount to elevating this experience...',
-      image: '/images/blogs/4.jpg',
-      category: 'Furniture & Decor',
-      date: '2024-02-17',
-      users: 'InteriorDesignPro',
-    },
-    {
-      id: '3',
-      title: 'Bedroom Bliss: Designing a Cozy and Stylish Retreat',
-      excerpt:
-        'Your bedroom should be a sanctuary of comfort and relaxation. Explore tips for selecting the right furniture and decor.',
-      content:
-        'Your bedroom should be the most relaxing space in your home, offering a perfect blend of comfort and style. From selecting the right bed frame to choosing soothing color palettes, every detail contributes to a serene and inviting atmosphere...',
-      image: '/images/blogs/2.jpg',
-      category: 'Furniture & Decor',
-      date: '2024-02-16',
-      users: 'DiningRoomGuru',
-    },
-    {
-      id: '4',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/3.jpg',
-      category: 'Furniture',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-    {
-      id: '5',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/5.jpg',
-      category: 'office',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-    {
-      id: '6',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/6.jpg',
-      category: 'office',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-    {
-      id: '7',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/7.jpg',
-      category: 'office',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-    {
-      id: '8',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/8.jpg',
-      category: 'smart home',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-    {
-      id: '9',
-      title: 'The Magic of Lighting: Enhance Your Home Ambience',
-      excerpt:
-        'Lighting can transform your space. Learn how to use floor lamps, pendant lights, and smart lighting solutions to set the mood.',
-      content:
-        'Lighting plays a crucial role in home decor, shaping the ambiance and functionality of each room. Whether it’s warm-toned pendant lights for the living room or task lighting for the workspace, the right choices can elevate your home’s atmosphere...',
-      image: './images/blogs/9.jpg',
-      category: 'smart home',
-      date: '2024-02-16',
-      users: 'SleepWellDesigner',
-    },
-  ];
+  private apiUrl = 'http://localhost:5000';
 
-  getBlogs(): BlogPost[] {
-    return this.blogs;
+  constructor(private http: HttpClient) {}
+
+  private handleError(error: HttpErrorResponse) {
+    console.error('Error occurred:', error);
+    return throwError(() => new Error(error.message || 'Server error'));
   }
 
-  getBlog(id: string): BlogPost | undefined {
-    return this.blogs.find((blog) => blog.id == id);
+  getAllPosts(
+    page: number = 1,
+    limit: number = 10
+  ): Observable<{ totalPosts: number; posts: BlogPost[] }> {
+    return this.http
+      .get<{ totalPosts: number; posts: BlogPost[] }>(
+        `${this.apiUrl}/posts?page=${page}&limit=${limit}`
+      )
+      .pipe(catchError(this.handleError));
+  }
+
+  getPostById(id: string): Observable<BlogPost> {
+    return this.http
+      .get<BlogPost>(`${this.apiUrl}/posts/${id}`)
+      .pipe(catchError(this.handleError));
+  }
+
+  getRecentPosts(): Observable<BlogPost[]> {
+    return this.http
+      .get<{ data: { posts: BlogPost[] } }>(`${this.apiUrl}/posts/recent`)
+      .pipe(
+        map((response) => response.data.posts),
+        catchError(this.handleError)
+      );
+  }
+
+  getRelatedPosts(id: string): Observable<BlogPost[]> {
+    return this.http
+      .get<{ data: { relatedPosts: BlogPost[] } }>(
+        `${this.apiUrl}/posts/${id}/related`
+      )
+      .pipe(
+        map((response) => response.data.relatedPosts),
+        catchError(this.handleError)
+      );
+  }
+
+  getCategories(): Observable<string[]> {
+    return this.http
+      .get<{ data: { categories: string[] } }>(
+        `${this.apiUrl}/posts/categories`
+      )
+      .pipe(
+        map((response) => response.data.categories),
+        catchError(this.handleError)
+      );
   }
 }

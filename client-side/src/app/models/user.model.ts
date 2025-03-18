@@ -2,8 +2,8 @@ import { product } from './product.model';
 
 export interface user {
   id: string;
-  username: string;
+  name: string;
   email: string;
-  favorites: product[];
-  cart: product[];
+  favorites?: product[];
+  cart?: product[];
 }

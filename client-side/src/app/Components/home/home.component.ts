@@ -44,7 +44,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
 
   ngOnInit(): void {
     this.products$ = this.productService.products$;
-    this.productService.getProducts().subscribe();
+    this.productService.getProducts(1, 8).subscribe();
   }
 
   ngAfterViewInit() {

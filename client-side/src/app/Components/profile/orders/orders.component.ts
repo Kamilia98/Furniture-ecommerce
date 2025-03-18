@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { OrderService } from '../../Services/order.service';
+import { OrderService } from '../../../Services/order.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { DropdownComponent } from '../shared/dropdown/dropdown.component';
+import { DropdownComponent } from '../../shared/dropdown/dropdown.component';
 
 interface Order {
   orderNumber: string;

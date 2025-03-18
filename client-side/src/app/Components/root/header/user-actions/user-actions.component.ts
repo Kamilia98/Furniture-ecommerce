@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
-import { product } from '../../Models/product.model';
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { trigger, transition, animate, style } from '@angular/animations';
 import { RouterModule } from '@angular/router';
-import { FavoriteService } from '../../Services/favorite.service';
-import { CartService } from '../../Services/cart.service';
-import { AuthService } from '../../Services/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { product } from '../../../../Models/product.model';
+import { FavoriteService } from '../../../../Services/favorite.service';
+import { CartService } from '../../../../Services/cart.service';
+import { AuthService } from '../../../../Services/auth.service';
 
 @Component({
   selector: 'app-user-actions',
@@ -48,6 +48,7 @@ export class UserActionsComponent implements OnInit {
 
   ngOnInit(): void {
     this.authService.isLoggedIn$.subscribe((status) => {
+      console.log(status);
       this.isLoggedIn = status;
       console.log(status);
     });
@@ -58,15 +59,13 @@ export class UserActionsComponent implements OnInit {
   }
 
   get favorites(): product[] {
-    let userID = '1';
-    const favoritesItems = this.favoriteService.getFavorites(userID);
+    const favoritesItems = this.favoriteService.getFavorites();
     this.favoritesLength = favoritesItems.length;
     return favoritesItems.slice(0, 4);
   }
 
   deleteFavorite(id: string): void {
-    let userID = '1';
-    this.favoriteService.removeFavorite(userID, id);
+    this.favoriteService.removeFavorite(id);
   }
 
   deleteCartProduct(id: string): void {

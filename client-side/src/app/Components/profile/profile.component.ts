@@ -1,19 +1,19 @@
 import { Component, OnInit } from '@angular/core';
 import { UserService } from '../../Services/user.service';
 import { user } from '../../Models/user.model';
-import { InputComponent } from '../shared/input/input.component';
-import { ButtonComponent } from '../shared/button/button.component';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../Services/auth.service';
+import { Observable } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.component.html',
   styleUrls: ['./profile.component.css'],
-  imports: [RouterOutlet],
+  imports: [RouterOutlet, CommonModule],
 })
 export class ProfileComponent implements OnInit {
-  user!: user;
+  user$!: Observable<user | null>;
   isChecked: boolean = false;
   activeComponent: string = 'orders';
 
@@ -24,7 +24,8 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.user = this.userService.getUser();
+    this.user$ = this.userService.user$;
+    this.userService.getUser().subscribe();
   }
 
   toggleCheck() {
@@ -38,6 +39,6 @@ export class ProfileComponent implements OnInit {
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/register']);
+    this.router.navigate(['/auth']);
   }
 }

@@ -62,15 +62,15 @@
 
   <!-- Pagination -->
   <div
-    class="flex items-center justify-center px-4 py-3 bg-white shadow-md rounded-lg"
+    class="flex justify-end p-3 bg-white shadow-md rounded-lg gap-4 md:gap-8"
   >
     <!-- Per Page Selection -->
-    <div class="flex items-center space-x-2">
+    <div class="flex items-center gap-2 min-w-auto">
       <p class="text-sm font-medium text-gray-700">Per page</p>
 
       <div class="relative">
         <button
-          class="bg-white h-14 flex items-center px-5 cursor-pointer w-full min-w-48 border border-gray-medium rounded-md focus:outline-none"
+          class="bg-white h-10 flex items-center px-5 cursor-pointer w-14 lg:w-30 border border-gray-medium rounded-md focus:outline-none"
           (click)="togglePageSizesMenuOpen(true)"
         >
           <span class="text-gray-dark">{{ itemsPerPage }}</span>
@@ -85,19 +85,21 @@
     </div>
 
     <!-- Page Info -->
-    <div class="flex-1 text-sm font-medium text-gray-700 text-center">
+    <div
+      class="flex items-center justify-end lg:justify-center text-sm font-medium text-gray-700 text-center min-w-auto"
+    >
       Page {{ currentPage }} of {{ totalPages }}
     </div>
 
     <!-- Pagination Buttons -->
-    <div class="flex items-center space-x-2">
+    <div class="flex gap-2 justify-end items-center">
       <button
         (click)="goToFirstPage()"
         [disabled]="currentPage === 1"
         class="p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50 flex"
       >
-        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
-        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1] w-1" />
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1] w-1" />
       </button>
 
       <button
@@ -105,7 +107,7 @@
         [disabled]="currentPage === 1"
         class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
       >
-        <img src="/icons/arrow.svg" alt="" class="scale-[-1]" />
+        <img src="/icons/arrow.svg" alt="" class="scale-[-1] w-1" />
       </button>
 
       <button
@@ -113,7 +115,7 @@
         [disabled]="currentPage === totalPages"
         class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
       >
-        <img src="/icons/arrow.svg" alt="" />
+        <img src="/icons/arrow.svg" alt="" class="w-1"/>
       </button>
 
       <button
@@ -121,8 +123,8 @@
         [disabled]="currentPage === totalPages"
         class="flex p-2 rounded-md border border-gray-300 hover:bg-gray-100 disabled:opacity-50"
       >
-        <img src="/icons/arrow.svg" alt="" />
-        <img src="/icons/arrow.svg" alt="" />
+        <img src="/icons/arrow.svg" alt="" class="w-1"/>
+        <img src="/icons/arrow.svg" alt="" class="w-1"/>
       </button>
     </div>
   </div>

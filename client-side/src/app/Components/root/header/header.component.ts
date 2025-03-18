@@ -1,11 +1,10 @@
-import { Component, HostListener, ElementRef } from '@angular/core';
+import { Component, HostListener, ElementRef, OnInit } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SearchComponent } from '../../search/search.component';
-import { UserActionsComponent } from '../../user-actions/user-actions.component';
-import { NavigationComponent } from '../../navigation/navigation.component';
-import { ProductService } from '../../../Services/product.service';
+import { UserActionsComponent } from './user-actions/user-actions.component';
+import { NavigationComponent } from './navigation/navigation.component';
 
 @Component({
   selector: 'app-header',
@@ -23,15 +22,8 @@ import { ProductService } from '../../../Services/product.service';
 })
 export class HeaderComponent {
   isActive = false;
-  productsNames: { id: string; value: string }[];
 
-  constructor(
-    private productService: ProductService,
-    private router: Router,
-    private elementRef: ElementRef
-  ) {
-    this.productsNames = [];
-  }
+  constructor(private router: Router, private elementRef: ElementRef) {}
 
   toggleMenu() {
     this.isActive = !this.isActive;

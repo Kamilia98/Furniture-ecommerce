@@ -24,7 +24,7 @@
         <div class="flex justify-between items-center">
           <label class="text-gray-700 font-medium">Password</label>
           <a
-            routerLink="/register/forgot-password"
+            routerLink="/auth/forgot-password"
             class="text-primary text-sm cursor-pointer hover:underline"
           >
             Forgot password?
@@ -58,13 +58,26 @@
           <span class="text-gray">Don't have an account?</span>
           <a
             class="text-primary font-semibold hover:underline"
-            routerLink="/register/signup"
+            routerLink="/auth/signup"
           >
             Sign Up
           </a>
         </div>
+        <div class="flex justify-center mt-5">
+          <button
+            (click)="onGoogleSignIn()"
+            class="flex items-center cursor-pointer justify-center gap-2 w-1/2 px-4 py-2 border border-gray-300 rounded-lg shadow-sm bg-white hover:bg-secondary transition duration-200"
+          >
+            <img
+              src="https://www.svgrepo.com/show/475656/google-color.svg"
+              alt="Google Logo"
+              class="w-5 h-5"
+            />
+            <span class="text-gray-700 font-medium">Continue with Google</span>
+          </button>
+        </div>
 
-        <div class="flex justify-center">
+        <div class="flex justify-center mt-5">
           <app-button (click)="onSubmit()">Sign In</app-button>
         </div>
       </form>

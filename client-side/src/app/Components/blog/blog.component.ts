@@ -16,10 +16,11 @@ import { FeatureBannerComponent } from '../shared/feature-banner/feature-banner.
     FeatureBannerComponent,
   ],
   templateUrl: './blog.component.html',
-  styleUrl: './blog.component.css',
+  styleUrls: ['./blog.component.css'], // ✅ تم تعديل `styleUrl` إلى `styleUrls`
 })
 export class BlogComponent implements OnInit {
   blogs: BlogPost[] = [];
+  blog: BlogPost | undefined;
   selectedCategory: string = '';
 
   constructor(
@@ -28,20 +29,23 @@ export class BlogComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.blogs = this.blogService.getBlogs();
+    const blogID = this.route.snapshot.paramMap.get('id');
 
-    if (this.blog) {
-      this.selectedCategory = this.blog.category;
+    if (blogID) {
+      this.blogService.getPostById(blogID).subscribe((data) => {
+        // ✅ استخدام `getPostById` بشكل صحيح
+        this.blog = data;
+        this.selectedCategory = data.category;
+      });
     }
+
+    this.blogService.getAllPosts().subscribe((data) => {
+      this.blogs = data.posts;
+    });
   }
 
   get blogID(): string | null {
-    const idParam = this.route.snapshot.paramMap.get('id');
-    return idParam ? idParam : null;
-  }
-
-  get blog(): BlogPost | undefined {
-    return this.blogID ? this.blogService.getBlog(this.blogID) : undefined;
+    return this.route.snapshot.paramMap.get('id');
   }
 
   get relatedBlogs(): BlogPost[] {

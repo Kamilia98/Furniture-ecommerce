@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
   imports: [CommonModule],
   template: `
     <div
-      class="absolute top-full left-0 bg-white min-w-max rounded-md p-2 mt-2 z-10 shadow"
+      class="absolute w-full top-full left-0 bg-white min-w-max rounded-md p-2 mt-2 z-10 shadow"
     >
       <ul class="flex flex-col">
         <li

@@ -7,7 +7,7 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5000/register';
+  private apiUrl = 'http://localhost:5000/auth';
   private isLoggedInSubject: BehaviorSubject<boolean>;
   isLoggedIn$: Observable<boolean>;
   constructor(private http: HttpClient, private router: Router) {
@@ -27,7 +27,14 @@ export class AuthService {
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    this.router.navigate(['/register/login']);
+    this.router.navigate(['/auth/login']);
+  }
+  googleSignIn() {
+    window.location.href = `${this.apiUrl}/google`;
+  }
+  handleGoogleLogin(token: string): void {
+    localStorage.setItem('token', token);
+    this.isLoggedInSubject.next(true);
   }
   isAuthenticated(): boolean {
     return !!localStorage.getItem('token');

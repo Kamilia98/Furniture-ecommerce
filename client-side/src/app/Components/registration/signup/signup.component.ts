@@ -61,7 +61,7 @@ export class SignupComponent {
       this.authService.signup(this.form.value).subscribe({
         next: (res) => {
           this.form.reset();
-          this.router.navigate(['/register/login']);
+          this.router.navigate(['/auth/login']);
         },
         error: (err) => {
           this.errorMessage = err.error.error;

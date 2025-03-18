@@ -20,7 +20,12 @@ html {
       active-track-color: var(--color-primary),
       hover-state-layer-color: transparent,
       focus-state-layer-color: transparent,
-      focus-handle-color:#a87706
+      focus-handle-color: #a87706,
+    )
+  );
+  @include mat.progress-spinner-overrides(
+    (
+      active-indicator-color: var(--color-primary),
     )
   );
 }

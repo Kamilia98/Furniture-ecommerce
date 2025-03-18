@@ -22,8 +22,8 @@ import { adminGuard } from './Guards/admin.guard';
 import { authGuard } from './Guards/auth.guard';
 
 import { ProfileComponent } from './Components/profile/profile.component';
-import { SettingComponent } from './Components/setting/setting.component';
-import { OrdersComponent } from './Components/orders/orders.component';
+import { SettingComponent } from './Components/profile/setting/setting.component';
+import { OrdersComponent } from './Components/profile/orders/orders.component';
 import { FavoritesItemsComponent } from './Components/shared/favorites-items/favorites-items.component';
 import { PrivacyPolicyComponent } from './Components/privacy-policy/privacy-policy.component';
 import { ReturnsComponent } from './Components/returns/returns.component';
@@ -32,7 +32,7 @@ import { StepperComponent } from './Components/shared/stepper/stepper.component'
 
 export const routes: Routes = [
   {
-    path: 'register',
+    path: 'auth',
     component: RegistrationComponent,
     children: [
       { path: '', component: LoginComponent, canActivate: [authGuard] },
@@ -40,11 +40,6 @@ export const routes: Routes = [
       { path: 'signup', component: SignupComponent, canActivate: [authGuard] },
       { path: 'forgot-password', component: ForgotPasswordComponent },
       { path: 'reset-password', component: ResetPasswordComponent },
-      { path: '**', component: ErrorComponent },
-
-      { path: '', component: LoginComponent },
-      { path: 'login', component: LoginComponent },
-      { path: 'signup', component: SignupComponent },
       { path: '**', component: ErrorComponent },
     ],
   },
@@ -66,18 +61,6 @@ export const routes: Routes = [
       { path: 'favorites', component: FavoritesComponent },
       { path: 'privacypolicy', component: PrivacyPolicyComponent },
       { path: 'returns', component: ReturnsComponent },
-      // { path: 'payment', component: PaymentComponent },
-      {
-        path: '',
-        component: StepperComponent,
-        children: [
-          { path: 'cart', component: CartComponent },
-          { path: 'checkout', component: CheckoutComponent },
-          { path: 'order-complete', component: OrdersComponent },
-          { path: '**', component: ErrorComponent },
-        ],
-      },
-
       {
         path: 'profile',
         component: ProfileComponent,
@@ -99,6 +82,17 @@ export const routes: Routes = [
             component: SettingComponent,
           },
         ],
+      },
+      { path: 'cart', component: CartComponent },
+      {
+        path: 'checkout',
+        component: CheckoutComponent,
+        canActivate: [authGuard],
+      },
+      {
+        path: 'order-complete',
+        component: OrdersComponent,
+        canActivate: [authGuard],
       },
       { path: '**', component: ErrorComponent },
     ],

@@ -1,3 +1,4 @@
+@let user = (user$ |async)??{name:'',email:''};
 <main
   class="max-w-[1680px] flex flex-col gap-2 items-start px-4 md:px-6 lg:px-8 mx-auto w-full"
 >
@@ -13,7 +14,7 @@
               src="images/user.png"
           /></span>
           <div class="flex flex-col">
-            <p class="text-sm">{{ user.username }}</p>
+            <p class="text-sm">{{ user.name }}</p>
             <p class="text-xs">{{ user.email }}</p>
           </div>
         </div>
@@ -32,7 +33,9 @@
           </li>
           <li
             class="flex items-center gap-2 text-sm px-4 py-4 rounded-3xl font-medium cursor-pointer {{
-              activeComponent === 'favorites' ? 'bg-gray-light' : 'bg-transparent'
+              activeComponent === 'favorites'
+                ? 'bg-gray-light'
+                : 'bg-transparent'
             }} hover:bg-gray-light transition-colors duration-500"
             (click)="route('favorites')"
           >
@@ -108,7 +111,8 @@
             <p class="text-xs sm:text-sm">Settings</p>
           </li>
           <li
-            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 border-transparent hover:border-black" (click)="logout()"
+            class="py-3 px-2 flex flex-col gap-1 sm:gap-2 items-center text-center cursor-pointer border-t-2 border-transparent hover:border-black"
+            (click)="logout()"
           >
             <img src="/icons/logout.svg" alt="" />
             <p class="text-xs sm:text-sm">Logout</p>
