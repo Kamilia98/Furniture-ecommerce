@@ -7,10 +7,9 @@ import { DropdownComponent } from '../shared/dropdown/dropdown.component';
 interface Order {
   orderNumber: string;
   status: string;
-  total: number;
+  total: string;
   createdAt: string;
 }
-
 @Component({
   selector: 'app-orders',
   templateUrl: './orders.component.html',
@@ -31,13 +30,6 @@ export class OrdersComponent implements OnInit {
   pageSizes = ['10', '20', '50', '100'];
   currentPage = 1;
 
-  get totalPages(): number {
-    return Math.max(
-      1,
-      Math.ceil(this.filteredOrders.length / +this.itemsPerPage)
-    );
-  }
-
   constructor(private orderService: OrderService) {}
 
   ngOnInit(): void {
@@ -45,10 +37,18 @@ export class OrdersComponent implements OnInit {
   }
 
   fetchOrders(): void {
-    this.orderService.getOrders().subscribe((data) => {
-      this.orders = data;
-      this.applyFilters();
-    });
+    this.orderService
+      .getOrders(this.currentPage, +this.itemsPerPage)
+      .subscribe({
+        next: (response) => {
+          this.orders = response.data.orders;
+          this.totalItems = response.data.totalOrders;
+          this.applyFilters();
+        },
+        error: (err) => {
+          console.error('Error fetching orders:', err);
+        },
+      });
   }
 
   applyFilters(): void {
@@ -60,15 +60,7 @@ export class OrdersComponent implements OnInit {
       );
     });
 
-    this.totalItems = this.filteredOrders.length;
     this.currentPage = 1;
-    this.updateDisplayedOrders();
-  }
-
-  updatePageSize(pageSize: { id: string; value: string }): void {
-    this.currentPage = 1;
-    this.itemsPerPage = pageSize.value;
-    this.pageSizesMenuOpen = false;
     this.updateDisplayedOrders();
   }
 
@@ -78,31 +70,42 @@ export class OrdersComponent implements OnInit {
     this.displayedOrders = this.filteredOrders.slice(startIndex, endIndex);
   }
 
+  updatePageSize(pageSize: { id: string; value: string }): void {
+    this.itemsPerPage = pageSize.value;
+    this.currentPage = 1;
+    this.pageSizesMenuOpen = false;
+    this.fetchOrders();
+  }
+
   goToFirstPage(): void {
     this.currentPage = 1;
-    this.updateDisplayedOrders();
+    this.fetchOrders();
   }
 
   goToPreviousPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updateDisplayedOrders();
+      this.fetchOrders();
     }
   }
 
   goToNextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updateDisplayedOrders();
+      this.fetchOrders();
     }
   }
 
   goToLastPage(): void {
     this.currentPage = this.totalPages;
-    this.updateDisplayedOrders();
+    this.fetchOrders();
   }
 
   togglePageSizesMenuOpen(open: boolean) {
-    this.pageSizesMenuOpen = !this.pageSizesMenuOpen;
+    this.pageSizesMenuOpen = open;
+  }
+
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.totalItems / +this.itemsPerPage));
   }
 }

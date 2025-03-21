@@ -68,17 +68,6 @@ export const routes: Routes = [
       { path: 'returns', component: ReturnsComponent },
       // { path: 'payment', component: PaymentComponent },
       {
-        path: '',
-        component: StepperComponent,
-        children: [
-          { path: 'cart', component: CartComponent },
-          { path: 'checkout', component: CheckoutComponent },
-          { path: 'order-complete', component: OrdersComponent },
-          { path: '**', component: ErrorComponent },
-        ],
-      },
-
-      {
         path: 'profile',
         component: ProfileComponent,
         children: [
@@ -100,6 +89,17 @@ export const routes: Routes = [
           },
         ],
       },
+      {
+        path: '',
+        component: StepperComponent,
+        children: [
+          { path: 'cart', component: CartComponent },
+          { path: 'checkout', component: CheckoutComponent },
+          { path: 'order-complete', component: OrdersComponent },
+          { path: '**', component: ErrorComponent },
+        ],
+      },
+
       { path: '**', component: ErrorComponent },
     ],
   },
