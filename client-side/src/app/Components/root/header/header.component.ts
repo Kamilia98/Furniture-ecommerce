@@ -22,7 +22,8 @@ import { NavigationComponent } from './navigation/navigation.component';
     FormsModule,
     UserActionsComponent,
     NavigationComponent,
-  ],
+    SearchComponent
+],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
