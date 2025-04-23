@@ -114,6 +114,7 @@ const ProductSchema = new mongoose.Schema(
         domesticWarranty: { type: String },
       },
     },
+    deleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
@@ -123,7 +124,6 @@ ProductSchema.pre('save', function (next) {
     const colorInfo = ALLOWED_COLORS.find((c) => c.name === color.name);
     if (colorInfo) {
       color.hex = colorInfo.hex;
-      console.log('aadsasdcdasaedAF', color.hex);
     } else {
       return next(new Error(`Invalid color name: ${color.name}`));
     }
