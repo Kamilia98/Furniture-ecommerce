@@ -5,7 +5,7 @@ require('dotenv').config();
 
 // Scripts to run
 require('./src/middlewares/passport.middleware');
-require('./src/services/orderStatus.service');
+// require('./src/services/orderStatus.service');
 
 const passport = require('passport');
 

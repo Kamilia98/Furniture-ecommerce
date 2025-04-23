@@ -11,6 +11,11 @@ const orderController = require('../controllers/order.controller');
 
 // router.use(limiter);
 
-router.route('/').get(verifyToken, orderController.getOrders); // GET All Orders
+// should add middleware later
+router.route('/all').get(orderController.getAllOrders); // GET All Orders
+
+router.route('/').get(verifyToken, orderController.getOrders); // GET User Orders
+
+router.patch('/:id/status', orderController.updateOrderStatus);
 
 module.exports = router;
