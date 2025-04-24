@@ -44,7 +44,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   sortOption[sortBy] = sortOrder === 'asc' ? 1 : -1;
 
   const orders = await Order.find(filter)
-    .populate({ path: 'userId', select: 'username' }) // 🧠 populate user name
+    .populate({ path: 'userId', select: 'username' }) 
     .select('_id orderNumber status orderItems totalAmount createdAt userId')
     .sort(sortOption)
     .skip(skip)
@@ -89,6 +89,46 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   });
 });
 
+const getOrderDetails = asyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+  console.log('id', id);
+
+  const order = await Order.findById(id)
+    .populate({ path: 'userId', select: 'username email' })
+    .populate('orderItems.id')
+    .exec();
+
+  if (!order) {
+    return next(new AppError('Order not found', 404, httpStatusText.FAIL));
+  }
+  console.log('order', order);
+
+  const formattedOrder = {
+    id: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    totalAmount: order.totalAmount.toFixed(2),
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    user: {
+      id: order.userId?._id || null,
+      username: order.userId?.username || 'N/A',
+      email: order.userId?.email || 'N/A',
+    },
+    orderItems: order.orderItems.map((item) => ({
+      name: item?.name || 'Unknown',
+      price: item.price,
+      quantity: item.quantity,
+      total: (item.price * item.quantity).toFixed(2),
+    })),
+  };
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: formattedOrder,
+  });
+});
+
 const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -112,7 +152,7 @@ const updateOrderStatus = async (req, res) => {
   }
 };
 
-const getOrders = asyncWrapper(async (req, res, next) => {
+const getUserOrders = asyncWrapper(async (req, res, next) => {
   const userId = req.user._id;
 
   let { limit = 10, page = 1 } = req.query;
@@ -163,4 +203,9 @@ const getOrders = asyncWrapper(async (req, res, next) => {
   });
 });
 
-module.exports = { getOrders, getAllOrders, updateOrderStatus };
+module.exports = {
+  getUserOrders,
+  getAllOrders,
+  getOrderDetails,
+  updateOrderStatus,
+};
