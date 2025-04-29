@@ -25,7 +25,7 @@ export class CartService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private toast: NgToastService
+    private toast: NgToastService,
   ) {
     this.authService.isLoggedIn$.subscribe((status) => {
       this.isLoggedInSubject.next(status);
@@ -103,14 +103,14 @@ export class CartService {
             console.log('[CartService] Updated cart:', cart);
             this.cartSubject.next(cart);
           }),
-          catchError(this.handleError<ProductCart[]>('getCart', []))
+          catchError(this.handleError<ProductCart[]>('getCart', [])),
         );
     } else {
       console.log('[CartService] Fetching guest cart...');
       const guestCart = this.getGuestCart();
       this.cartSubject.next(guestCart);
       this.cartSubtotalSubject.next(
-        guestCart.reduce((sum, p) => sum + p.subtotal, 0)
+        guestCart.reduce((sum, p) => sum + p.subtotal, 0),
       );
       return of(guestCart);
     }
@@ -142,7 +142,7 @@ export class CartService {
           if (response.status !== 'success') return;
 
           const cartProducts = response.data.products.map((p: ProductCart) =>
-            this.mapToProductCart(p)
+            this.mapToProductCart(p),
           );
 
           this.cartSubject.next(cartProducts);
@@ -183,7 +183,7 @@ export class CartService {
     id: string,
     change: number,
     remove = false,
-    color?: string
+    color?: string,
   ): void {
     let cart = [...this.cartSubject.getValue()];
     let name = '';
@@ -208,24 +208,24 @@ export class CartService {
         .patch(
           this.apiUrl,
           { id, quantity: remove ? 0 : product?.quantity || 0, color },
-          { headers: this.getAuthHeaders() }
+          { headers: this.getAuthHeaders() },
         )
         .pipe(
           catchError((error) => {
             this.toast.danger(
               remove
                 ? `Failed to remove ${name} from cart.`
-                : `Failed to update ${name} quantity.`
+                : `Failed to update ${name} quantity.`,
             );
             return this.handleError('modifyQuantity')(error);
-          })
+          }),
         )
         .subscribe({
           next: (response: any) => {
             if (response.status === 'success') {
               this.cartSubject.next(cart);
               this.cartSubtotalSubject.next(
-                cart.reduce((sum, p) => sum + p.subtotal, 0)
+                cart.reduce((sum, p) => sum + p.subtotal, 0),
               );
 
               const message = remove
@@ -239,7 +239,7 @@ export class CartService {
       this.saveGuestCart(cart);
       this.cartSubject.next(cart);
       this.cartSubtotalSubject.next(
-        cart.reduce((sum, p) => sum + p.subtotal, 0)
+        cart.reduce((sum, p) => sum + p.subtotal, 0),
       );
       const message = remove
         ? `${name} has been removed from the cart.`
@@ -261,7 +261,7 @@ export class CartService {
   isInCart(id: string): boolean {
     const exists = this.cartSubject.getValue().some((p) => p.id === id);
     console.log(
-      `[CartService] Checking if product ${id} is in cart: ${exists}`
+      `[CartService] Checking if product ${id} is in cart: ${exists}`,
     );
     return exists;
   }
@@ -272,6 +272,7 @@ export class CartService {
     localStorage.removeItem('cart');
     this.cartSubtotalSubject.next(0);
   }
+
   private updateCartState(cart: ProductCart[]): void {
     // Update the cart items
     this.cartSubject.next(cart);
@@ -301,21 +302,21 @@ export class CartService {
               color: product.color,
             },
           ],
-          { headers: this.getAuthHeaders() }
+          { headers: this.getAuthHeaders() },
         )
         .pipe(catchError(this.handleError('addProductWithColor')))
         .subscribe({
           next: (response: any) => {
             if (response.status === 'success') {
               const cartProducts = response.data.products.map(
-                (p: ProductCart) => this.mapToProductCart(p)
+                (p: ProductCart) => this.mapToProductCart(p),
               );
               console.log(cartProducts);
               this.cartSubject.next(cartProducts);
               this.cartSubtotalSubject.next(response.data.totalPrice);
 
               this.toast.success(
-                `${product.name} (${product.color}) added to cart successfully`
+                `${product.name} (${product.color.name}) added to cart successfully`,
               );
             }
           },
@@ -323,7 +324,7 @@ export class CartService {
     } else {
       this.handleGuestAddProductWithColor(product, quantity, product.price);
       this.toast.success(
-        `${product.name} (${product.color}) added to cart successfully`
+        `${product.name} (${product.color.name}) added to cart successfully`,
       );
     }
   }
@@ -335,11 +336,11 @@ export class CartService {
   private handleGuestAddProductWithColor(
     product: Product,
     quantity: number,
-    price: number
+    price: number,
   ): void {
     const cart = [...this.cartSubject.getValue()];
     const existing = cart.find(
-      (p) => p.id === product.id && p.color === product.color
+      (p) => p.id === product.id && p.color === product.color,
     );
 
     if (existing) {
@@ -358,11 +359,10 @@ export class CartService {
     this.updateCartState(cart);
   }
 
-  isColorInCart(id: string, colorName: string): boolean {
+  isColorInCart(id: string, colorHex: string): boolean {
     const cart = this.cartSubject.getValue();
     console.log('[isColorInCart]', cart);
-    console.log(cart);
-    return cart.some((item) => item.id === id && item.color === colorName);
+    return cart.some((item) => item.id === id && item.color?.hex === colorHex);
   }
   isUserLoggedIn(): boolean {
     return this.isLoggedInSubject.getValue();

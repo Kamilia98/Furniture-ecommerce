@@ -138,7 +138,7 @@ const getFilteredProducts = async (
         sale: 1,
         quantity: '$firstColor.quantity',
         effectivePrice: 1,
-        mainColor: '$firstColor.name',
+        mainColor: '$firstColor.hex',
         categories: {
           $map: {
             input: '$categories',
