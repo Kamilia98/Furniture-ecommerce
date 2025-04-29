@@ -3,7 +3,7 @@ const httpStatusText = require('../utils/httpStatusText');
 const AppError = require('../utils/appError');
 const Order = require('../models/order.model');
 
-// Admin
+// Admin - Get All Orders
 const getAllOrders = asyncWrapper(async (req, res, next) => {
   let {
     limit = 10,
@@ -18,10 +18,12 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     maxAmount,
   } = req.query;
 
+  // Convert pagination to numbers
   limit = parseInt(limit);
   page = parseInt(page);
 
   if (isNaN(limit) || isNaN(page) || limit <= 0 || page <= 0) {
+    console.error('Invalid pagination parameters:', { limit, page });
     return next(
       new AppError(
         "Invalid pagination parameters. 'limit' and 'page' must be positive numbers.",
@@ -32,34 +34,32 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   }
 
   const skip = (page - 1) * limit;
+  const filter = {};
 
-  let filter = {};
-
+  // Search filter
   if (searchQuery) {
     const searchRegex = new RegExp(searchQuery, 'i');
-    console.log('Generated search regex:', searchRegex);
     filter.$or = [{ orderNumber: { $regex: searchRegex } }];
+    console.log('Applying search filter:', filter.$or);
   }
 
-  // Filter by status if provided
+  // Status filter
   if (status) {
-    if (Array.isArray(status)) {
-      filter.status = { $in: status };
-    } else if (typeof status === 'string') {
-      const statusArray = status.split(',');
-      filter.status = { $in: statusArray };
-    }
+    const statusArray = Array.isArray(status) ? status : status.split(',');
+    filter.status = { $in: statusArray };
+    console.log('Applying status filter:', statusArray);
   }
 
-  // Filter by date range if provided
-  if (startDate && endDate) {
-    filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-  } else if (startDate) {
-    filter.createdAt = { $gte: new Date(startDate) };
-  } else if (endDate) {
-    filter.createdAt = { $lte: new Date(endDate) };
+  // Date range filter
+  const createdAtFilter = {};
+  if (startDate) createdAtFilter.$gte = new Date(startDate);
+  if (endDate) createdAtFilter.$lte = new Date(endDate);
+  if (Object.keys(createdAtFilter).length) {
+    filter.createdAt = createdAtFilter;
+    console.log('Applying date filter:', createdAtFilter);
   }
 
+  // Amount filter validation
   if (
     minAmount &&
     maxAmount &&
@@ -67,6 +67,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     maxAmount !== '0' &&
     parseFloat(minAmount) >= parseFloat(maxAmount)
   ) {
+    console.error('Invalid amount range:', { minAmount, maxAmount });
     return next(
       new AppError(
         "'minAmount' should be less than 'maxAmount'.",
@@ -76,19 +77,20 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     );
   }
 
-  // Filter by amount range if minAmount or maxAmount are provided
+  // Amount range filter
   if (minAmount && minAmount !== '0') {
-    // Avoid checking if minAmount is '0'
     filter.totalAmount = { ...filter.totalAmount, $gte: parseFloat(minAmount) };
   }
   if (maxAmount && maxAmount !== '0') {
-    // Avoid checking if maxAmount is '0'
     filter.totalAmount = { ...filter.totalAmount, $lte: parseFloat(maxAmount) };
   }
+  if (filter.totalAmount) {
+    console.log('Applying totalAmount filter:', filter.totalAmount);
+  }
 
-  // Sorting logic
-  const sortOption = {};
-  sortOption[sortBy] = sortOrder === 'asc' ? 1 : -1;
+  // Sorting
+  const sortOption = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+  console.log('Sorting orders by:', sortOption);
 
   const orders = await Order.find(filter)
     .populate({ path: 'userId', select: 'username' })
@@ -98,6 +100,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     .limit(limit);
 
   const totalOrders = await Order.countDocuments(filter);
+  console.log(`Found ${orders.length} orders out of ${totalOrders} total`);
 
   if (orders.length === 0) {
     return next(
@@ -109,20 +112,18 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     );
   }
 
-  const formattedOrders = orders.map((order) => {
-    return {
-      id: order._id,
-      orderNumber: order.orderNumber,
-      status: order.status,
-      totalAmount: `${order.totalAmount.toFixed(2)}`,
-      createdAt: order.createdAt.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }),
-      userName: order.userId?.username || 'N/A',
-    };
-  });
+  const formattedOrders = orders.map((order) => ({
+    id: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    totalAmount: `${order.totalAmount.toFixed(2)}`,
+    createdAt: order.createdAt.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+    userName: order.userId?.username || 'N/A',
+  }));
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -135,6 +136,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   });
 });
 
+// Admin - Update Order Status
 const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -147,91 +149,89 @@ const updateOrderStatus = async (req, res) => {
     );
 
     if (!updatedOrder) {
+      console.warn(`Order not found: ${id}`);
       return res.status(404).json({ message: 'Order not found' });
     }
 
+    console.log(`Updated order status for order ${id} to ${status}`);
     res.json({ message: 'Order status updated', order: updatedOrder });
   } catch (err) {
+    console.error('Error updating order status:', err);
     res
       .status(500)
       .json({ message: 'Error updating order', error: err.message });
   }
 };
 
-// Utility function to calculate start and end dates for different ranges
+// Utility: Get Date Range Based on Named Range
 const getRangeDates = (range) => {
   const today = new Date();
   let startDate, endDate;
 
   switch (range) {
     case 'today':
-      startDate = new Date(today.setHours(0, 0, 0, 0)); // Start of the day
-      endDate = new Date(today.setHours(23, 59, 59, 999)); // End of the day
+      startDate = new Date(today.setHours(0, 0, 0, 0));
+      endDate = new Date(today.setHours(23, 59, 59, 999));
       break;
-    case 'this-week':
-      const firstDayOfWeek = today.getDate() - today.getDay(); // Get the first day of the week
-      startDate = new Date(today.setDate(firstDayOfWeek)).setHours(0, 0, 0, 0); // Start of the week
-      endDate = new Date(today.setDate(firstDayOfWeek + 6)).setHours(
-        23,
-        59,
-        59,
-        999
-      ); // End of the week
+    case 'this-week': {
+      const firstDay = today.getDate() - today.getDay();
+      startDate = new Date(today.setDate(firstDay));
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(today.setDate(firstDay + 6));
+      endDate.setHours(23, 59, 59, 999);
       break;
+    }
     case 'this-month':
-      startDate = new Date(today.getFullYear(), today.getMonth(), 1); // First day of the month
-      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0); // Last day of the month
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
       break;
     case 'last-month':
-      startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1); // First day of last month
-      endDate = new Date(today.getFullYear(), today.getMonth(), 0); // Last day of last month
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      endDate = new Date(today.getFullYear(), today.getMonth(), 0);
       break;
     default:
-      throw new Error('Invalid range specified');
+      throw new Error(`Invalid range specified: ${range}`);
   }
 
-  // Make sure to return Date objects
-  return { startDate: new Date(startDate), endDate: new Date(endDate) };
+  return { startDate, endDate };
 };
 
-// Controller function for order analytics
+// Admin - Get Order Analytics
 const getOrderAnalytics = async (req, res) => {
   try {
     const { range } = req.query;
     const { startDate, endDate } = getRangeDates(range);
-    // Fetch the orders within the selected date range
-    const orders = await Order.find({
-      createdAt: {
-        $gte: startDate,
-        $lte: endDate,
-      },
+    console.log(`Getting analytics for range: ${range}`, {
+      startDate,
+      endDate,
     });
 
-    // Calculate total orders
-    const totalOrders = orders.length;
+    const orders = await Order.find({
+      createdAt: { $gte: startDate, $lte: endDate },
+    });
 
-    // Calculate total revenue
+    const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + order.totalAmount,
       0
     );
 
-    // Calculate average order value (if there are orders)
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-    // Return the analytics data
-    res.json({
-      totalOrders,
-      totalRevenue,
-      averageOrderValue,
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: {
+        totalOrders,
+        totalRevenue: totalRevenue.toFixed(2),
+      },
     });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error fetching order analytics', error });
+  } catch (err) {
+    console.error('Error fetching order analytics:', err);
+    res.status(500).json({
+      status: httpStatusText.ERROR,
+      message: 'Failed to fetch order analytics',
+      error: err.message,
+    });
   }
 };
-
-//user-admin
 const getOrderDetails = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
