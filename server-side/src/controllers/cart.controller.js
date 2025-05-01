@@ -9,7 +9,7 @@ const asyncWrapper = require('../middlewares/asyncWrapper.middleware');
 const formatProductData = (id, quantity, color) => {
   if (!id) return null;
 
-  const colorVariant = id.colors.find((c) => c.name === color);
+  const colorVariant = id.colors.find((c) => c.hex === color.hex);
   if (!colorVariant) return null;
 
   const availableQuantity = colorVariant.quantity || 0;
@@ -20,7 +20,7 @@ const formatProductData = (id, quantity, color) => {
   return {
     _id: id._id,
     name: id.name,
-    color: colorVariant.name,
+    color: { name: colorVariant.name, hex: colorVariant.hex },
     quantity: finalQuantity,
     image: colorVariant.images?.[0]?.url || null,
     price: effectivePrice,
@@ -43,10 +43,12 @@ const getUserCart = asyncWrapper(async (req, res, next) => {
   }
 
   const products = cart.products
-    .map(({ id, quantity, color }) => formatProductData(id, quantity, color))
+    .map(({ id, quantity, color }) =>
+      formatProductData(id, quantity, color)
+    )
     .filter(Boolean);
 
-  const totalPrice = products.reduce((sum, item) => sum + item.subtotal, 0);
+  const totalPrice = cart.totalPrice;
 
   console.log(
     `[Cart] Cart retrieved for user: ${userId}, Total products: ${products.length}`
@@ -65,14 +67,13 @@ const addToCart = asyncWrapper(async (req, res, next) => {
   console.log(`[Cart] Adding to cart for user: ${userId}`);
 
   if (!Array.isArray(items) || items.length === 0) {
-    console.warn(
-      `[Cart] Invalid or empty cart items provided by user: ${userId}`
-    );
+    console.warn(`[Cart] Invalid or empty cart items from user: ${userId}`);
     return next(new AppError('Invalid cart items.', 400, httpStatusText.FAIL));
   }
 
+  // Validate all items
   for (const item of items) {
-    const { id, quantity, color } = item;
+    const { id, quantity, colorHex } = item;
 
     if (!mongoose.Types.ObjectId.isValid(id) || quantity < 1) {
       return next(
@@ -85,50 +86,57 @@ const addToCart = asyncWrapper(async (req, res, next) => {
       return next(new AppError('Product not found.', 404, httpStatusText.FAIL));
     }
 
-    if (!color) {
-      item.color = product.colors[0]?.name;
-      if (!item.color) {
-        return next(
-          new AppError(
-            'Product has no available colors.',
-            400,
-            httpStatusText.FAIL
-          )
-        );
-      }
-    }
-
-    const colorVariant = product.colors.find((c) => c.name === item.color);
-    if (!colorVariant) {
+    const chosenColor = colorHex || product.colors[0]?.hex;
+    if (!chosenColor) {
       return next(
         new AppError(
-          `Color ${item.color} not available.`,
+          'Product has no available colors.',
           400,
           httpStatusText.FAIL
         )
       );
     }
+
+    const colorVariant = product.colors.find((c) => c.hex === chosenColor);
+    if (!colorVariant) {
+      return next(
+        new AppError(
+          `Color "${chosenColor}" not available.`,
+          400,
+          httpStatusText.FAIL
+        )
+      );
+    }
+
+    item.color = {
+      name: colorVariant.name,
+      hex: colorVariant.hex,
+    };
   }
 
+  // Find or create cart
   let cart = await Cart.findOne({ userId });
   if (!cart) {
     cart = new Cart({ userId, products: [] });
-    console.log(`[Cart] Creating new cart for user: ${userId}`);
+    console.log(`[Cart] Created new cart for user: ${userId}`);
   }
 
+  // Add or update products in cart
   for (const { id, quantity, color } of items) {
     const product = await Product.findById(id).lean();
-    const colorVariant = product.colors.find((c) => c.name === color);
+    console.log(color);
+    const colorVariant = product.colors.find((c) => c.name === color.name);
+    console.log(colorVariant);
     const availableQuantity = colorVariant?.quantity ?? 0;
     const finalQuantity = Math.min(quantity, availableQuantity);
 
     if (finalQuantity === 0) {
-      console.warn(`[Cart] Attempted to add out-of-stock product: ${id}`);
+      console.warn(`[Cart] Product out of stock: ${id}`);
       continue;
     }
 
     const existing = cart.products.find(
-      (p) => p.id.toString() === id && p.color === color
+      (p) => p.id.toString() === id && p.color.hex === color.hex
     );
 
     if (existing) {
@@ -152,12 +160,10 @@ const addToCart = asyncWrapper(async (req, res, next) => {
   const products = updatedCart.products
     .map(({ id, quantity, color }) => formatProductData(id, quantity, color))
     .filter(Boolean);
-
-  const totalPrice = products.reduce((sum, item) => sum + item.subtotal, 0);
-
+  console.log(products);
   res.status(201).json({
     status: httpStatusText.SUCCESS,
-    data: { products, totalPrice },
+    data: { products, totalPrice: cart.totalPrice },
   });
 });
 
@@ -178,7 +184,7 @@ const updateCart = asyncWrapper(async (req, res, next) => {
   }
 
   if (!color) {
-    color = product.colors[0]?.name;
+    color = product.colors[0]?.hex;
     if (!color) {
       return next(
         new AppError('No available color found.', 400, httpStatusText.FAIL)
@@ -192,7 +198,7 @@ const updateCart = asyncWrapper(async (req, res, next) => {
   }
 
   const productIndex = cart.products.findIndex(
-    (p) => p.id.toString() === id && p.color === color
+    (p) => p.id.toString() === id && p.color.hex === color
   );
 
   if (productIndex === -1) {

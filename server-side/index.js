@@ -32,6 +32,7 @@ const galleryRouter = require('./src/routes/gallery.routes');
 const contactRouter = require('./src/routes/contact.routes');
 const orderRouter = require('./src/routes/order.routes');
 const paymentRouter = require('./src/routes/payment.routes');
+const settingsRouter = require('./src/routes/settings.routes');
 
 / * * * * End Router imports * * * * /;
 
@@ -60,6 +61,7 @@ app.use('/api', galleryRouter);
 app.use('/contact', contactRouter);
 app.use('/orders', orderRouter);
 app.use('/payments', paymentRouter);
+app.use('/settings', settingsRouter);
 
 / * * * Global MiddleWare * * * /;
 app.all('*', (req, res, next) => {

@@ -8,8 +8,7 @@ export interface Product {
   date: Date;
   sale?: number;
   quantity: number;
-  color: string;
-  colors?: string[];
+  color: { name: string; hex: string };
   sizes?: string[];
   brand?: string;
 }
