@@ -11,7 +11,6 @@ const placeOrder = asyncWrapper(async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { shippingAddress, paymentMethod, transactionId } = req.body;
-    console.log('req.body>>>>>>>>>>', req.body);
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return next(new AppError('Invalid User ID', 400, httpStatusText.FAIL));
     }
@@ -20,25 +19,17 @@ const placeOrder = asyncWrapper(async (req, res, next) => {
     if (!cart || cart.products.length === 0) {
       return next(new AppError('Cart is empty', 400, httpStatusText.FAIL));
     }
+    console.log(cart.products);
     const orderItems = cart.products.map((item) => {
-      const effectivePrice = item.id.price * (1 - item.id.sale / 100);
       return {
         id: item.id._id,
         name: item.id.name,
         quantity: item.quantity,
-        price: effectivePrice,
-        subtotal: effectivePrice * item.quantity,
+        price: item.subtotal,
+        color: item.color,
       };
     });
-    console.log('-----------------------------');
-    console.log('cart.products>>>>>>>>>>>', cart.products);
-    console.log('-----------------------------');
-    console.log('orderItems>>>>>>>>>>>', orderItems);
-    console.log('-----------------------------');
-    console.log('cart>>>>>>>>>>>', cart);
-
     for (const item of cart.products) {
-      console.log('quantiti', item.quantity, item.id.quantity);
       if (item.quantity > item.id.quantity) {
         return next(
           new AppError(
@@ -49,17 +40,14 @@ const placeOrder = asyncWrapper(async (req, res, next) => {
         );
       }
     }
-    const totalAmount = orderItems.reduce(
-      (acc, item) => acc + item.subtotal,
-      0
-    );
+
     const order = new Order({
       userId,
       orderItems,
       shippingAddress,
-      totalAmount,
       paymentMethod,
       transactionId,
+      totalAmount: cart.totalPrice.toFixed(2),
     });
 
     await order.save();
@@ -72,7 +60,7 @@ const placeOrder = asyncWrapper(async (req, res, next) => {
     );
 
     await Promise.all(updatePromises);
-    await Cart.findOneAndDelete({ userId });
+    await Cart.findOneAndDelete(userId);
 
     res.status(201).json({ message: 'Order placed successfully!', order });
   } catch (error) {

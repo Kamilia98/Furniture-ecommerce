@@ -100,7 +100,7 @@ export class ProductComponent implements OnInit {
       this.cartService.cart$.subscribe(() => {
         this.isInCartState = this.cartService.isColorInCart(
           this.id,
-          this.selectedColor?.name ?? '',
+          this.selectedColor?.hex ?? '',
         );
       }),
     );
@@ -117,7 +117,7 @@ export class ProductComponent implements OnInit {
   private updateCartStateForCurrentProduct(): void {
     this.isInCartState = this.cartService.isColorInCart(
       this.id,
-      this.selectedColor?.name ?? '',
+      this.selectedColor?.hex ?? '',
     );
   }
 
@@ -132,12 +132,11 @@ export class ProductComponent implements OnInit {
       image: this.selectedColor?.mainImage || 'default-image.jpg',
       subTitle: product.subtitle,
       price: this.salePrice,
-      color: this.selectedColor?.name || '',
+      color: { hex: this.selectedColor?.hex ?? '', name: this.selectedColor?.name ?? '' },
       quantity: this.count,
       categories: product.categories || [],
       date: product.date,
       sale: product.sale,
-      colors: [this.selectedColor?.hex || ''],
       sizes: [],
       brand: product.brand,
     };

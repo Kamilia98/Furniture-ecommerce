@@ -3,7 +3,7 @@ const httpStatusText = require('../utils/httpStatusText');
 const AppError = require('../utils/appError');
 const Order = require('../models/order.model');
 
-// Admin
+// Admin - Get All Orders
 const getAllOrders = asyncWrapper(async (req, res, next) => {
   let {
     limit = 10,
@@ -13,12 +13,17 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     endDate,
     sortBy = 'createdAt',
     sortOrder = 'desc',
+    searchQuery,
+    minAmount,
+    maxAmount,
   } = req.query;
 
+  // Convert pagination to numbers
   limit = parseInt(limit);
   page = parseInt(page);
 
   if (isNaN(limit) || isNaN(page) || limit <= 0 || page <= 0) {
+    console.error('Invalid pagination parameters:', { limit, page });
     return next(
       new AppError(
         "Invalid pagination parameters. 'limit' and 'page' must be positive numbers.",
@@ -29,28 +34,73 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   }
 
   const skip = (page - 1) * limit;
+  const filter = {};
 
-  let filter = {};
-  if (status) filter.status = status;
-  if (startDate && endDate) {
-    filter.createdAt = { $gte: new Date(startDate), $lte: new Date(endDate) };
-  } else if (startDate) {
-    filter.createdAt = { $gte: new Date(startDate) };
-  } else if (endDate) {
-    filter.createdAt = { $lte: new Date(endDate) };
+  // Search filter
+  if (searchQuery) {
+    const searchRegex = new RegExp(searchQuery, 'i');
+    filter.$or = [{ orderNumber: { $regex: searchRegex } }];
+    console.log('Applying search filter:', filter.$or);
   }
 
-  const sortOption = {};
-  sortOption[sortBy] = sortOrder === 'asc' ? 1 : -1;
+  // Status filter
+  if (status) {
+    const statusArray = Array.isArray(status) ? status : status.split(',');
+    filter.status = { $in: statusArray };
+    console.log('Applying status filter:', statusArray);
+  }
+
+  // Date range filter
+  const createdAtFilter = {};
+  if (startDate) createdAtFilter.$gte = new Date(startDate);
+  if (endDate) createdAtFilter.$lte = new Date(endDate);
+  if (Object.keys(createdAtFilter).length) {
+    filter.createdAt = createdAtFilter;
+    console.log('Applying date filter:', createdAtFilter);
+  }
+
+  // Amount filter validation
+  if (
+    minAmount &&
+    maxAmount &&
+    minAmount !== '0' &&
+    maxAmount !== '0' &&
+    parseFloat(minAmount) >= parseFloat(maxAmount)
+  ) {
+    console.error('Invalid amount range:', { minAmount, maxAmount });
+    return next(
+      new AppError(
+        "'minAmount' should be less than 'maxAmount'.",
+        400,
+        httpStatusText.FAIL
+      )
+    );
+  }
+
+  // Amount range filter
+  if (minAmount && minAmount !== '0') {
+    filter.totalAmount = { ...filter.totalAmount, $gte: parseFloat(minAmount) };
+  }
+  if (maxAmount && maxAmount !== '0') {
+    filter.totalAmount = { ...filter.totalAmount, $lte: parseFloat(maxAmount) };
+  }
+  if (filter.totalAmount) {
+    console.log('Applying totalAmount filter:', filter.totalAmount);
+  }
+
+  // Sorting
+  const sortOption = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
+  console.log('Sorting orders by:', sortOption);
 
   const orders = await Order.find(filter)
-    .populate({ path: 'userId', select: 'username' }) 
+    .populate({ path: 'userId', select: 'username' })
     .select('_id orderNumber status orderItems totalAmount createdAt userId')
     .sort(sortOption)
     .skip(skip)
     .limit(limit);
 
   const totalOrders = await Order.countDocuments(filter);
+  console.log(`Found ${orders.length} orders out of ${totalOrders} total`);
 
   if (orders.length === 0) {
     return next(
@@ -62,21 +112,18 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     );
   }
 
-  const formattedOrders = orders.map((order) => {
-    console.log('order', order);
-    return {
-      id: order._id,
-      orderNumber: order.orderNumber,
-      status: order.status,
-      total: `${order.totalAmount.toFixed(2)}`,
-      createdAt: order.createdAt.toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-      }),
-      userName: order.userId?.username || 'N/A',
-    };
-  });
+  const formattedOrders = orders.map((order) => ({
+    id: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    totalAmount: `${order.totalAmount.toFixed(2)}`,
+    createdAt: order.createdAt.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    }),
+    userName: order.userId?.username || 'N/A',
+  }));
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -89,46 +136,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   });
 });
 
-const getOrderDetails = asyncWrapper(async (req, res, next) => {
-  const { id } = req.params;
-  console.log('id', id);
-
-  const order = await Order.findById(id)
-    .populate({ path: 'userId', select: 'username email' })
-    .populate('orderItems.id')
-    .exec();
-
-  if (!order) {
-    return next(new AppError('Order not found', 404, httpStatusText.FAIL));
-  }
-  console.log('order', order);
-
-  const formattedOrder = {
-    id: order._id,
-    orderNumber: order.orderNumber,
-    status: order.status,
-    totalAmount: order.totalAmount.toFixed(2),
-    createdAt: order.createdAt,
-    updatedAt: order.updatedAt,
-    user: {
-      id: order.userId?._id || null,
-      username: order.userId?.username || 'N/A',
-      email: order.userId?.email || 'N/A',
-    },
-    orderItems: order.orderItems.map((item) => ({
-      name: item?.name || 'Unknown',
-      price: item.price,
-      quantity: item.quantity,
-      total: (item.price * item.quantity).toFixed(2),
-    })),
-  };
-
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    data: formattedOrder,
-  });
-});
-
+// Admin - Update Order Status
 const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
@@ -141,17 +149,158 @@ const updateOrderStatus = async (req, res) => {
     );
 
     if (!updatedOrder) {
+      console.warn(`Order not found: ${id}`);
       return res.status(404).json({ message: 'Order not found' });
     }
 
+    console.log(`Updated order status for order ${id} to ${status}`);
     res.json({ message: 'Order status updated', order: updatedOrder });
   } catch (err) {
+    console.error('Error updating order status:', err);
     res
       .status(500)
       .json({ message: 'Error updating order', error: err.message });
   }
 };
 
+// Utility: Get Date Range Based on Named Range
+const getRangeDates = (range) => {
+  const today = new Date();
+  let startDate, endDate;
+
+  switch (range) {
+    case 'today':
+      startDate = new Date(today.setHours(0, 0, 0, 0));
+      endDate = new Date(today.setHours(23, 59, 59, 999));
+      break;
+    case 'this-week': {
+      const firstDay = today.getDate() - today.getDay();
+      startDate = new Date(today.setDate(firstDay));
+      startDate.setHours(0, 0, 0, 0);
+      endDate = new Date(today.setDate(firstDay + 6));
+      endDate.setHours(23, 59, 59, 999);
+      break;
+    }
+    case 'this-month':
+      startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+      endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      break;
+    case 'last-month':
+      startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+      break;
+    default:
+      throw new Error(`Invalid range specified: ${range}`);
+  }
+
+  return { startDate, endDate };
+};
+
+// Admin - Get Order Analytics
+const getOrderAnalytics = async (req, res) => {
+  try {
+    const { range } = req.query;
+    const { startDate, endDate } = getRangeDates(range);
+    console.log(`Getting analytics for range: ${range}`, {
+      startDate,
+      endDate,
+    });
+
+    const orders = await Order.find();
+    console.log(5);
+    console.log(orders);
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce(
+      (sum, order) => sum + order.totalAmount,
+      0
+    );
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: {
+        totalOrders,
+        totalRevenue,
+        averageOrderValue,
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching order analytics:', err);
+    res.status(500).json({
+      status: httpStatusText.ERROR,
+      message: 'Failed to fetch order analytics',
+      error: err.message,
+    });
+  }
+};
+
+const getOrderDetails = asyncWrapper(async (req, res, next) => {
+  const { id } = req.params;
+
+  const order = await Order.findById(id)
+    .populate({
+      path: 'userId',
+      select: 'username email',
+    })
+    .populate({
+      path: 'orderItems.id',
+      select: 'name price colors images',
+      model: 'Product',
+    })
+    .exec();
+
+  if (!order) {
+    return next(new AppError('Order not found', 404, httpStatusText.FAIL));
+  }
+
+  const formattedOrder = {
+    id: order._id,
+    orderNumber: order.orderNumber,
+    status: order.status,
+    totalAmount: order.totalAmount.toFixed(2),
+    shippingAddress: {
+      name: order.shippingAddress.name,
+      phone: order.shippingAddress.phone,
+      email: order.shippingAddress.email,
+      address: order.shippingAddress.address,
+      city: order.shippingAddress.city,
+      zipCode: order.shippingAddress.zipCode,
+      country: order.shippingAddress.country,
+    },
+    paymentMethod: order.paymentMethod,
+    createdAt: order.createdAt,
+    updatedAt: order.updatedAt,
+    user: {
+      id: order.userId?._id || null,
+      username: order.userId?.username || 'N/A',
+      email: order.userId?.email || 'N/A',
+    },
+    orderItems: order.orderItems.map((item) => {
+      const product = item.id;
+      const selectedColor = product?.colors?.find(
+        (color) => color.hex === item.color.hex
+      );
+
+      console.log(selectedColor);
+      return {
+        id: product?._id || null,
+        name: product?.name || 'Unknown Product',
+        price: item.price.toFixed(2),
+        quantity: item.quantity,
+        color: item.color,
+        image: selectedColor?.images?.[0]?.url || null,
+        sku: selectedColor?.sku || item.sku,
+        total: (item.price * item.quantity).toFixed(2),
+      };
+    }),
+  };
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: formattedOrder,
+  });
+});
+//User
 const getUserOrders = asyncWrapper(async (req, res, next) => {
   const userId = req.user._id;
 
@@ -208,4 +357,5 @@ module.exports = {
   getAllOrders,
   getOrderDetails,
   updateOrderStatus,
+  getOrderAnalytics,
 };
