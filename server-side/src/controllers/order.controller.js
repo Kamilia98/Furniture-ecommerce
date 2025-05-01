@@ -206,21 +206,22 @@ const getOrderAnalytics = async (req, res) => {
       endDate,
     });
 
-    const orders = await Order.find({
-      createdAt: { $gte: startDate, $lte: endDate },
-    });
+    const orders = await Order.find();
+    console.log(5);
+    console.log(orders);
 
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + order.totalAmount,
       0
     );
-
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
     res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
         totalOrders,
-        totalRevenue: totalRevenue.toFixed(2),
+        totalRevenue,
+        averageOrderValue,
       },
     });
   } catch (err) {
@@ -232,6 +233,7 @@ const getOrderAnalytics = async (req, res) => {
     });
   }
 };
+
 const getOrderDetails = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
