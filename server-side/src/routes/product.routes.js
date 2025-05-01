@@ -11,6 +11,7 @@ const router = express.Router();
 // router.use(limiter);
 
 router.route("/").get(productController.getAllProducts);
+router.route("/color").get(productController.getAllProductsWithColors);
 router.route("/search").get(productController.getSearchProducts);
 router.route("/min-price").get(productController.getMinEffectivePrice);
 router.route("/max-price").get(productController.getMaxEffectivePrice);

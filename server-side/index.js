@@ -32,18 +32,6 @@ const galleryRouter = require("./src/routes/gallery.routes");
 const contactRouter = require("./src/routes/contact.routes");
 const orderRouter = require("./src/routes/order.routes");
 const paymentRouter = require("./src/routes/payment.routes");
-const registerationRouter = require("./src/routes/registration.routes");
-const userRouter = require("./src/routes/user.routes");
-const categoreRouter = require("./src/routes/category.routes");
-const productRouter = require("./src/routes/product.routes");
-const postRouter = require("./src/routes/post.routes");
-const checkoutRouter = require("./src/routes/checkout.routes");
-const cartRouter = require("./src/routes/cart.routes");
-const galleryRouter = require("./src/routes/gallery.routes");
-const contactRouter = require("./src/routes/contact.routes");
-const orderRouter = require("./src/routes/order.routes");
-const paymentRouter = require("./src/routes/payment.routes");
-const settingsRouter = require("./src/routes/settings.routes");
 
 / * * * * End Router imports * * * * /;
 
