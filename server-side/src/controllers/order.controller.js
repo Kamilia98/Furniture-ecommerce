@@ -16,6 +16,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     searchQuery,
     minAmount,
     maxAmount,
+    userId, 
   } = req.query;
 
   // Convert pagination to numbers
@@ -23,7 +24,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   page = parseInt(page);
 
   if (isNaN(limit) || isNaN(page) || limit <= 0 || page <= 0) {
-    console.error('Invalid pagination parameters:', { limit, page });
     return next(
       new AppError(
         "Invalid pagination parameters. 'limit' and 'page' must be positive numbers.",
@@ -35,6 +35,11 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
 
   const skip = (page - 1) * limit;
   const filter = {};
+
+  if (userId) {
+    filter.userId = userId;
+    console.log('Filtering by userId:', userId);
+  }
 
   // Search filter
   if (searchQuery) {
@@ -59,7 +64,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     console.log('Applying date filter:', createdAtFilter);
   }
 
-  // Amount filter validation
+  // Amount validation
   if (
     minAmount &&
     maxAmount &&
@@ -67,7 +72,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     maxAmount !== '0' &&
     parseFloat(minAmount) >= parseFloat(maxAmount)
   ) {
-    console.error('Invalid amount range:', { minAmount, maxAmount });
     return next(
       new AppError(
         "'minAmount' should be less than 'maxAmount'.",
@@ -84,11 +88,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   if (maxAmount && maxAmount !== '0') {
     filter.totalAmount = { ...filter.totalAmount, $lte: parseFloat(maxAmount) };
   }
-  if (filter.totalAmount) {
-    console.log('Applying totalAmount filter:', filter.totalAmount);
-  }
 
-  // Sorting
   const sortOption = { [sortBy]: sortOrder === 'asc' ? 1 : -1 };
   console.log('Sorting orders by:', sortOption);
 
@@ -100,7 +100,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     .limit(limit);
 
   const totalOrders = await Order.countDocuments(filter);
-  console.log(`Found ${orders.length} orders out of ${totalOrders} total`);
 
   if (orders.length === 0) {
     return next(
@@ -135,6 +134,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     },
   });
 });
+
 
 // Admin - Update Order Status
 const updateOrderStatus = async (req, res) => {
