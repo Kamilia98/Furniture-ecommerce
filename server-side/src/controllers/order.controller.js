@@ -338,6 +338,8 @@ const getUserOrders = asyncWrapper(async (req, res, next) => {
     orderNumber: order.orderNumber,
     status: order.status,
     orderNumber: order.orderNumber,
+    country: order.shippingAddress.country,
+    paymentMethod: order.paymentMethod,
     total: `${order.totalAmount.toFixed(2)}`,
     createdAt: order.createdAt.toLocaleDateString('en-US', {
       year: 'numeric',

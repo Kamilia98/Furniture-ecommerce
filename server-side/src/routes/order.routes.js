@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const verifyToken = require('../middlewares/auth.middleware');
 const orderController = require('../controllers/order.controller');
