@@ -5,8 +5,8 @@ import {
   ChangeDetectorRef,
   OnInit,
   HostListener,
-  OnDestroy,
 } from '@angular/core';
+
 import { CommonModule, CurrencyPipe } from '@angular/common';
 import { ButtonComponent } from '../button/button.component';
 import { RouterModule } from '@angular/router';
@@ -21,8 +21,6 @@ import {
 import { FavoriteService } from '../../../Services/favorite.service';
 import { CartService } from '../../../Services/cart.service';
 import { Product } from '../../../Models/product.model';
-import { ProductCart } from '../../../Models/productCart.model';
-import { Subscription } from 'rxjs';
 import { ComparisonService } from '../../../Services/comparison.service';
 
 @Component({
@@ -43,7 +41,7 @@ import { ComparisonService } from '../../../Services/comparison.service';
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ProductItemComponent implements OnInit, OnDestroy {
+export class ProductItemComponent implements OnInit {
   @Input({ required: true }) product!: Product;
 
   isHovered = false;
@@ -51,8 +49,6 @@ export class ProductItemComponent implements OnInit, OnDestroy {
 
   isInCartState = false;
   isFavoriteState = false;
-
-  private subs = new Subscription();
 
   constructor(
     private cdr: ChangeDetectorRef,
@@ -62,21 +58,17 @@ export class ProductItemComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.subs.add(
-      this.cartService.cart$.subscribe((cart) => {
-        this.isInCartState = cart.some((item) => item.id === this.product.id);
-        this.cdr.markForCheck();
-      }),
-    );
+    this.cartService.cart$.subscribe((cart) => {
+      this.isInCartState = cart.some((item) => item.id === this.product.id);
+      this.cdr.markForCheck();
+    });
 
-    this.subs.add(
-      this.favoriteService.favorites$.subscribe((favorites) => {
-        this.isFavoriteState = favorites.some(
-          (fav) => fav.id === this.product.id,
-        );
-        this.cdr.markForCheck();
-      }),
-    );
+    this.favoriteService.favorites$.subscribe((favorites) => {
+      this.isFavoriteState = favorites.some(
+        (fav) => fav.id === this.product.id,
+      );
+      this.cdr.markForCheck();
+    });
   }
 
   toggleFavourites(): void {
@@ -123,9 +115,5 @@ export class ProductItemComponent implements OnInit, OnDestroy {
         this.product.name,
       );
     }
-  }
-
-  ngOnDestroy(): void {
-    this.subs.unsubscribe();
   }
 }

@@ -16,7 +16,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     searchQuery,
     minAmount,
     maxAmount,
-    userId, 
+    userId,
   } = req.query;
 
   // Convert pagination to numbers
@@ -135,7 +135,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
   });
 });
 
-
 // Admin - Update Order Status
 const updateOrderStatus = async (req, res) => {
   const { id } = req.params;
@@ -207,9 +206,7 @@ const getOrderAnalytics = async (req, res) => {
     });
 
     const orders = await Order.find();
-    console.log(5);
-    console.log(orders);
-
+    
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + order.totalAmount,
