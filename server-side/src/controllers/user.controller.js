@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/appError");
 const User = require("../models/user.model");
+const Order = require("../models/order.model");
 const asyncWrapper = require("../middlewares/asyncWrapper.middleware");
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
@@ -13,7 +14,7 @@ cloudinary.config({
 });
 
 const getAllUsers = asyncWrapper(async (req, res, next) => {
-  let { limit = 10, page = 1, search = "" } = req.query;
+  let { limit = 10, page = 1, search = "", role = "" } = req.query;
 
   console.log("query", limit, page, search);
   limit = Math.max(1, limit);
@@ -30,21 +31,39 @@ const getAllUsers = asyncWrapper(async (req, res, next) => {
 
   const skip = (page - 1) * limit;
   const searchFilter = search
-    ? { username: { $regex: search, $options: "i" }, isDeleted: false }
-    : { isDeleted: false };
+    ? {
+        username: { $regex: search, $options: "i" },
+        isDeleted: false,
+        role: role,
+      }
+    : { isDeleted: false, role: role };
   const totalUsers = await User.countDocuments(searchFilter);
   console.log("totalUsers", totalUsers);
   const users = await User.find(searchFilter)
-    .select("_id username email favourites role thumbnail createdAt")
+    .select("_id username email favourites role thumbnail createdAt gender")
     .limit(limit)
     .skip(skip)
     .lean();
+  const usersWithOrders = await Order.distinct("userId");
+  const totalUsersWithOrders = usersWithOrders.length;
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const newCustomers = await User.countDocuments({
+    createdAt: {
+      $gte: startOfMonth,
+      $lt: endOfMonth,
+    },
+  });
 
   console.log("users", users);
   console.log("totalUsers", totalUsers);
+  console.log("newCustomers", newCustomers);
+  console.log("usersWithOrders", totalUsersWithOrders);
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { totalUsers, users },
+    data: { totalUsers, users, newCustomers, totalUsersWithOrders },
   });
 });
 
@@ -55,7 +74,7 @@ const getUser = asyncWrapper(async (req, res, next) => {
   }
 
   const user = await User.findById(userId).select(
-    "username email favourites role createdAt thumbnail"
+    "username email favourites role createdAt thumbnail gender"
   );
 
   if (!user) {
