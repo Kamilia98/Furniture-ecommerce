@@ -82,139 +82,6 @@ const getAllProducts = asyncWrapper(async (req, res, next) => {
   });
 });
 
-// const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
-//   let {
-//     limit = 16,
-//     page = 1,
-//     categories = "",
-//     order = "desc",
-//     sortBy = "date",
-//     minPrice,
-//     maxPrice,
-//   } = req.query;
-
-//   limit = Number(limit);
-//   page = Number(page);
-//   if (isNaN(limit) || isNaN(page) || limit < 1 || page < 1) {
-//     return next(
-//       new AppError("Invalid pagination parameters.", 400, httpStatusText.FAIL)
-//     );
-//   }
-
-//   const skip = (page - 1) * limit;
-//   const sortFields = {
-//     name: "name",
-//     date: "date",
-//     price: "effectivePrice",
-//   };
-//   const sortField = sortFields[sortBy] || sortFields.date;
-//   const sortOrder = order === "asc" ? 1 : -1;
-
-//   // 1. Category Filter
-//   const categoryFilter = {
-//     deleted: false,
-//     ...(categories && {
-//       categories: {
-//         $in: categories.split(",").map((id) => {
-//           if (!mongoose.isValidObjectId(id.trim())) {
-//             throw new AppError(
-//               "Invalid Category ID format.",
-//               400,
-//               httpStatusText.FAIL
-//             );
-//           }
-//           return new mongoose.Types.ObjectId(id.trim());
-//         }),
-//       },
-//     }),
-//   };
-
-//   // 2. Get price range if not provided
-//   if (!minPrice || !maxPrice) {
-//     const range = await getPriceRange(); // You must have this helper already
-//     minPrice = minPrice ?? range.minPrice;
-//     maxPrice = maxPrice ?? range.maxPrice;
-//   }
-
-//   const priceFilter = {
-//     effectivePrice: {
-//       $gte: Number(minPrice),
-//       $lte: Number(maxPrice),
-//     },
-//   };
-
-//   // 3. Pipeline for aggregation
-//   const pipeline = [
-//     { $match: categoryFilter },
-//     {
-//       $addFields: {
-//         effectivePrice: {
-//           $cond: [
-//             { $ifNull: ["$sale", false] },
-//             { $multiply: ["$price", { $subtract: [1, "$sale"] }] },
-//             "$price",
-//           ],
-//         },
-//       },
-//     },
-//     { $match: priceFilter },
-//     {
-//       $project: {
-//         name: 1,
-//         subtitle: 1,
-//         price: 1,
-//         sale: 1,
-//         brand: 1,
-//         categories: 1,
-//         colors: {
-//           $map: {
-//             input: "$colors",
-//             as: "color",
-//             in: {
-//               name: "$$color.name",
-//               hex: "$$color.hex",
-//               quantity: "$$color.quantity",
-//               sku: "$$color.sku",
-//               images: "$$color.images",
-//             },
-//           },
-//         },
-//       },
-//     },
-//     { $sort: { [sortField]: sortOrder } },
-//     { $skip: skip },
-//     { $limit: limit },
-//   ];
-
-//   const [products, totalCount] = await Promise.all([
-//     Product.aggregate(pipeline),
-//     Product.aggregate([
-//       { $match: categoryFilter },
-//       {
-//         $addFields: {
-//           effectivePrice: {
-//             $cond: [
-//               { $ifNull: ["$sale", false] },
-//               { $multiply: ["$price", { $subtract: [1, "$sale"] }] },
-//               "$price",
-//             ],
-//           },
-//         },
-//       },
-//       { $match: priceFilter },
-//       { $count: "total" },
-//     ]),
-//   ]);
-
-//   res.status(200).json({
-//     status: httpStatusText.SUCCESS,
-//     data: {
-//       totalProducts: totalCount[0]?.total || 0,
-//       products,
-//     },
-//   });
-// });
-
 const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
   let {
     limit = 16,
@@ -240,6 +107,7 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     name: "productName",
     date: "date",
     price: "effectivePrice",
+    quantity: "quantity",
   };
   const sortField = sortFields[sortBy] || sortFields.date;
   const sortOrder = order === "asc" ? 1 : -1;
@@ -270,29 +138,25 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     .lean();
 
   // Format with color variations
-  let flatProducts = products.flatMap((product) => {
+  let flatProducts = products.map((product) => {
     const effectivePrice =
       product.sale > 0
         ? product.price * (1 - product.sale / 100)
         : product.price;
-
-    const sharedData = {
+    return {
       _id: product._id,
-      productName: product.name,
+      name: product.name,
       price: product.price,
       sale: product.sale,
-      categoryName: product.categories.map((cat) => cat.name).join(", "),
+      categories: product.categories.map((cat) => cat.name).join(", "),
       date: product.date,
       effectivePrice,
       salePrice: effectivePrice.toFixed(2),
+      varients: product.colors.map((color) => ({
+        color: { hex: color.hex, name: color.name },
+        quantity: color.quantity,
+      })),
     };
-
-    return product.colors.map((color) => ({
-      ...sharedData,
-      sku: color.sku,
-      color: color.hex,
-      quantity: color.quantity,
-    }));
   });
 
   // Determine min/max price if not provided
