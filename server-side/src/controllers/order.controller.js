@@ -206,19 +206,36 @@ const getOrderAnalytics = async (req, res) => {
     });
 
     const orders = await Order.find();
-    
+
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + order.totalAmount,
       0
     );
     const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    const ordersByStatus = await Order.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    // Format the ordersByStatus result
+    const statusCounts = ordersByStatus.reduce((acc, status) => {
+      acc[status._id] = status.count;
+      return acc;
+    }, {});
+
+    console.log(statusCounts);
     res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
         totalOrders,
         totalRevenue,
-        averageOrderValue,
+        statusCounts,
       },
     });
   } catch (err) {
