@@ -70,7 +70,6 @@ export class ProductComponent implements OnInit {
   isFavoriteState: boolean = false;
 
   private routeSub: Subscription = new Subscription();
-  private subs: Subscription = new Subscription();
 
   skeletonArr = Array(4);
 
@@ -96,20 +95,16 @@ export class ProductComponent implements OnInit {
       }
     });
 
-    this.subs.add(
-      this.cartService.cart$.subscribe(() => {
-        this.isInCartState = this.cartService.isColorInCart(
-          this.id,
-          this.selectedColor?.hex ?? '',
-        );
-      }),
-    );
+    this.cartService.cart$.subscribe(() => {
+      this.isInCartState = this.cartService.isColorInCart(
+        this.id,
+        this.selectedColor?.hex ?? '',
+      );
+    });
 
-    this.subs.add(
-      this.favoriteService.favorites$.subscribe((favorites) => {
-        this.isFavoriteState = this.favoriteService.isInFavorites(this.id);
-      }),
-    );
+    this.favoriteService.favorites$.subscribe(() => {
+      this.isFavoriteState = this.favoriteService.isInFavorites(this.id);
+    });
 
     this.loadProduct();
   }
@@ -132,7 +127,10 @@ export class ProductComponent implements OnInit {
       image: this.selectedColor?.mainImage || 'default-image.jpg',
       subTitle: product.subtitle,
       price: this.salePrice,
-      color: { hex: this.selectedColor?.hex ?? '', name: this.selectedColor?.name ?? '' },
+      color: {
+        hex: this.selectedColor?.hex ?? '',
+        name: this.selectedColor?.name ?? '',
+      },
       quantity: this.count,
       categories: product.categories || [],
       date: product.date,

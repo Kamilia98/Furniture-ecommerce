@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const httpStatusText = require("../utils/httpStatusText");
 const AppError = require("../utils/appError");
 const User = require("../models/user.model");
+const Order = require("../models/order.model");
 const asyncWrapper = require("../middlewares/asyncWrapper.middleware");
 const bcrypt = require("bcrypt");
 const cloudinary = require("cloudinary").v2;
@@ -13,8 +14,8 @@ cloudinary.config({
 });
 
 const getAllUsers = asyncWrapper(async (req, res, next) => {
-  let { limit = 10, page = 1 } = req.query;
-  console.log("query", limit, page);
+  let { limit = 10, page = 1, search = "", role = "" } = req.query;
+  console.log("query", limit, page, search);
   limit = Math.max(1, limit);
   page = Math.max(1, page);
   if (isNaN(limit) || isNaN(page)) {
@@ -26,16 +27,44 @@ const getAllUsers = asyncWrapper(async (req, res, next) => {
       )
     );
   }
+
   const skip = (page - 1) * limit;
-  const totalUsers = await User.countDocuments();
-  const users = await User.find()
-    .select("_id username email favourites role")
+  const searchFilter = search
+    ? {
+        username: { $regex: search, $options: "i" },
+        isDeleted: false,
+        role: role,
+      }
+    : { isDeleted: false, role: role };
+  const totalUsers = await User.countDocuments(searchFilter);
+  console.log("totalUsers", totalUsers);
+  const users = await User.find(searchFilter)
+    .select(
+      "_id username email favourites role thumbnail createdAt gender phone"
+    )
     .limit(limit)
     .skip(skip)
     .lean();
+  const usersWithOrders = await Order.distinct("userId");
+  const totalUsersWithOrders = usersWithOrders.length;
+  const now = new Date();
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+
+  const newCustomers = await User.countDocuments({
+    createdAt: {
+      $gte: startOfMonth,
+      $lt: endOfMonth,
+    },
+  });
+
+  console.log("users", users);
+  console.log("totalUsers", totalUsers);
+  console.log("newCustomers", newCustomers);
+  console.log("usersWithOrders", totalUsersWithOrders);
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { totalUsers, users },
+    data: { totalUsers, users, newCustomers, totalUsersWithOrders },
   });
 });
 
@@ -46,7 +75,7 @@ const getUser = asyncWrapper(async (req, res, next) => {
   }
 
   const user = await User.findById(userId).select(
-    "username email favourites role"
+    "username email favourites role createdAt thumbnail gender phone"
   );
 
   if (!user) {
@@ -144,7 +173,11 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));
   }
-  const user = await User.findByIdAndDelete(userId);
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { isDeleted: true },
+    { new: true }
+  );
   if (!user) {
     return next(
       new AppError(
@@ -164,6 +197,10 @@ const deleteUser = asyncWrapper(async (req, res, next) => {
 const editUser = asyncWrapper(async (req, res, next) => {
   const userId = req.params.userId;
   const { username, email, favourites, role } = req.body;
+  console.log("🚀 ~ editUser ~ role:", role);
+  console.log("🚀 ~ editUser ~ username:", username);
+  console.log("🚀 ~ editUser ~ email:", email);
+  console.log("🚀 ~ editUser ~ favourites:", favourites);
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));

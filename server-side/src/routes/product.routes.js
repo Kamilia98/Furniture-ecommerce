@@ -18,7 +18,6 @@ router.route("/max-price").get(productController.getMaxEffectivePrice);
 router.route("/comparison/:id").get(productController.getProductForComparison);
 router.route("/create").get(productController.createProduct);
 router.route("/update/:id").get(productController.updateProduct);
-
 router.route("/:id").get(productController.getProductById);
 router.route("/:id").delete(productController.deleteProduct);
 
