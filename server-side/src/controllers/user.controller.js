@@ -15,7 +15,6 @@ cloudinary.config({
 
 const getAllUsers = asyncWrapper(async (req, res, next) => {
   let { limit = 10, page = 1, search = "", role = "" } = req.query;
-
   console.log("query", limit, page, search);
   limit = Math.max(1, limit);
   page = Math.max(1, page);

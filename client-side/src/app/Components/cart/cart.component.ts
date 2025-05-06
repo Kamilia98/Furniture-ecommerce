@@ -67,7 +67,6 @@ export class CartComponent implements OnInit {
               this.toast.danger(
                 `you have reached to available quantity for ${item.name}`,
               );
-              // console.log(`Maximum quantity available for ${item.name}`);
             }
           }
           return of(null);

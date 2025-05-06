@@ -33,7 +33,6 @@ const getAllProducts = asyncWrapper(async (req, res, next) => {
   const sortField = sortFields[sortBy] || sortFields.date;
   const sortOrder = order === "asc" ? 1 : -1;
 
-  // Category filter
   const categoryFilter = {
     deleted: false,
     ...(categories && {
@@ -80,6 +79,125 @@ const getAllProducts = asyncWrapper(async (req, res, next) => {
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { totalProducts, products },
+  });
+});
+
+const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
+  let {
+    limit = 16,
+    page = 1,
+    categories = "",
+    order = "desc",
+    sortBy = "date",
+    minPrice,
+    maxPrice,
+  } = req.query;
+
+  limit = Number(limit);
+  page = Number(page);
+  const skip = (page - 1) * limit;
+
+  if (isNaN(limit) || isNaN(page) || limit < 1 || page < 1) {
+    return next(
+      new AppError("Invalid pagination parameters.", 400, httpStatusText.FAIL)
+    );
+  }
+
+  const sortFields = {
+    name: "name",
+    date: "date",
+    price: "price",
+    sale: "sale",
+  };
+  const sortField = sortFields[sortBy] || sortFields.date;
+  const sortOrder = order === "asc" ? 1 : -1;
+
+  // Category filter
+  const categoryFilter = {
+    deleted: false,
+    ...(categories && {
+      categories: {
+        $in: categories.split(",").map((id) => {
+          if (!mongoose.isValidObjectId(id.trim())) {
+            throw new AppError(
+              "Invalid Category ID format.",
+              400,
+              httpStatusText.FAIL
+            );
+          }
+          return new mongoose.Types.ObjectId(id.trim());
+        }),
+      },
+    }),
+  };
+
+  // Fetch raw products first
+  const products = await Product.find(categoryFilter)
+    .select("name price sale colors categories date")
+    .populate("categories", "name")
+    .lean();
+
+  // Format with color variations
+  let flatProducts = products.map((product) => {
+    const effectivePrice =
+      product.sale > 0
+        ? product.price * (1 - product.sale / 100)
+        : product.price;
+    return {
+      _id: product._id,
+      name: product.name,
+      price: product.price,
+      sale: product.sale,
+      categories: product.categories.map((cat) => cat.name).join(", "),
+      date: product.date,
+      effectivePrice,
+      salePrice: effectivePrice.toFixed(2),
+      varients: product.colors.map((color) => ({
+        color: { hex: color.hex, name: color.name },
+        quantity: color.quantity,
+      })),
+    };
+  });
+
+  // Determine min/max price if not provided
+  if (!minPrice || !maxPrice) {
+    const prices = flatProducts.map((p) => p.effectivePrice);
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    minPrice = minPrice ?? min;
+    maxPrice = maxPrice ?? max;
+  }
+
+  // Apply price filtering
+  flatProducts = flatProducts.filter(
+    (item) =>
+      item.effectivePrice >= Number(minPrice) &&
+      item.effectivePrice <= Number(maxPrice)
+  );
+
+  // Sorting
+  flatProducts.sort((a, b) => {
+    const valA = a[sortField];
+    const valB = b[sortField];
+
+    if (typeof valA === "string") {
+      return sortOrder * valA.localeCompare(valB);
+    } else {
+      return sortOrder * (valA - valB);
+    }
+  });
+
+  const totalProducts = flatProducts.length;
+
+  // Pagination
+  const paginatedProducts = flatProducts.slice(skip, skip + limit);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: {
+      totalProducts,
+      products: paginatedProducts,
+    },
   });
 });
 
@@ -486,4 +604,5 @@ module.exports = {
   deleteProduct,
   createProduct,
   updateProduct,
+  getAllProductsWithColors,
 };
