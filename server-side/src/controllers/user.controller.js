@@ -40,7 +40,9 @@ const getAllUsers = asyncWrapper(async (req, res, next) => {
   const totalUsers = await User.countDocuments(searchFilter);
   console.log("totalUsers", totalUsers);
   const users = await User.find(searchFilter)
-    .select("_id username email favourites role thumbnail createdAt gender")
+    .select(
+      "_id username email favourites role thumbnail createdAt gender phone"
+    )
     .limit(limit)
     .skip(skip)
     .lean();
@@ -74,7 +76,7 @@ const getUser = asyncWrapper(async (req, res, next) => {
   }
 
   const user = await User.findById(userId).select(
-    "username email favourites role createdAt thumbnail gender"
+    "username email favourites role createdAt thumbnail gender phone"
   );
 
   if (!user) {
