@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const User = require('./user.model'); // Assuming User model is in the same directory
+const mongoose = require("mongoose");
+const User = require("./user.model");
 
 const BlogSchema = new mongoose.Schema(
   {
@@ -10,12 +10,12 @@ const BlogSchema = new mongoose.Schema(
     img: { type: String, required: true },
     adminUser: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
       validate: {
         validator: async function (value) {
           const user = await User.findById(value);
-          return user && user.role === 'ADMIN';
+          return user && user.role === "ADMIN";
         },
         message: "adminUser must have the 'ADMIN' role",
       },
@@ -25,4 +25,4 @@ const BlogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('Blog', BlogSchema);
+module.exports = mongoose.model("Blog", BlogSchema);
