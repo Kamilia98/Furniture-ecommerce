@@ -104,10 +104,10 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
   }
 
   const sortFields = {
-    name: "productName",
+    name: "name",
     date: "date",
-    price: "effectivePrice",
-    quantity: "quantity",
+    price: "price",
+    sale: "sale",
   };
   const sortField = sortFields[sortBy] || sortFields.date;
   const sortOrder = order === "asc" ? 1 : -1;
