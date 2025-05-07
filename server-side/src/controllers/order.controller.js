@@ -213,23 +213,35 @@ const getRangeDates = (range) => {
 // Admin - Get Order Analytics
 const getOrderAnalytics = async (req, res) => {
   try {
-    const { range } = req.query;
+    const { range, userId } = req.query;
     const { startDate, endDate } = getRangeDates(range);
+
     console.log(`Getting analytics for range: ${range}`, {
       startDate,
       endDate,
+      userId,
     });
 
-    const orders = await Order.find();
+
+    const filter = {};
+
+    if (userId) {
+      filter.userId = userId;
+    }
+
+    // Fetch orders based on the filter
+    const orders = await Order.find(filter);
 
     const totalOrders = orders.length;
     const totalRevenue = orders.reduce(
       (sum, order) => sum + order.totalAmount,
       0
     );
-    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+    console.log(filter);
 
+    // Group orders by status
     const ordersByStatus = await Order.aggregate([
+      { $match: filter }, 
       {
         $group: {
           _id: '$status',
@@ -244,20 +256,19 @@ const getOrderAnalytics = async (req, res) => {
       return acc;
     }, {});
 
-    console.log(statusCounts);
     res.status(200).json({
       status: httpStatusText.SUCCESS,
       data: {
         totalOrders,
-        totalRevenue,
+        totalRevenue: totalRevenue.toFixed(2),
         statusCounts,
       },
     });
   } catch (err) {
-    console.error("Error fetching order analytics:", err);
+    console.error('Error fetching order analytics:', err);
     res.status(500).json({
       status: httpStatusText.ERROR,
-      message: "Failed to fetch order analytics",
+      message: 'Failed to fetch order analytics',
       error: err.message,
     });
   }
