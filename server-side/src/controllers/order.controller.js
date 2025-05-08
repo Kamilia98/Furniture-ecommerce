@@ -123,18 +123,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     }),
     userName: order.userId?.username || "N/A",
   }));
-  let totalAmountOrders = 0;
-  let averageOrderValue = 0;
-  let totalOrdersWithUser = 0;
-  if (userId) {
-    const orderforTotalAmount = await Order.find({ userId });
-    totalAmountOrders = orderforTotalAmount.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0
-    );
-    averageOrderValue = totalAmountOrders / orderforTotalAmount.length;
-    totalOrdersWithUser = orderforTotalAmount.length;
-  }
+
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -143,9 +132,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
       totalOrders,
       currentPage: page,
       totalPages: Math.ceil(totalOrders / limit),
-      totalAmountOrders,
-      averageOrderValue,
-      totalOrdersWithUser,
     },
   });
 });
