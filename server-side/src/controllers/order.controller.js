@@ -18,7 +18,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     maxAmount,
     userId,
   } = req.query;
-
   // Convert pagination to numbers
   limit = parseInt(limit);
   page = parseInt(page);
@@ -134,7 +133,11 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     );
     averageOrderValue = totalAmountOrders / orderforTotalAmount.length;
     totalOrdersWithUser = orderforTotalAmount.length;
+    console.log("totalAmountOrdersssssssssssssssssssssssssssssssssssssssssssss", totalAmountOrders);
   }
+  console.log("totalAmountOrders", totalAmountOrders);
+  console.log("averageOrderValue", averageOrderValue);
+  console.log("totalOrdersWithUser", totalOrdersWithUser);
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
