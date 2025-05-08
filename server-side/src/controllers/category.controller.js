@@ -6,7 +6,20 @@ const asyncWrapper = require('../middlewares/asyncWrapper.middleware');
 const mongoose = require('mongoose');
 
 const getAllCategories = asyncWrapper(async (req, res, next) => {
+  const { searchQuery, page = 1, limit = 10 } = req.query; 
+
+  const matchStage = searchQuery
+    ? { name: { $regex: searchQuery, $options: 'i' } } 
+    : {};
+    console.log(req.query)
+
+  const pageNumber = parseInt(page, 10);
+  const pageSize = parseInt(limit, 10);
+
   const categoriesWithProductCount = await Category.aggregate([
+    {
+      $match: matchStage, 
+    },
     {
       $lookup: {
         from: 'products',
@@ -23,15 +36,27 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
         productCount: { $size: '$products' },
       },
     },
+    {
+      $skip: (pageNumber - 1) * pageSize, 
+    },
+    {
+      $limit: pageSize, 
+    },
   ]);
 
+  const totalCategories = await Category.countDocuments(matchStage);
   if (!categoriesWithProductCount.length) {
     return next(new AppError('No categories found.', 404, httpStatusText.FAIL));
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { categories: categoriesWithProductCount },
+    data: {
+      categories: categoriesWithProductCount,
+      currentPage:page,
+      totalPages:Math.ceil(totalCategories / pageSize),
+      totalCategories
+    },
   });
 });
 

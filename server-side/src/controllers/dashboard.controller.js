@@ -33,7 +33,7 @@ const getMetrics = asyncWrapper(async (req, res, next) => {
   }, 0);
 
   const totalOrders = await Order.countDocuments({});
-  const totalCustomers = await User.countDocuments({ role: 'USER' });
+  const totalCustomers = await User.countDocuments({ role: 'USER',isDeleted:false });
   const totalSales = await Order.aggregate([
     { $group: { _id: null, totalSales: { $sum: '$totalAmount' } } },
   ]);
