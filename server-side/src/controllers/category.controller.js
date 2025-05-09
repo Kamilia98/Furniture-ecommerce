@@ -6,20 +6,26 @@ const asyncWrapper = require('../middlewares/asyncWrapper.middleware');
 const mongoose = require('mongoose');
 
 const getAllCategories = asyncWrapper(async (req, res, next) => {
-  const { searchQuery, page = 1, limit = 10 } = req.query; 
+  const { searchQuery, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
   const matchStage = searchQuery
-    ? { name: { $regex: searchQuery, $options: 'i' } } 
+    ? { name: { $regex: searchQuery, $options: 'i' } }
     : {};
-    console.log(req.query)
 
   const pageNumber = parseInt(page, 10);
   const pageSize = parseInt(limit, 10);
 
+  let sortStage = {};
+  if (sortBy === 'productCount') {
+    sortStage = { productCount: sortOrder === 'desc' ? -1 : 1 };
+  } else if (sortBy === 'name') {
+    sortStage = { name: sortOrder === 'desc' ? -1 : 1 };
+  } else {
+    sortStage = { createdAt: sortOrder === 'desc' ? -1 : 1 };
+  }
+
   const categoriesWithProductCount = await Category.aggregate([
-    {
-      $match: matchStage, 
-    },
+    { $match: matchStage },
     {
       $lookup: {
         from: 'products',
@@ -34,14 +40,12 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
         image: 1,
         description: 1,
         productCount: { $size: '$products' },
+        createdAt: 1,
       },
     },
-    {
-      $skip: (pageNumber - 1) * pageSize, 
-    },
-    {
-      $limit: pageSize, 
-    },
+    { $sort: sortStage },
+    { $skip: (pageNumber - 1) * pageSize },
+    { $limit: pageSize },
   ]);
 
   const totalCategories = await Category.countDocuments(matchStage);
@@ -53,9 +57,9 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
     status: httpStatusText.SUCCESS,
     data: {
       categories: categoriesWithProductCount,
-      currentPage:page,
-      totalPages:Math.ceil(totalCategories / pageSize),
-      totalCategories
+      currentPage: pageNumber,
+      totalPages: Math.ceil(totalCategories / pageSize),
+      totalCategories,
     },
   });
 });
