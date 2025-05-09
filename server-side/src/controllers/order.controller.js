@@ -100,16 +100,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
 
   const totalOrders = await Order.countDocuments(filter);
 
-  if (orders.length === 0) {
-    return next(
-      new AppError(
-        "No orders found with the specified filters",
-        404,
-        httpStatusText.FAIL
-      )
-    );
-  }
-
   const formattedOrders = orders.map((order) => ({
     id: order._id,
     orderNumber: order.orderNumber,
@@ -123,16 +113,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     userName: order.userId?.username || "N/A",
   }));
 
-  const orderforTotalAmount = await Order.find({ userId });
-  const totalAmountOrders = orderforTotalAmount.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0
-    );
-    const averageOrdersValue=totalAmountOrders/(orderforTotalAmount.length || 1)
-    console.log("orderforTotalAmount",orderforTotalAmount.length);
-    console.log("totalAmountOrders",totalAmountOrders);
-    console.log("averageOrdersValue",averageOrdersValue);
-
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -140,9 +120,7 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
       totalOrders,
       currentPage: page,
       totalPages: Math.ceil(totalOrders / limit),
-      totalAmountOrders,
-      averageOrdersValue,
-      userOrders:orderforTotalAmount.length
+    
     },
   });
 });
