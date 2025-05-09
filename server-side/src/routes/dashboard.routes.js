@@ -5,5 +5,6 @@ const verifyToken = require('../middlewares/auth.middleware');
 
 router.route('/metrics').get(dashboardController.getMetrics);
 router.route('/montlySales').get(dashboardController.getMontlySales);
+router.route('/orderStatus').get(dashboardController.getOrderStatus);
 
 module.exports = router;

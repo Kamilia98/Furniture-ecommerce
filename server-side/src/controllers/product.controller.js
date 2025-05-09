@@ -279,34 +279,34 @@ const calculateEffectivePrice = () => ({
   },
 });
 
-const getProductById = asyncWrapper(async (req, res, next) => {
-  const { id } = req.params;
-  if (!id) {
-    return next(
-      new AppError("Product ID is required", 400, httpStatusText.FAIL)
-    );
-  }
-  if (!mongoose.isValidObjectId(id)) {
-    return next(
-      new AppError("Invalid Product ID format", 400, httpStatusText.FAIL)
-    );
-  }
+  const getProductById = asyncWrapper(async (req, res, next) => {
+    const { id } = req.params;
+    if (!id) {
+      return next(
+        new AppError("Product ID is required", 400, httpStatusText.FAIL)
+      );
+    }
+    if (!mongoose.isValidObjectId(id)) {
+      return next(
+        new AppError("Invalid Product ID format", 400, httpStatusText.FAIL)
+      );
+    }
 
-  const product = await Product.findById(id)
-    .select(
-      "_id name subtitle price date sale categories description brand colors additionalInformation"
-    )
-    .populate("categories", "name")
-    .lean();
+    const product = await Product.findById(id)
+      .select(
+        "_id name subtitle price date sale categories description brand colors additionalInformation"
+      )
+      .populate("categories", "name")
+      .lean();
 
-  if (!product) {
-    return next(new AppError("Product not found", 404, httpStatusText.FAIL));
-  }
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    data: { product },
+    if (!product) {
+      return next(new AppError("Product not found", 404, httpStatusText.FAIL));
+    }
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      data: { product },
+    });
   });
-});
 
 const getMinEffectivePrice = asyncWrapper(async (req, res, next) => {
   const minPrice = await Product.aggregate([

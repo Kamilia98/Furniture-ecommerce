@@ -26,9 +26,9 @@ const UserSchema = new mongoose.Schema(
     },
     gender: {
       type: String,
-      enum: ["male", "female", "unknown"],
-      default: "unknown",
-    },   
+      enum: ["male", "female", "N/A","unknown"],
+      default: "N/A",
+    },
     resetToken: String,
     resetTokenExpiry: Date,
   },

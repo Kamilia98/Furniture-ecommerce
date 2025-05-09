@@ -18,7 +18,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     maxAmount,
     userId,
   } = req.query;
-
   // Convert pagination to numbers
   limit = parseInt(limit);
   page = parseInt(page);
@@ -101,16 +100,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
 
   const totalOrders = await Order.countDocuments(filter);
 
-  if (orders.length === 0) {
-    return next(
-      new AppError(
-        "No orders found with the specified filters",
-        404,
-        httpStatusText.FAIL
-      )
-    );
-  }
-
   const formattedOrders = orders.map((order) => ({
     id: order._id,
     orderNumber: order.orderNumber,
@@ -123,18 +112,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
     }),
     userName: order.userId?.username || "N/A",
   }));
-  let totalAmountOrders = 0;
-  let averageOrderValue = 0;
-  let totalOrdersWithUser = 0;
-  if (userId) {
-    const orderforTotalAmount = await Order.find({ userId });
-    totalAmountOrders = orderforTotalAmount.reduce(
-      (sum, order) => sum + order.totalAmount,
-      0
-    );
-    averageOrderValue = totalAmountOrders / orderforTotalAmount.length;
-    totalOrdersWithUser = orderforTotalAmount.length;
-  }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
@@ -143,9 +120,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
       totalOrders,
       currentPage: page,
       totalPages: Math.ceil(totalOrders / limit),
-      totalAmountOrders,
-      averageOrderValue,
-      totalOrdersWithUser,
     },
   });
 });
