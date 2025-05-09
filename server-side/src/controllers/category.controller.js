@@ -15,16 +15,11 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
   const pageNumber = parseInt(page, 10);
   const pageSize = parseInt(limit, 10);
 
-  let sortStage = {};
-  if (sortBy === 'productCount') {
-    sortStage = { productCount: sortOrder === 'desc' ? -1 : 1 };
-  } else if (sortBy === 'name') {
-    sortStage = { name: sortOrder === 'desc' ? -1 : 1 };
-  } else {
-    sortStage = { createdAt: sortOrder === 'desc' ? -1 : 1 };
-  }
+  const sortStage = {
+    [sortBy]: sortOrder === 'desc' ? -1 : 1,
+  };
 
-  const categoriesWithProductCount = await Category.aggregate([
+  const categoriesWithProductCountAndSales = await Category.aggregate([
     { $match: matchStage },
     {
       $lookup: {
@@ -35,11 +30,53 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        productCount: { $size: '$products' },
+        totalSales: {
+          $round: [
+            {
+              $sum: {
+                $map: {
+                  input: '$orders',
+                  as: 'order',
+                  in: {
+                    $sum: {
+                      $map: {
+                        input: '$$order.orderItems',
+                        as: 'item',
+                        in: {
+                          $cond: [
+                            { $in: ['$$item.id', '$products._id'] },
+                            { $multiply: ['$$item.price', '$$item.quantity'] },
+                            0,
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            2, 
+          ],
+        },
+      },
+    },
+    {
       $project: {
         name: 1,
         image: 1,
         description: 1,
-        productCount: { $size: '$products' },
+        productCount: 1,
+        totalSales: 1,
         createdAt: 1,
       },
     },
@@ -49,14 +86,14 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
   ]);
 
   const totalCategories = await Category.countDocuments(matchStage);
-  if (!categoriesWithProductCount.length) {
+  if (!categoriesWithProductCountAndSales.length) {
     return next(new AppError('No categories found.', 404, httpStatusText.FAIL));
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
-      categories: categoriesWithProductCount,
+      categories: categoriesWithProductCountAndSales,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalCategories / pageSize),
       totalCategories,
@@ -89,20 +126,160 @@ const getCategoryDetails = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $addFields: {
+        totalProducts: { $size: '$products' },
+      },
+    },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        totalSales: {
+          $sum: {
+            $map: {
+              input: '$orders',
+              as: 'order',
+              in: {
+$round:[
+
+  {
+    
+    $sum: {
+      $map: {
+        input: '$$order.orderItems',
+        as: 'item',
+        in: {
+          $cond: [
+            { $in: ['$$item.id', '$products._id'] },
+            { $multiply: ['$$item.price', '$$item.quantity'] },
+            0,
+          ],
+        },
+      },
+    },
+  },2
+],
+              },
+            },
+          },
+        },
+      },
+    },
+    {
       $project: {
         name: 1,
         description: 1,
         image: 1,
-        products: 1,
+        totalProducts: 1,
+        totalSales: 1,
       },
     },
   ]);
+
+  console.log(categoryDetails[0])
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: { category: categoryDetails[0] },
   });
 });
+
+
+const getCategoriesAnalytics = asyncWrapper(async (req, res, next) => {
+  console.log(1)
+  const categorySummary = await Category.aggregate([
+    {
+      $lookup: {
+        from: 'products',
+        localField: '_id',
+        foreignField: 'categories',
+        as: 'products',
+      },
+    },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        totalItemsSold: {
+          $sum: {
+            $map: {
+              input: '$orders',
+              as: 'order',
+              in: {
+                $sum: {
+                  $map: {
+                    input: '$$order.orderItems',
+                    as: 'item',
+                    in: {
+                      $cond: [
+                        { $in: ['$$item.id', '$products._id'] },
+                        '$$item.quantity', // Sum the quantity of items sold
+                        0,
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        totalItemsSold: 1,
+      },
+    },
+    {
+      $sort: { totalItemsSold: -1 }, // Sort by total items sold in descending order
+    },
+    {
+      $group: {
+        _id: null,
+        totalCategories: { $sum: 1 }, // Count total categories
+        categories: { $push: { name: '$name', totalItemsSold: '$totalItemsSold' } }, // Push all categories with their sales
+      },
+    },
+    {
+      $addFields: {
+        mostSalledCategory: { $arrayElemAt: ['$categories', 0] }, // Most sold category
+        leastSalledCategory: { $arrayElemAt: ['$categories', -1] }, // Least sold category
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalCategories: 1,
+        mostSalledCategory: 1,
+        leastSalledCategory: 1,
+
+      },
+    },
+  ]);
+
+  if (!categorySummary.length) {
+    return next(new AppError('No categories found.', 404, httpStatusText.FAIL));
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: categorySummary[0],
+  });
+});
+
 
 const editCategory = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
@@ -157,25 +334,22 @@ const addCategory = asyncWrapper(async (req, res, next) => {
 });
 
 const deleteCategory = asyncWrapper(async (req, res, next) => {
-  const { id } = req.params; // Get the category ID from the request parameters
-  console.log(id);
-  // Validate the category ID
+  const { id } = req.params;
+
+
   if (!mongoose.Types.ObjectId.isValid(id)) {
     return next(new AppError('Invalid category ID.', 400, httpStatusText.FAIL));
   }
 
-  // Find and delete the category
   const deletedCategory = await Category.findByIdAndDelete(id);
 
-  // If the category is not found
   if (!deletedCategory) {
     return next(new AppError('Category not found.', 404, httpStatusText.FAIL));
   }
 
-  // Remove the category reference from all products
   await Product.updateMany(
-    { categories: id }, // Find products that reference the deleted category
-    { $pull: { categories: id } } // Remove the category ID from the categories array
+    { categories: id }, 
+    { $pull: { categories: id } } 
   );
 
   // Respond with a success message
@@ -189,6 +363,7 @@ const deleteCategory = asyncWrapper(async (req, res, next) => {
 module.exports = {
   getAllCategories,
   getCategoryDetails,
+  getCategoriesAnalytics,
   editCategory,
   addCategory,
   deleteCategory,

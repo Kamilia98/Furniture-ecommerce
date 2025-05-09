@@ -120,7 +120,6 @@ const getAllOrders = asyncWrapper(async (req, res, next) => {
       totalOrders,
       currentPage: page,
       totalPages: Math.ceil(totalOrders / limit),
-    
     },
   });
 });
