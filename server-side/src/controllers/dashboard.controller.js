@@ -353,7 +353,7 @@ const getSalesByPeriod = asyncWrapper(async (req, res, next) => {
 });
 
 const getBestEntities = asyncWrapper(async (req, res, next) => {
-  // Best Product (by number of orders it was included in)
+  // Best Product (by number of distinct orders it was included in)
   const bestProduct = await Product.aggregate([
     {
       $lookup: {
@@ -363,46 +363,85 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
         as: 'orders',
       },
     },
-    { $unwind: '$orders' },
-    { $unwind: '$orders.orderItems' },
     {
-      $group: {
-        _id: '$_id',
-        orderCount: { $sum: 1 },
-        colors: { $push: '$orders.orderItems.color.name' },
+      $addFields: {
+        matchingOrderItems: {
+          $filter: {
+            input: '$orders',
+            as: 'order',
+            cond: {
+              $gt: [
+                {
+                  $size: {
+                    $filter: {
+                      input: '$$order.orderItems',
+                      as: 'item',
+                      cond: { $eq: ['$$item.id', '$_id'] },
+                    },
+                  },
+                },
+                0,
+              ],
+            },
+          },
+        },
       },
     },
-    { $sort: { orderCount: -1 } },
-    { $limit: 1 },
+    {
+      $addFields: {
+        orderCount: { $size: '$matchingOrderItems' },
+        allColors: {
+          $reduce: {
+            input: '$matchingOrderItems',
+            initialValue: [],
+            in: {
+              $concatArrays: [
+                '$$value',
+                {
+                  $map: {
+                    input: {
+                      $filter: {
+                        input: '$$this.orderItems',
+                        as: 'item',
+                        cond: { $eq: ['$$item.id', '$_id'] },
+                      },
+                    },
+                    as: 'matchItem',
+                    in: '$$matchItem.color.name',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
     {
       $addFields: {
         mostPopularColor: {
           $let: {
             vars: {
-              uniqueColors: { $setUnion: ['$colors', []] },
+              uniqueColors: { $setUnion: ['$allColors', []] },
             },
             in: {
-              $arrayElemAt: [
-                {
-                  $map: {
-                    input: '$$uniqueColors',
-                    as: 'color',
-                    in: {
-                      color: '$$color',
-                      count: {
-                        $size: {
-                          $filter: {
-                            input: '$colors',
-                            as: 'c',
-                            cond: { $eq: ['$$c', '$$color'] },
-                          },
+              $first: {
+                $map: {
+                  input: '$$uniqueColors',
+                  as: 'color',
+                  in: {
+                    color: '$$color',
+                    count: {
+                      $size: {
+                        $filter: {
+                          input: '$allColors',
+                          as: 'c',
+                          cond: { $eq: ['$$c', '$$color'] },
                         },
                       },
                     },
                   },
                 },
-                0, // pick the first color (most frequent)
-              ],
+              },
             },
           },
         },
@@ -439,6 +478,10 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $sort: { orderCount: -1 },
+    },
+    { $limit: 1 },
+    {
       $project: {
         _id: 0,
         productId: '$_id',
@@ -456,6 +499,7 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
     },
   ]);
 
+  // Best Category (by number of orders its products are in)
   const bestCategory = await Category.aggregate([
     {
       $lookup: {
@@ -466,16 +510,48 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $addFields: {
+        productIds: {
+          $map: {
+            input: '$products',
+            as: 'p',
+            in: '$$p._id',
+          },
+        },
+      },
+    },
+    {
       $lookup: {
         from: 'orders',
-        localField: 'products._id',
-        foreignField: 'orderItems.id',
+        let: { productIds: '$productIds' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $gt: [
+                  {
+                    $size: {
+                      $filter: {
+                        input: '$orderItems',
+                        as: 'item',
+                        cond: {
+                          $in: ['$$item.id', '$$productIds'],
+                        },
+                      },
+                    },
+                  },
+                  0,
+                ],
+              },
+            },
+          },
+        ],
         as: 'orders',
       },
     },
     {
       $addFields: {
-        orderCount: { $size: '$orders' }, // Count the number of orders the category's products are included in
+        orderCount: { $size: '$orders' },
         totalSales: {
           $sum: {
             $map: {
@@ -488,7 +564,7 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
                     as: 'item',
                     in: {
                       $cond: [
-                        { $in: ['$$item.id', '$products._id'] },
+                        { $in: ['$$item.id', '$productIds'] },
                         { $multiply: ['$$item.price', '$$item.quantity'] },
                         0,
                       ],
@@ -499,14 +575,14 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
             },
           },
         },
-        productCount: { $size: '$products' }, // Count the number of products in the category
+        productCount: { $size: '$products' },
       },
     },
     {
-      $sort: { orderCount: -1 }, // Sort by the number of orders in descending order
+      $sort: { orderCount: -1 },
     },
     {
-      $limit: 1, // Get the top category
+      $limit: 1,
     },
     {
       $project: {
@@ -514,7 +590,7 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
         description: 1,
         image: 1,
         orderCount: 1,
-        totalSales: { $round: ['$totalSales', 2] }, // Round total sales to 2 decimal places
+        totalSales: { $round: ['$totalSales', 2] },
         productCount: 1,
       },
     },
@@ -561,7 +637,7 @@ const getBestEntities = asyncWrapper(async (req, res, next) => {
   ]);
 
   res.status(200).json({
-    status: httpStatusText.SUCCESS,
+    status: 'SUCCESS',
     data: {
       bestProduct: bestProduct[0] || null,
       bestCategory: bestCategory[0] || null,
