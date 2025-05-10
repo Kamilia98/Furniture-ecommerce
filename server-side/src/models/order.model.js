@@ -1,17 +1,17 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const OrderSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: 'User',
       required: true,
     },
     orderItems: [
       {
         id: {
           type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
+          ref: 'Product',
           required: true,
         },
         name: { type: String, required: true },
@@ -39,12 +39,12 @@ const OrderSchema = new mongoose.Schema(
     totalAmount: { type: Number, required: true },
     status: {
       type: String,
-      enum: ["Pending", "Processing", "Shipped", "Delivered", "Cancelled"],
-      default: "Pending",
+      enum: ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'],
+      default: 'Pending',
     },
     paymentMethod: {
       type: String,
-      enum: ["cod", "bank", "Direct Bank Transfer", "Cash on Delivery"],
+      enum: ['cod', 'bank', 'Direct Bank Transfer', 'Cash on Delivery'],
       required: true,
     },
     orderNumber: { type: String, unique: true },
@@ -54,15 +54,15 @@ const OrderSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-OrderSchema.pre("save", async function (next) {
+OrderSchema.pre('save', async function (next) {
   if (!this.orderNumber) {
     try {
       const lastOrder = await mongoose
-        .model("Order")
+        .model('Order')
         .findOne()
         .sort({ createdAt: -1 });
       let newOrderNumber = 1000;
-      let prefix = "A";
+      let prefix = 'A';
 
       if (lastOrder && lastOrder.orderNumber) {
         const match = lastOrder.orderNumber.match(/^([A-Z])(\d+)$/);
@@ -87,4 +87,4 @@ OrderSchema.pre("save", async function (next) {
   next();
 });
 
-module.exports = mongoose.model("Order", OrderSchema);
+module.exports = mongoose.model('Order', OrderSchema);

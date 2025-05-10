@@ -29,4 +29,6 @@ router.get('/logout', registerationController.logout);
 router.post('/forgot-password', registerationController.forgotPassword);
 router.post('/reset-password', registerationController.resetPassword);
 
+router.post('/admin/invite', registerationController.inviteAdmin);
+
 module.exports = router;

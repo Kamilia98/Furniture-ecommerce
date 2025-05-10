@@ -1,12 +1,24 @@
+const mongoose = require('mongoose');
 const Category = require('../models/category.model');
 const Product = require('../models/product.model');
-const httpStatusText = require('../utils/httpStatusText');
 const AppError = require('../utils/appError');
+const httpStatusText = require('../utils/httpStatusText');
 const asyncWrapper = require('../middlewares/asyncWrapper.middleware');
-const mongoose = require('mongoose');
 
+// Helper to validate MongoDB ObjectId
+const isValidObjectId = (id) => mongoose.Types.ObjectId.isValid(id);
+
+// ==============================
+// GET /categories
+// ==============================
 const getAllCategories = asyncWrapper(async (req, res, next) => {
-  const { searchQuery, page = 1, limit = 10, sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
+  const {
+    searchQuery,
+    page = 1,
+    limit = 10,
+    sortBy = 'createdAt',
+    sortOrder = 'desc',
+  } = req.query;
 
   const matchStage = searchQuery
     ? { name: { $regex: searchQuery, $options: 'i' } }
@@ -14,17 +26,9 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
 
   const pageNumber = parseInt(page, 10);
   const pageSize = parseInt(limit, 10);
+  const sortStage = { [sortBy]: sortOrder === 'desc' ? -1 : 1 };
 
-  let sortStage = {};
-  if (sortBy === 'productCount') {
-    sortStage = { productCount: sortOrder === 'desc' ? -1 : 1 };
-  } else if (sortBy === 'name') {
-    sortStage = { name: sortOrder === 'desc' ? -1 : 1 };
-  } else {
-    sortStage = { createdAt: sortOrder === 'desc' ? -1 : 1 };
-  }
-
-  const categoriesWithProductCount = await Category.aggregate([
+  const categories = await Category.aggregate([
     { $match: matchStage },
     {
       $lookup: {
@@ -35,11 +39,53 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        productCount: { $size: '$products' },
+        totalSales: {
+          $round: [
+            {
+              $sum: {
+                $map: {
+                  input: '$orders',
+                  as: 'order',
+                  in: {
+                    $sum: {
+                      $map: {
+                        input: '$$order.orderItems',
+                        as: 'item',
+                        in: {
+                          $cond: [
+                            { $in: ['$$item.id', '$products._id'] },
+                            { $multiply: ['$$item.price', '$$item.quantity'] },
+                            0,
+                          ],
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            2,
+          ],
+        },
+      },
+    },
+    {
       $project: {
         name: 1,
         image: 1,
         description: 1,
-        productCount: { $size: '$products' },
+        productCount: 1,
+        totalSales: 1,
         createdAt: 1,
       },
     },
@@ -49,14 +95,15 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
   ]);
 
   const totalCategories = await Category.countDocuments(matchStage);
-  if (!categoriesWithProductCount.length) {
+
+  if (!categories.length) {
     return next(new AppError('No categories found.', 404, httpStatusText.FAIL));
   }
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
-      categories: categoriesWithProductCount,
+      categories,
       currentPage: pageNumber,
       totalPages: Math.ceil(totalCategories / pageSize),
       totalCategories,
@@ -64,22 +111,94 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
   });
 });
 
+// ==============================
+// GET /categories/:id
+// ==============================
 const getCategoryDetails = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
 
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!isValidObjectId(id)) {
     return next(new AppError('Invalid category ID.', 400, httpStatusText.FAIL));
   }
 
-  const existingCategory = await Category.findById(id);
-  if (!existingCategory) {
+  const category = await Category.findById(id);
+  if (!category) {
     return next(new AppError('Category not found.', 404, httpStatusText.FAIL));
   }
 
-  const categoryDetails = await Category.aggregate([
+  const details = await Category.aggregate([
+    { $match: { _id: new mongoose.Types.ObjectId(id) } },
     {
-      $match: { _id: new mongoose.Types.ObjectId(id) },
+      $lookup: {
+        from: 'products',
+        localField: '_id',
+        foreignField: 'categories',
+        as: 'products',
+      },
     },
+    { $addFields: { totalProducts: { $size: '$products' } } },
+    {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        totalSales: {
+          $sum: {
+            $map: {
+              input: '$orders',
+              as: 'order',
+              in: {
+                $round: [
+                  {
+                    $sum: {
+                      $map: {
+                        input: '$$order.orderItems',
+                        as: 'item',
+                        in: {
+                          $cond: [
+                            { $in: ['$$item.id', '$products._id'] },
+                            { $multiply: ['$$item.price', '$$item.quantity'] },
+                            0,
+                          ],
+                        },
+                      },
+                    },
+                  },
+                  2,
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+    {
+      $project: {
+        name: 1,
+        description: 1,
+        image: 1,
+        totalProducts: 1,
+        totalSales: 1,
+      },
+    },
+  ]);
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    data: { category: details[0] },
+  });
+});
+
+// ==============================
+// GET /categories/analytics
+// ==============================
+const getCategoriesAnalytics = asyncWrapper(async (req, res, next) => {
+  const analytics = await Category.aggregate([
     {
       $lookup: {
         from: 'products',
@@ -89,106 +208,158 @@ const getCategoryDetails = asyncWrapper(async (req, res, next) => {
       },
     },
     {
+      $lookup: {
+        from: 'orders',
+        localField: 'products._id',
+        foreignField: 'orderItems.id',
+        as: 'orders',
+      },
+    },
+    {
+      $addFields: {
+        totalItemsSold: {
+          $sum: {
+            $map: {
+              input: '$orders',
+              as: 'order',
+              in: {
+                $sum: {
+                  $map: {
+                    input: '$$order.orderItems',
+                    as: 'item',
+                    in: {
+                      $cond: [
+                        { $in: ['$$item.id', '$products._id'] },
+                        '$$item.quantity',
+                        0,
+                      ],
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    {
       $project: {
         name: 1,
-        description: 1,
-        image: 1,
-        products: 1,
+        totalItemsSold: 1,
+      },
+    },
+    { $sort: { totalItemsSold: -1 } },
+    {
+      $group: {
+        _id: null,
+        totalCategories: { $sum: 1 },
+        categories: { $push: { name: '$name', totalItemsSold: '$totalItemsSold' } },
+      },
+    },
+    {
+      $addFields: {
+        mostSalledCategory: { $arrayElemAt: ['$categories', 0] },
+        leastSalledCategory: { $arrayElemAt: ['$categories', -1] },
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        totalCategories: 1,
+        mostSalledCategory: 1,
+        leastSalledCategory: 1,
       },
     },
   ]);
 
+  if (!analytics.length) {
+    return next(new AppError('No categories found.', 404, httpStatusText.FAIL));
+  }
+
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { category: categoryDetails[0] },
+    data: analytics[0],
   });
 });
 
+// ==============================
+// Patch /categories/:id
+// ==============================
 const editCategory = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
   const { name, description, image } = req.body;
 
-  // Validate the category ID
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  if (!isValidObjectId(id)) {
     return next(new AppError('Invalid category ID.', 400, httpStatusText.FAIL));
   }
 
-  // Find and update the category
-  const updatedCategory = await Category.findByIdAndUpdate(
+  const updated = await Category.findByIdAndUpdate(
     id,
     { name, description, image },
-    { new: true, runValidators: true } // Return the updated document and validate the input
+    { new: true, runValidators: true }
   );
 
-  // If the category is not found
-  if (!updatedCategory) {
+  if (!updated) {
     return next(new AppError('Category not found.', 404, httpStatusText.FAIL));
   }
 
-  // Respond with the updated category
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    data: { category: updatedCategory },
+    data: { category: updated },
   });
 });
 
+// ==============================
+// POST /categories
+// ==============================
 const addCategory = asyncWrapper(async (req, res, next) => {
   const { name, description, image } = req.body;
 
-  const existingCategory = await Category.findOne({ name });
-  if (existingCategory) {
+  const exists = await Category.findOne({ name });
+  if (exists) {
     return next(
-      new AppError(
-        'Category with this name already exists.',
-        400,
-        httpStatusText.FAIL
-      )
+      new AppError('Category with this name already exists.', 400, httpStatusText.FAIL)
     );
   }
 
-  // Create a new category
-  const newCategory = await Category.create({ name, description, image });
+  const created = await Category.create({ name, description, image });
 
-  // Respond with the newly created category
   res.status(201).json({
     status: httpStatusText.SUCCESS,
-    data: { category: newCategory },
+    data: { category: created },
   });
 });
 
+// ==============================
+// DELETE /categories/:id
+// ==============================
 const deleteCategory = asyncWrapper(async (req, res, next) => {
-  const { id } = req.params; // Get the category ID from the request parameters
-  console.log(id);
-  // Validate the category ID
-  if (!mongoose.Types.ObjectId.isValid(id)) {
+  const { id } = req.params;
+
+  if (!isValidObjectId(id)) {
     return next(new AppError('Invalid category ID.', 400, httpStatusText.FAIL));
   }
 
-  // Find and delete the category
-  const deletedCategory = await Category.findByIdAndDelete(id);
-
-  // If the category is not found
-  if (!deletedCategory) {
+  const deleted = await Category.findByIdAndDelete(id);
+  if (!deleted) {
     return next(new AppError('Category not found.', 404, httpStatusText.FAIL));
   }
 
-  // Remove the category reference from all products
-  await Product.updateMany(
-    { categories: id }, // Find products that reference the deleted category
-    { $pull: { categories: id } } // Remove the category ID from the categories array
-  );
+  await Product.updateMany({ categories: id }, { $pull: { categories: id } });
 
-  // Respond with a success message
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    message:
-      'Category deleted successfully and references removed from products.',
+    message: 'Category deleted successfully and references removed from products.',
   });
 });
 
+// ==============================
+// Exports
+// ==============================
 module.exports = {
   getAllCategories,
   getCategoryDetails,
+  getCategoriesAnalytics,
   editCategory,
   addCategory,
   deleteCategory,

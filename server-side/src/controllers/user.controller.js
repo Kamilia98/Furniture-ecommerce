@@ -330,6 +330,94 @@ const getFavourites = asyncWrapper(async (req, res, next) => {
   });
 });
 
+const updateProfile = asyncWrapper(async (req, res, next) => {
+  const userId = req.user._id;
+  const { fname, lname, phone, bio, country, city } = req.body;
+
+
+  if (!fname || !lname) {
+    return next(
+      new AppError("First name and last name are required", 400, httpStatusText.FAIL)
+    );
+  }
+
+  const updates = {
+    username: `${fname} ${lname}`.trim(),
+    phone,
+    bio,
+    country,
+    city
+  };
+  
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).select("-password -googleId");
+
+  if (!user) {
+    return next(new AppError("User not found", 404, httpStatusText.NOT_FOUND));
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Profile updated successfully",
+    data: { user }
+  });
+});
+
+
+// Admin user management routes
+const getAllAdminUsers = asyncWrapper(async (req, res, next) => {
+    const users = await User.find({ role: { $in: ['ADMIN', 'EDITOR', 'SUPPORT', 'MANAGER'] }, isDeleted: { $ne: true } })
+        .select("_id username email role status createdAt");
+    res.status(200).json({ status: httpStatusText.SUCCESS, data: users });
+});
+
+const editAdminUser = asyncWrapper(async (req, res, next) => {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { role },
+        { new: true, runValidators: true }
+    ).select("_id username email role status");
+
+    if (!updatedUser) {
+        return next(new AppError("Admin user not found.", 404, httpStatusText.NOT_FOUND));
+    }
+
+    res.status(200).json({ status: httpStatusText.SUCCESS, data: updatedUser });
+});
+
+const deleteAdminUser = asyncWrapper(async (req, res, next) => {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));
+    }
+
+    const deletedUser = await User.findByIdAndUpdate(
+        userId,
+        { isDeleted: true },
+        { new: true }
+    );
+
+    if (!deletedUser) {
+        return next(new AppError("Admin user not found.", 404, httpStatusText.NOT_FOUND));
+    }
+
+    res.status(200).json({ status: httpStatusText.SUCCESS, message: "Admin user deleted successfully." });
+});
+
+
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -340,4 +428,9 @@ module.exports = {
   getFavourites,
   changePassword,
   changeIMG,
+  updateProfile,
+  getAllAdminUsers,
+  editAdminUser,
+  deleteAdminUser,
+
 };
