@@ -367,6 +367,57 @@ const updateProfile = asyncWrapper(async (req, res, next) => {
   });
 });
 
+
+// Admin user management routes
+const getAllAdminUsers = asyncWrapper(async (req, res, next) => {
+    const users = await User.find({ role: { $in: ['ADMIN', 'EDITOR', 'SUPPORT', 'MANAGER'] }, isDeleted: { $ne: true } })
+        .select("_id username email role status createdAt");
+    res.status(200).json({ status: httpStatusText.SUCCESS, data: users });
+});
+
+const editAdminUser = asyncWrapper(async (req, res, next) => {
+    const { userId } = req.params;
+    const { role } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+        userId,
+        { role },
+        { new: true, runValidators: true }
+    ).select("_id username email role status");
+
+    if (!updatedUser) {
+        return next(new AppError("Admin user not found.", 404, httpStatusText.NOT_FOUND));
+    }
+
+    res.status(200).json({ status: httpStatusText.SUCCESS, data: updatedUser });
+});
+
+const deleteAdminUser = asyncWrapper(async (req, res, next) => {
+    const { userId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return next(new AppError("Invalid User ID", 400, httpStatusText.FAIL));
+    }
+
+    const deletedUser = await User.findByIdAndUpdate(
+        userId,
+        { isDeleted: true },
+        { new: true }
+    );
+
+    if (!deletedUser) {
+        return next(new AppError("Admin user not found.", 404, httpStatusText.NOT_FOUND));
+    }
+
+    res.status(200).json({ status: httpStatusText.SUCCESS, message: "Admin user deleted successfully." });
+});
+
+
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -378,4 +429,8 @@ module.exports = {
   changePassword,
   changeIMG,
   updateProfile,
+  getAllAdminUsers,
+  editAdminUser,
+  deleteAdminUser,
+
 };
