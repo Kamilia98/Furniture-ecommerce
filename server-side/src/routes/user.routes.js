@@ -23,7 +23,8 @@ router
   .put(verifyToken, allowedTo("USER"), userController.changePassword);
 router
   .route("/profile")
-  .get(verifyToken, allowedTo("USER"), userController.getProfile);
+  .get(verifyToken, allowedTo("USER","ADMIN","MANAGER","EDITOR"), userController.getProfile)
+  .put(verifyToken, allowedTo("USER","ADMIN","MANAGER","EDITOR"), userController.updateProfile);
 router.route("/profile/change-img").put(verifyToken, userController.changeIMG);
 router
   .route("/:userId")
@@ -34,8 +35,11 @@ router
 router
   .route("/toggle-favourites")
   .post(verifyToken, userController.toggleFavourite);
-router
-  .route("/profile")
-  .get(verifyToken, allowedTo("USER"), userController.getProfile)
-  .put(verifyToken, allowedTo("USER"), userController.updateProfile);
+
+
+// Admin user management routes
+router.get("/admin/users", verifyToken, allowedTo("ADMIN","MANAGER"), userController.getAllAdminUsers);
+router.patch("/admin/users/:userId", verifyToken, allowedTo("ADMIN","MANAGER"), userController.editAdminUser);
+router.delete("/admin/users/:userId", verifyToken, allowedTo("ADMIN","MANAGER"), userController.deleteAdminUser);
+
 module.exports = router;

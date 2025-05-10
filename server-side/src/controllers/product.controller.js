@@ -564,21 +564,22 @@ const productSchema = Joi.object({
 });
 
 const createProduct = asyncWrapper(async (req, res, next) => {
-  const { error, value } = productSchema.validate(req.query, {
-    abortEarly: false,
-  });
+  
+  // const { error, value } = productSchema.validate(req.query, {
+  //   abortEarly: false,
+  // });
 
-  if (error) {
-    return next(
-      new AppError(
-        error.details.map((e) => e.message).join(', '),
-        400,
-        httpStatusText.FAIL
-      )
-    );
-  }
+  // if (error) {
+  //   return next(
+  //     new AppError(
+  //       error.details.map((e) => e.message).join(", "),
+  //       400,
+  //       httpStatusText.FAIL
+  //     )
+  //   );
+  // }
 
-  const { name, subtitle, price, sale = 0, colors, categories } = value;
+  const { name, subtitle, price, sale = 0, colors, categories ,description ,brand ,additionalInformation } = req.body;
   const categoryArray = Array.isArray(categories)
     ? categories
     : categories.split(',').map((id) => id.trim());
@@ -589,6 +590,9 @@ const createProduct = asyncWrapper(async (req, res, next) => {
     price,
     sale,
     colors,
+    description,
+    brand,
+    additionalInformation ,
     categories: categoryArray.map((id) => new mongoose.Types.ObjectId(id)),
     deleted: false,
     date: new Date(),
@@ -600,6 +604,7 @@ const createProduct = asyncWrapper(async (req, res, next) => {
     data: product,
   });
 });
+
 
 const updateProduct = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
