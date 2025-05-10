@@ -34,5 +34,8 @@ router
 router
   .route("/toggle-favourites")
   .post(verifyToken, userController.toggleFavourite);
-
+router
+  .route("/profile")
+  .get(verifyToken, allowedTo("USER"), userController.getProfile)
+  .put(verifyToken, allowedTo("USER"), userController.updateProfile);
 module.exports = router;

@@ -330,6 +330,43 @@ const getFavourites = asyncWrapper(async (req, res, next) => {
   });
 });
 
+const updateProfile = asyncWrapper(async (req, res, next) => {
+  const userId = req.user._id;
+  const { fname, lname, phone, bio, country, city } = req.body;
+
+
+  if (!fname || !lname) {
+    return next(
+      new AppError("First name and last name are required", 400, httpStatusText.FAIL)
+    );
+  }
+
+  const updates = {
+    username: `${fname} ${lname}`.trim(),
+    phone,
+    bio,
+    country,
+    city
+  };
+  
+
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { $set: updates },
+    { new: true, runValidators: true }
+  ).select("-password -googleId");
+
+  if (!user) {
+    return next(new AppError("User not found", 404, httpStatusText.NOT_FOUND));
+  }
+
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: "Profile updated successfully",
+    data: { user }
+  });
+});
+
 module.exports = {
   getAllUsers,
   getUser,
@@ -340,4 +377,5 @@ module.exports = {
   getFavourites,
   changePassword,
   changeIMG,
+  updateProfile,
 };
