@@ -15,6 +15,103 @@ const generateToken = (payload, expiresIn = null) => {
   return jwt.sign(payload, process.env.JWT_SECRET, options);
 };
 
+
+const inviteAdmin = asyncWrapper(async (req, res, next) => {
+    console.log('[INVITE ADMIN] Request Body:', req.body);
+    const { email, role} = req.body;
+
+    const existingUser = await userModel.findOne({ email });
+    if (existingUser) {
+        console.warn('[INVITE ADMIN] Email already exists:', email);
+        return next(new AppError('User with this email already exists.', 400, httpStatusText.FAIL));
+    }
+
+    const invitationToken = generateToken({ email }, '24h');
+    const invitationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
+
+     // Generate username from email (part before the '@')
+    const generatedUsername = email.substring(0, email.indexOf('@'));
+    // Basic sanitization to remove non-alphanumeric characters
+    const sanitizedUsername = generatedUsername.replace(/[^a-zA-Z0-9]/g, '');
+    // Ensure username is at least 3 characters long (you might want more sophisticated logic)
+    const username = sanitizedUsername.length >= 3 ? sanitizedUsername : `user_${Date.now().toString().slice(-5)}`;
+
+    const newUser = new userModel({
+        email: email,
+        role: role,
+        status: 'pending',
+        invitationToken: invitationToken,
+        invitationTokenExpiry: invitationTokenExpiry,
+        username: username
+    });
+
+    console.log('[INVITE ADMIN] newUser.username before save:', newUser.username); 
+
+    await newUser.save();
+    console.log('[INVITE ADMIN] Pending admin user created:', email)
+
+    const invitationLink = `http://localhost:5173/reset-password?token=${invitationToken}`; // Your frontend reset password route
+    const mailOptions = {
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: 'Invitation to Join Our Team as an Admin',
+        html: `
+            <p>Hello!</p>
+            <p>You have been invited to join our team as an administrator with the role of <strong>${role}</strong>.</p>
+            <p>Please click the following link to set your password and activate your account:</p>
+            <p><a href="${invitationLink}">${invitationLink}</a></p>
+            <p>This invitation link will expire in 24 hours.</p>
+            <p>If you did not request this invitation, please ignore this email.</p>
+            <p>Best regards,<br>Furniro Team</p>
+        `,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            console.error('[EMAIL] Failed to send invitation email:', error);
+            return next(new AppError('Error sending invitation email.', 500, httpStatusText.ERROR));
+        }
+        console.log('[EMAIL] Invitation email sent to:', email);
+        res.status(200).json({ status: httpStatusText.SUCCESS, message: 'Invitation sent successfully.' });
+    });
+});
+
+// POST /reset-password (adjust to handle invitation tokens)
+const resetPassword = asyncWrapper(async (req, res, next) => {
+    const { token, password } = req.body;
+    console.log('[RESET PASSWORD] Token received:', token);
+
+    const user = await userModel.findOne({
+        $or: [
+            { resetToken: token },
+            { invitationToken: token, status: 'pending' }
+        ],
+        $or: [
+            { resetTokenExpiry: { $gt: Date.now() } },
+            { invitationTokenExpiry: { $gt: Date.now() } }
+        ]
+    }).select('+password +resetToken +resetTokenExpiry +invitationToken +invitationTokenExpiry');
+
+    if (!user) {
+        console.warn('[RESET PASSWORD] Invalid or expired token.');
+        return next(new AppError('Invalid or expired token.', 400, httpStatusText.FAIL));
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetToken = null;
+    user.resetTokenExpiry = null;
+    user.invitationToken = null;
+    user.invitationTokenExpiry = null;
+    user.status = 'active'; // Activate the user upon setting password
+
+    await user.save();
+    console.log('[RESET PASSWORD] Password reset for:', user.email);
+
+    res.status(200).json({ status: httpStatusText.SUCCESS, message: 'Password reset successfully. Your account is now active.' });
+});
+
+
 // POST /signup
 const signup = asyncWrapper(async (req, res, next) => {
   const userData = req.body;
@@ -69,6 +166,16 @@ const login = asyncWrapper(async (req, res, next) => {
       new AppError('Invalid email or password.', 400, httpStatusText.FAIL)
     );
   }
+
+  if (user.role !== 'OWNER' && user.role !== 'ADMIN') {
+    console.warn(`[LOGIN] User ${email} has role ${user.role}, which is not allowed to log in.`);
+    return next(
+      new AppError('Only OWNER and ADMIN can log in.', 403, httpStatusText.FAIL, { 
+        message: 'Only owner and admins can login!', 
+      })
+    );
+  }
+  await userModel.findByIdAndUpdate(user._id, { status: 'active' },{ new: true });
 
   const token = generateToken({
     _id: user._id,
@@ -152,32 +259,32 @@ const forgotPassword = asyncWrapper(async (req, res, next) => {
 });
 
 // POST /reset-password
-const resetPassword = asyncWrapper(async (req, res, next) => {
-  const { token, password } = req.body;
-  console.log('[RESET PASSWORD] Token received:', token);
+// const resetPassword = asyncWrapper(async (req, res, next) => {
+//   const { token, password } = req.body;
+//   console.log('[RESET PASSWORD] Token received:', token);
 
-  const user = await userModel.findOne({ resetToken: token });
-  if (!user || user.resetTokenExpiry < Date.now()) {
-    console.warn('[RESET PASSWORD] Invalid or expired token.');
-    return next(
-      new AppError('Invalid or expired token.', 400, httpStatusText.FAIL)
-    );
-  }
+//   const user = await userModel.findOne({ resetToken: token });
+//   if (!user || user.resetTokenExpiry < Date.now()) {
+//     console.warn('[RESET PASSWORD] Invalid or expired token.');
+//     return next(
+//       new AppError('Invalid or expired token.', 400, httpStatusText.FAIL)
+//     );
+//   }
 
-  const salt = await bcrypt.genSalt(10);
-  user.password = await bcrypt.hash(password, salt);
-  user.resetToken = null;
-  user.resetTokenExpiry = null;
+//   const salt = await bcrypt.genSalt(10);
+//   user.password = await bcrypt.hash(password, salt);
+//   user.resetToken = null;
+//   user.resetTokenExpiry = null;
 
-  await user.save();
+//   await user.save();
 
-  console.log('[RESET PASSWORD] Password reset for:', user.email);
+//   console.log('[RESET PASSWORD] Password reset for:', user.email);
 
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    message: 'Password reset successfully.',
-  });
-});
+//   res.status(200).json({
+//     status: httpStatusText.SUCCESS,
+//     message: 'Password reset successfully.',
+//   });
+// });
 
 // POST /logout
 const logout = asyncWrapper(async (req, res, next) => {
@@ -187,11 +294,40 @@ const logout = asyncWrapper(async (req, res, next) => {
     console.warn('[LOGOUT] No token provided');
     return next(new AppError('Token is required', 400, httpStatusText.FAIL));
   }
+  try {
+ 
+    const decodedToken = jwt.verify(token, process.env.JWT_SECRET);
+    const userId = decodedToken._id;  
 
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    message: 'Logged out successfully.',
-  });
+    const updatedUser = await userModel.findByIdAndUpdate(
+      userId,
+      { status: 'inactive' },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      console.warn('[LOGOUT] User not found:', userId);
+      return next(new AppError('User not found', 404, httpStatusText.FAIL));
+    }
+
+    console.log(`[LOGOUT] User ${userId} status set to inactive`);
+
+
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      message: 'Logged out successfully. User status set to inactive.  Remember to invalidate JWT!',
+      data: null,
+    });
+  } catch (error) {
+   
+    console.error('[LOGOUT] Error decoding/verifying token:', error);
+    return next(new AppError('Invalid or expired token.', 401, httpStatusText.FAIL));
+  }
+
+  // res.status(200).json({
+  //   status: httpStatusText.SUCCESS,
+  //   message: 'Logged out successfully.',
+  // });
 });
 
 module.exports = {
@@ -201,4 +337,5 @@ module.exports = {
   forgotPassword,
   resetPassword,
   logout,
+  inviteAdmin,
 };

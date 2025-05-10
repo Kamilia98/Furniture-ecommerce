@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const UserSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
+    // username: { type: String},
     email: { type: String, unique: true },
     phone: { type: String },
     bio: { type: String },
@@ -16,7 +17,7 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["USER", "ADMIN"],
+      enum: ["USER", "ADMIN", "MANAGER", "SUPPORT", "EDITOR"],
       default: "USER",
     },
     thumbnail: {
@@ -31,8 +32,21 @@ const UserSchema = new mongoose.Schema(
     },
     resetToken: String,
     resetTokenExpiry: Date,
+  
+      status: {
+      type: String,
+      enum: ["pending", "active", "inactive"],
+      default: "inactive",
+    },
+    invitationToken: {
+      type: String,
+      select: false,
+    },
+    invitationTokenExpiry: {
+      type: Date,
+      select: false,
+    },
   },
-
   { timestamps: true }
 );
 
