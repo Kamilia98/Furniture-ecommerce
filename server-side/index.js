@@ -35,6 +35,7 @@ const paymentRouter = require('./src/routes/payment.routes');
 const storeConfigRouter = require('./src/routes/storeConfig.routes');
 const shippingMethods = require('./src/routes/shippingMethods.routes');
 const currency = require('./src/routes/currency.routes');
+const language = require('./src/routes/language.routes');
 const dashBoardRouter = require('./src/routes/dashboard.routes');
 
 / * * * * End Router imports * * * * /;
@@ -68,6 +69,7 @@ app.use('/settings', storeConfigRouter);
 app.use('/dashboard', dashBoardRouter);
 app.use('/shippings', shippingMethods);
 app.use('/currency', currency);
+app.use('/language', language);
 
 / * * * Global MiddleWare * * * /;
 app.all('*', (req, res, next) => {
