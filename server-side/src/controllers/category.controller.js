@@ -33,8 +33,19 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
     {
       $lookup: {
         from: 'products',
-        localField: '_id',
-        foreignField: 'categories',
+        let: { categoryId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $in: ['$$categoryId', '$categories'] },
+                  { $eq: ['$deleted', false] },
+                ],
+              },
+            },
+          },
+        ],
         as: 'products',
       },
     },
@@ -48,7 +59,7 @@ const getAllCategories = asyncWrapper(async (req, res, next) => {
     },
     {
       $addFields: {
-        productCount: { $size: '$products' },
+        productCount: { $size: '$products' }, // Count only non-deleted products
         totalSales: {
           $round: [
             {
@@ -131,8 +142,19 @@ const getCategoryDetails = asyncWrapper(async (req, res, next) => {
     {
       $lookup: {
         from: 'products',
-        localField: '_id',
-        foreignField: 'categories',
+        let: { categoryId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $in: ['$$categoryId', '$categories'] }, // Match products in the category
+                  { $eq: ['$deleted', false] }, // Ensure the product is not deleted
+                ],
+              },
+            },
+          },
+        ],
         as: 'products',
       },
     },
@@ -253,7 +275,9 @@ const getCategoriesAnalytics = asyncWrapper(async (req, res, next) => {
       $group: {
         _id: null,
         totalCategories: { $sum: 1 },
-        categories: { $push: { name: '$name', totalItemsSold: '$totalItemsSold' } },
+        categories: {
+          $push: { name: '$name', totalItemsSold: '$totalItemsSold' },
+        },
       },
     },
     {
@@ -318,7 +342,11 @@ const addCategory = asyncWrapper(async (req, res, next) => {
   const exists = await Category.findOne({ name });
   if (exists) {
     return next(
-      new AppError('Category with this name already exists.', 400, httpStatusText.FAIL)
+      new AppError(
+        'Category with this name already exists.',
+        400,
+        httpStatusText.FAIL
+      )
     );
   }
 
@@ -349,7 +377,8 @@ const deleteCategory = asyncWrapper(async (req, res, next) => {
 
   res.status(200).json({
     status: httpStatusText.SUCCESS,
-    message: 'Category deleted successfully and references removed from products.',
+    message:
+      'Category deleted successfully and references removed from products.',
   });
 });
 
