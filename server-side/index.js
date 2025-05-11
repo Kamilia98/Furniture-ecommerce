@@ -37,6 +37,9 @@ const shippingMethods = require('./src/routes/shippingMethods.routes');
 const currency = require('./src/routes/currency.routes');
 const language = require('./src/routes/language.routes');
 const dashBoardRouter = require('./src/routes/dashboard.routes');
+const allowedTo = require("./src/middlewares/allowTo.middleware");
+const verifyToken = require("./src/middlewares/auth.middleware");
+
 
 / * * * * End Router imports * * * * /;
 

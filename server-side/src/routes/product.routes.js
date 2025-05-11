@@ -1,5 +1,8 @@
-const express = require('express');
-const productController = require('../controllers/product.controller');
+const verifyToken = require('../middlewares/auth.middleware');
+const permessionTo = require('../middlewares/permissionTo.middleware');
+const express = require("express");
+const productController = require("../controllers/product.controller");
+
 const router = express.Router();
 // const rateLimit = require('express-rate-limit');
 
@@ -10,6 +13,7 @@ const router = express.Router();
 
 // router.use(limiter);
 
+
 router.route('/').get(productController.getAllProducts);
 router.route('/analytics').get(productController.getProductMetrics);
 router.route('/color').get(productController.getAllProductsWithColors);
@@ -17,9 +21,9 @@ router.route('/search').get(productController.getSearchProducts);
 router.route('/min-price').get(productController.getMinEffectivePrice);
 router.route('/max-price').get(productController.getMaxEffectivePrice);
 router.route('/comparison/:id').get(productController.getProductForComparison);
-router.route('/create').post(productController.createProduct);
-router.route('/update/:id').patch(productController.updateProduct);
+router.route('/create').post(verifyToken,permessionTo("manage_products"),productController.createProduct);
+router.route('/update/:id').patchverifyToken,permessionTo("manage_products"),productController.updateProduct);
 router.route('/:id').get(productController.getProductById);
-router.route('/:id').delete(productController.deleteProduct);
+router.route('/:id').delete(verifyToken,permessionTo("manage_products"),productController.deleteProduct);
 
 module.exports = router;
