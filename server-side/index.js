@@ -34,7 +34,8 @@ const orderRouter = require('./src/routes/order.routes');
 const paymentRouter = require('./src/routes/payment.routes');
 const storeConfigRouter = require('./src/routes/storeConfig.routes'); 
 const dashBoardRouter = require('./src/routes/dashboard.routes');
-
+const allowedTo = require("./src/middlewares/allowTo.middleware");
+const verifyToken = require("./src/middlewares/auth.middleware");
 
 / * * * * End Router imports * * * * /;
 

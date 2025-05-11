@@ -5,7 +5,7 @@ const verifyToken = require('../middlewares/auth.middleware');
 const allowedTo = require('../middlewares/allowTo.middleware'); 
 
 router.route('/')
-  .get(verifyToken, allowedTo('ADMIN',"MANAGER"), storeConfigController.getStoreConfig)
-  .put(verifyToken, allowedTo('ADMIN',"MANAGER"), storeConfigController.updateStoreConfig);
+  .get(verifyToken, allowedTo('ADMIN',"OWNER"), storeConfigController.getStoreConfig)
+  .put(verifyToken, allowedTo('ADMIN',"OWNER"), storeConfigController.updateStoreConfig);
 
 module.exports = router;

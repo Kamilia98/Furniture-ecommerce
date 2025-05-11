@@ -18,7 +18,7 @@ const generateToken = (payload, expiresIn = null) => {
 
 const inviteAdmin = asyncWrapper(async (req, res, next) => {
     console.log('[INVITE ADMIN] Request Body:', req.body);
-    const { email, role} = req.body;
+    const { email, permissions} = req.body;
 
     const existingUser = await userModel.findOne({ email });
     if (existingUser) {
@@ -29,16 +29,16 @@ const inviteAdmin = asyncWrapper(async (req, res, next) => {
     const invitationToken = generateToken({ email }, '24h');
     const invitationTokenExpiry = Date.now() + 24 * 60 * 60 * 1000;
 
-     // Generate username from email (part before the '@')
+    
     const generatedUsername = email.substring(0, email.indexOf('@'));
-    // Basic sanitization to remove non-alphanumeric characters
+    
     const sanitizedUsername = generatedUsername.replace(/[^a-zA-Z0-9]/g, '');
-    // Ensure username is at least 3 characters long (you might want more sophisticated logic)
+   
     const username = sanitizedUsername.length >= 3 ? sanitizedUsername : `user_${Date.now().toString().slice(-5)}`;
 
     const newUser = new userModel({
         email: email,
-        role: role,
+        permissions,
         status: 'pending',
         invitationToken: invitationToken,
         invitationTokenExpiry: invitationTokenExpiry,
@@ -54,10 +54,10 @@ const inviteAdmin = asyncWrapper(async (req, res, next) => {
     const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Invitation to Join Our Team as an Admin',
+        subject: 'Invitation to Join Our Team',
         html: `
             <p>Hello!</p>
-            <p>You have been invited to join our team as an administrator with the role of <strong>${role}</strong>.</p>
+            <p>You have been invited to join our team as an administrator with the role of <strong>ADMIN</strong>.</p>
             <p>Please click the following link to set your password and activate your account:</p>
             <p><a href="${invitationLink}">${invitationLink}</a></p>
             <p>This invitation link will expire in 24 hours.</p>
@@ -103,7 +103,7 @@ const resetPassword = asyncWrapper(async (req, res, next) => {
     user.resetTokenExpiry = null;
     user.invitationToken = null;
     user.invitationTokenExpiry = null;
-    user.status = 'active'; // Activate the user upon setting password
+    user.status = 'active'; 
 
     await user.save();
     console.log('[RESET PASSWORD] Password reset for:', user.email);
@@ -147,51 +147,59 @@ const signup = asyncWrapper(async (req, res, next) => {
 });
 
 // POST /login
+
 const login = asyncWrapper(async (req, res, next) => {
-  const { email, password } = req.body;
-  console.log('[LOGIN] Attempted login with email:', email);
+  try {
+    const { email, password } = req.body;
+    console.log('[LOGIN] Attempted login with email:', email);
 
-  const user = await userModel.findOne({ email });
-  if (!user) {
-    console.warn('[LOGIN] Email not found:', email);
-    return next(
-      new AppError('Invalid email or password.', 400, httpStatusText.FAIL)
-    );
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      console.warn('[LOGIN] Email not found:', email);
+      return next(
+        new AppError('Invalid email or password.', 400, httpStatusText.FAIL)
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.warn('[LOGIN] Invalid password for:', email);
+      return next(
+        new AppError('Invalid email or password.', 400, httpStatusText.FAIL)
+      );
+    }
+
+    if (user.role !== 'OWNER' && user.role !== 'ADMIN') {
+      console.warn(`[LOGIN] User ${email} has role ${user.role}, which is not allowed to log in.`);
+      return next(
+        new AppError('Only OWNER and ADMIN can log in.', 403, httpStatusText.FAIL, { 
+          message: 'Only owner and admins can login!', 
+        })
+      );
+    }
+
+    await userModel.findByIdAndUpdate(user._id, { status: 'active' }, { new: true });
+
+    const token = generateToken({
+      _id: user._id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+      thumbnail: user.thumbnail,
+      permissions: user.permissions, 
+    });
+
+    console.log('[LOGIN] User logged in:', email);
+
+    res.status(200).json({
+      status: httpStatusText.SUCCESS,
+      message: 'Logged in successfully',
+      data: { token },
+    });
+  } catch (error) {
+    console.error('[LOGIN] Internal Server Error:', error);
+    return next(new AppError('Internal Server Error.', 500, httpStatusText.ERROR));
   }
-
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    console.warn('[LOGIN] Invalid password for:', email);
-    return next(
-      new AppError('Invalid email or password.', 400, httpStatusText.FAIL)
-    );
-  }
-
-  if (user.role !== 'OWNER' && user.role !== 'ADMIN') {
-    console.warn(`[LOGIN] User ${email} has role ${user.role}, which is not allowed to log in.`);
-    return next(
-      new AppError('Only OWNER and ADMIN can log in.', 403, httpStatusText.FAIL, { 
-        message: 'Only owner and admins can login!', 
-      })
-    );
-  }
-  await userModel.findByIdAndUpdate(user._id, { status: 'active' },{ new: true });
-
-  const token = generateToken({
-    _id: user._id,
-    email: user.email,
-    username: user.username,
-    role: user.role,
-    thumbnail: user.thumbnail,
-  });
-
-  console.log('[LOGIN] User logged in:', email);
-
-  res.status(200).json({
-    status: httpStatusText.SUCCESS,
-    message: 'Logged in successfully',
-    data: { token },
-  });
 });
 
 // GET /auth/google/callback
