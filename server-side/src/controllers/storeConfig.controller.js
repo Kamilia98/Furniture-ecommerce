@@ -8,8 +8,8 @@ const StoreSettings = require('../models/settings/storeSettings.model');
 
 const getStoreConfig = asyncWrapper(async (req, res, next) => {
   const storeSettings = (await StoreSettings.findOne()) || {};
-  const currencies = await Currency.find({ deletedAt: null, isActive: true });
-  const languages = await Language.find({ deletedAt: null, isActive: true });
+  const currencies = await Currency.find({ isDeleted: false, isActive: true });
+  const languages = await Language.find({ isDeleted: false, isActive: true });
   const shippingMethods = await ShippingMethod.find({
     isDeleted: false,
     isActive: true,
