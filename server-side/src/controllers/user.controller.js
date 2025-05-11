@@ -373,29 +373,35 @@ const updateProfile = asyncWrapper(async (req, res, next) => {
 
 // Admin user management routes
 const getAllAdminUsers = asyncWrapper(async (req, res, next) => {
-
-    const users = await User.find({ permissions: { $exists: true, $ne: [] }, isDeleted: { $ne: true } })
-        .select("_id username email permissions status createdAt");
-    res.status(200).json({ status: httpStatusText.SUCCESS, data: users });
+  const users = await User.find({
+    isDeleted: { $ne: true },
+    role: { $eq: 'ADMIN' },
+  }).select('_id username email permissions status createdAt');
+  res.status(200).json({ status: httpStatusText.SUCCESS, data: users });
 });
 
 const editAdminUser = asyncWrapper(async (req, res, next) => {
-    const { userId } = req.params;
-    const { permissions } = req.body; 
+  const { userId } = req.params;
+  const { permissions } = req.body;
 
   if (!mongoose.Types.ObjectId.isValid(userId)) {
     return next(new AppError('Invalid User ID', 400, httpStatusText.FAIL));
   }
-    if (!Array.isArray(permissions) || permissions.length === 0) {
-        return next(new AppError("Permissions must be a non-empty array.", 400, httpStatusText.FAIL));
-    }
+  if (!Array.isArray(permissions) || permissions.length === 0) {
+    return next(
+      new AppError(
+        'Permissions must be a non-empty array.',
+        400,
+        httpStatusText.FAIL
+      )
+    );
+  }
 
-    const updatedUser = await User.findByIdAndUpdate(
-        userId,
-        { permissions }, 
-        { new: true, runValidators: true }
-    ).select("_id username email permissions status");
-
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { permissions },
+    { new: true, runValidators: true }
+  ).select('_id username email permissions status');
 
   if (!updatedUser) {
     return next(
