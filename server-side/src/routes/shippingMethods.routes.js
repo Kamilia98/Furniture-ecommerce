@@ -8,22 +8,22 @@ router
   .route('/')
   .get(
     verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
+    allowedTo('ADMIN', 'OWNER'),
     shippingMethod.getShippingMethods
   )
   .put(
     verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
+    allowedTo('ADMIN', 'OWNER'),
     shippingMethod.updatedShippingMethod
   )
   .delete(
     verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
+    allowedTo('ADMIN', 'OWNER'),
     shippingMethod.deletShippingMethod
   )
   .post(
     verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
+    allowedTo('ADMIN', 'OWNER'),
     shippingMethod.addShippingMethod
   );
 

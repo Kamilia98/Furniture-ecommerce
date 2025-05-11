@@ -6,14 +6,14 @@ const allowedTo = require('../middlewares/allowTo.middleware');
 
 router
   .route('/')
-  .get(verifyToken, allowedTo('ADMIN', 'MANAGER'), currency.addCurrency)
-  .put(verifyToken, allowedTo('ADMIN', 'MANAGER'), currency.updatedCurrency)
+  .get(verifyToken, allowedTo('ADMIN', 'OWNER'), currency.addCurrency)
+  .put(verifyToken, allowedTo('ADMIN', 'OWNER'), currency.updatedCurrency)
   .patch(
     verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
+    allowedTo('ADMIN', 'OWNER'),
     currency.updatedCurrencyDefault
   )
-  .delete(verifyToken, allowedTo('ADMIN', 'MANAGER'), currency.deletCurrency)
-  .post(verifyToken, allowedTo('ADMIN', 'MANAGER'), currency.addCurrency);
+  .delete(verifyToken, allowedTo('ADMIN', 'OWNER'), currency.deletCurrency)
+  .post(verifyToken, allowedTo('ADMIN', 'OWNER'), currency.addCurrency);
 
 module.exports = router;
