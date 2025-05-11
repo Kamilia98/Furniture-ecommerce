@@ -91,6 +91,7 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     sortBy = 'date',
     minPrice,
     maxPrice,
+    searchQuery = '',
   } = req.query;
 
   limit = Number(limit);
@@ -110,7 +111,7 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     sale: 'sale',
   };
   const sortField = sortFields[sortBy] || sortFields.date;
-  const sortOrder = order === 'asc' ? 1 : -1;
+  const sortOrder = order === 'desc' ? 1 : -1;
 
   // Category filter
   const categoryFilter = {
@@ -131,8 +132,17 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     }),
   };
 
+  const searchFilter = searchQuery
+    ? {
+        $or: [
+          { name: { $regex: searchQuery, $options: 'i' } },
+          { 'categories.name': { $regex: searchQuery, $options: 'i' } },
+        ],
+      }
+    : {};
+
   // Fetch raw products first
-  const products = await Product.find(categoryFilter)
+  const products = await Product.find({ ...categoryFilter, ...searchFilter })
     .select('name price sale colors categories date')
     .populate('categories', 'name')
     .lean();
@@ -439,7 +449,7 @@ const getSearchProducts = asyncWrapper(async (req, res, next) => {
 });
 
 const getProductMetrics = asyncWrapper(async (req, res) => {
-  const totalProducts = await Product.countDocuments();
+  const totalProducts = await Product.countDocuments({ deleted: false });
 
   const lowStockAggregation = await Product.aggregate([
     { $unwind: '$colors' },
@@ -564,7 +574,6 @@ const productSchema = Joi.object({
 });
 
 const createProduct = asyncWrapper(async (req, res, next) => {
-  
   // const { error, value } = productSchema.validate(req.query, {
   //   abortEarly: false,
   // });
@@ -579,7 +588,17 @@ const createProduct = asyncWrapper(async (req, res, next) => {
   //   );
   // }
 
-  const { name, subtitle, price, sale = 0, colors, categories ,description ,brand ,additionalInformation } = req.body;
+  const {
+    name,
+    subtitle,
+    price,
+    sale = 0,
+    colors,
+    categories,
+    description,
+    brand,
+    additionalInformation,
+  } = req.body;
   const categoryArray = Array.isArray(categories)
     ? categories
     : categories.split(',').map((id) => id.trim());
@@ -592,7 +611,7 @@ const createProduct = asyncWrapper(async (req, res, next) => {
     colors,
     description,
     brand,
-    additionalInformation ,
+    additionalInformation,
     categories: categoryArray.map((id) => new mongoose.Types.ObjectId(id)),
     deleted: false,
     date: new Date(),
@@ -605,42 +624,42 @@ const createProduct = asyncWrapper(async (req, res, next) => {
   });
 });
 
-
 const updateProduct = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { error, value } = productSchema.validate(req.query, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    return next(
-      new AppError(
-        error.details.map((e) => e.message).join(', '),
-        400,
-        httpStatusText.FAIL
-      )
-    );
-  }
-
-  const { name, subtitle, price, sale = 0, colors, categories } = value;
 
   if (!mongoose.isValidObjectId(id)) {
     return next(new AppError('Invalid product ID.', 400, httpStatusText.FAIL));
   }
 
+  const {
+    name,
+    subtitle,
+    description,
+    price,
+    sale = 0,
+    brand,
+    colors,
+    categories,
+    additionalInformation,
+  } = req.body;
+
   const categoryArray = Array.isArray(categories)
     ? categories
-    : categories.split(',').map((id) => id.trim());
+    : categories?.split(',').map((id) => id.trim());
 
   const updated = await Product.findByIdAndUpdate(
     id,
     {
       name,
       subtitle,
+      description,
       price,
       sale,
+      brand,
       colors,
-      categories: categoryArray.map((id) => new mongoose.Types.ObjectId(id)),
+      additionalInformation,
+      categories: categoryArray?.map((id) => new mongoose.Types.ObjectId(id)),
+      deleted: false,
     },
     { new: true }
   );
