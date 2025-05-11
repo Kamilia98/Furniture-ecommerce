@@ -52,6 +52,8 @@ const getAllUsers = asyncWrapper(async (req, res, next) => {
   const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
 
   const newCustomers = await User.countDocuments({
+    role: 'USER',
+    isDeleted: false,
     createdAt: {
       $gte: startOfMonth,
       $lt: endOfMonth,
@@ -420,12 +422,10 @@ const deleteAdminUser = asyncWrapper(async (req, res, next) => {
     );
   }
 
-  res
-    .status(200)
-    .json({
-      status: httpStatusText.SUCCESS,
-      message: 'Admin user deleted successfully.',
-    });
+  res.status(200).json({
+    status: httpStatusText.SUCCESS,
+    message: 'Admin user deleted successfully.',
+  });
 });
 
 module.exports = {

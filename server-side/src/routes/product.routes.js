@@ -10,16 +10,16 @@ const router = express.Router();
 
 // router.use(limiter);
 
-router.route("/").get(productController.getAllProducts);
+router.route('/').get(productController.getAllProducts);
 router.route('/analytics').get(productController.getProductMetrics);
-router.route("/color").get(productController.getAllProductsWithColors);
-router.route("/search").get(productController.getSearchProducts);
-router.route("/min-price").get(productController.getMinEffectivePrice);
-router.route("/max-price").get(productController.getMaxEffectivePrice);
-router.route("/comparison/:id").get(productController.getProductForComparison);
-router.route("/create").get(productController.createProduct);
-router.route("/update/:id").get(productController.updateProduct);
-router.route("/:id").get(productController.getProductById);
-router.route("/:id").delete(productController.deleteProduct);
+router.route('/color').get(productController.getAllProductsWithColors);
+router.route('/search').get(productController.getSearchProducts);
+router.route('/min-price').get(productController.getMinEffectivePrice);
+router.route('/max-price').get(productController.getMaxEffectivePrice);
+router.route('/comparison/:id').get(productController.getProductForComparison);
+router.route('/create').post(productController.createProduct);
+router.route('/update/:id').patch(productController.updateProduct);
+router.route('/:id').get(productController.getProductById);
+router.route('/:id').delete(productController.deleteProduct);
 
 module.exports = router;
