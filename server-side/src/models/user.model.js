@@ -17,8 +17,8 @@ const UserSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["USER", "ADMIN", "MANAGER", "SUPPORT", "EDITOR"],
-      default: "USER",
+      enum: ["USER", "ADMIN","OWNER"],
+      default: "ADMIN",
     },
     thumbnail: {
       type: String,
@@ -45,6 +45,10 @@ const UserSchema = new mongoose.Schema(
     invitationTokenExpiry: {
       type: Date,
       select: false,
+    },
+    permissions: {
+      type: [String], 
+      default: [], 
     },
   },
   { timestamps: true }

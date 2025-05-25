@@ -111,7 +111,7 @@ const getAllProductsWithColors = asyncWrapper(async (req, res, next) => {
     sale: 'sale',
   };
   const sortField = sortFields[sortBy] || sortFields.date;
-  const sortOrder = order === 'asc' ? 1 : -1;
+  const sortOrder = order === 'desc' ? 1 : -1;
 
   // Category filter
   const categoryFilter = {
@@ -626,39 +626,40 @@ const createProduct = asyncWrapper(async (req, res, next) => {
 
 const updateProduct = asyncWrapper(async (req, res, next) => {
   const { id } = req.params;
-  const { error, value } = productSchema.validate(req.query, {
-    abortEarly: false,
-  });
-
-  if (error) {
-    return next(
-      new AppError(
-        error.details.map((e) => e.message).join(', '),
-        400,
-        httpStatusText.FAIL
-      )
-    );
-  }
-
-  const { name, subtitle, price, sale = 0, colors, categories } = value;
 
   if (!mongoose.isValidObjectId(id)) {
     return next(new AppError('Invalid product ID.', 400, httpStatusText.FAIL));
   }
 
+  const {
+    name,
+    subtitle,
+    description,
+    price,
+    sale = 0,
+    brand,
+    colors,
+    categories,
+    additionalInformation,
+  } = req.body;
+
   const categoryArray = Array.isArray(categories)
     ? categories
-    : categories.split(',').map((id) => id.trim());
+    : categories?.split(',').map((id) => id.trim());
 
   const updated = await Product.findByIdAndUpdate(
     id,
     {
       name,
       subtitle,
+      description,
       price,
       sale,
+      brand,
       colors,
-      categories: categoryArray.map((id) => new mongoose.Types.ObjectId(id)),
+      additionalInformation,
+      categories: categoryArray?.map((id) => new mongoose.Types.ObjectId(id)),
+      deleted: false,
     },
     { new: true }
   );

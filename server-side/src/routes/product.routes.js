@@ -1,5 +1,8 @@
+const verifyToken = require('../middlewares/auth.middleware');
+const permessionTo = require('../middlewares/permissionTo.middleware');
 const express = require('express');
 const productController = require('../controllers/product.controller');
+
 const router = express.Router();
 // const rateLimit = require('express-rate-limit');
 
