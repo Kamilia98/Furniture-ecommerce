@@ -1,16 +1,19 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 const verifyToken = require('../middlewares/auth.middleware');
 const orderController = require('../controllers/order.controller');
-// const rateLimit = require('express-rate-limit');
 
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // max 100 requests per windowMs
-// });
+// Admin - Get all orders
+router.get('/all', verifyToken, orderController.getAllOrders);
+router.get('/analytics', verifyToken, orderController.getOrderAnalytics);
 
-// router.use(limiter);
+// User - Get their own orders
+router.get('/', verifyToken, orderController.getUserOrders);
 
-router.route('/').get(verifyToken, orderController.getOrders); // GET All Orders
+// User/Admin - Get details of a single order
+router.get('/:id', verifyToken, orderController.getOrderDetails);
+
+// Admin - Update order status
+router.patch('/:id/status', verifyToken, orderController.updateOrderStatus);
 
 module.exports = router;

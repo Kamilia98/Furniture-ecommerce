@@ -1,16 +1,18 @@
 const express = require('express');
-const { getAllCategories } = require('../controllers/category.controller');
+const categoriesController = require('../controllers/category.controller');
+const verifyToken = require('../middlewares/auth.middleware');
+const permessionTo = require('../middlewares/permissionTo.middleware');
+
 const router = express.Router();
-// const rateLimit = require('express-rate-limit');
-
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000, // 15 minutes
-//   max: 100, // max 100 requests per windowMs
-// });
-
-// router.use(limiter);
 
 // 1- Get all categories
-router.route('/').get(getAllCategories);
+router
+  .route('/analytics')
+  .get(verifyToken, categoriesController.getCategoriesAnalytics);
+router.route('/:id').get(verifyToken, categoriesController.getCategoryDetails);
+router.route('/:id').patch(verifyToken, categoriesController.editCategory);
+router.route('/:id').delete(verifyToken, categoriesController.deleteCategory);
+router.route('/').post(verifyToken, categoriesController.addCategory);
+router.route('/').get(categoriesController.getAllCategories);
 
 module.exports = router;

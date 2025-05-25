@@ -5,7 +5,7 @@ require('dotenv').config();
 
 // Scripts to run
 require('./src/middlewares/passport.middleware');
-require('./src/services/orderStatus.service');
+// require('./src/services/orderStatus.service');
 
 const passport = require('passport');
 
@@ -32,6 +32,14 @@ const galleryRouter = require('./src/routes/gallery.routes');
 const contactRouter = require('./src/routes/contact.routes');
 const orderRouter = require('./src/routes/order.routes');
 const paymentRouter = require('./src/routes/payment.routes');
+const storeConfigRouter = require('./src/routes/storeConfig.routes');
+const shippingMethods = require('./src/routes/shippingMethods.routes');
+const currency = require('./src/routes/currency.routes');
+const language = require('./src/routes/language.routes');
+const dashBoardRouter = require('./src/routes/dashboard.routes');
+const allowedTo = require("./src/middlewares/allowTo.middleware");
+const verifyToken = require("./src/middlewares/auth.middleware");
+
 
 / * * * * End Router imports * * * * /;
 
@@ -60,6 +68,11 @@ app.use('/api', galleryRouter);
 app.use('/contact', contactRouter);
 app.use('/orders', orderRouter);
 app.use('/payments', paymentRouter);
+app.use('/settings', storeConfigRouter);
+app.use('/dashboard', dashBoardRouter);
+app.use('/shippings', shippingMethods);
+app.use('/currency', currency);
+app.use('/language', language);
 
 / * * * Global MiddleWare * * * /;
 app.all('*', (req, res, next) => {

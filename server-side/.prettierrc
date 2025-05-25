@@ -1,0 +1,5 @@
+{
+  "tailwindStylesheet": "./src/style.css",
+  "singleQuote": true,
+  "tabWidth": 2
+}

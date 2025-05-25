@@ -32,8 +32,8 @@ export class BlogComponent implements OnInit, OnDestroy {
   relatedBlogs: Blog[] = [];
   selectedCategory: string = '';
   private routeSub: Subscription = new Subscription();
-  loading: boolean = true; // For main blog data
-  loadingRelatedBlogs: boolean = true; // For related blogs data
+  loading: boolean = true;
+  loadingRelatedBlogs: boolean = true; 
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -51,7 +51,6 @@ export class BlogComponent implements OnInit, OnDestroy {
       }
     });
 
-    // Initial fetch for the current blog (if needed)
     const blogID = this.route.snapshot.paramMap.get('id');
     if (blogID) {
       this.fetchBlogData(blogID);
@@ -65,24 +64,20 @@ export class BlogComponent implements OnInit, OnDestroy {
   }
 
   fetchBlogData(blogID: string): void {
-    this.loading = true; // Set loading to true for main blog
-    this.loadingRelatedBlogs = true; // Set loading to true for related blogs
+    this.loading = true;
+    this.loadingRelatedBlogs = true;
 
     this.blogService.getPostById(blogID).subscribe((data) => {
       this.blog = data;
       this.blogService.getRelatedPosts(blogID).subscribe((relatedData) => {
         this.relatedBlogs = relatedData;
-        this.loading = false; // Set loading to false for main blog
-        this.loadingRelatedBlogs = false; // Set loading to false for related blogs
+        this.loading = false;
+        this.loadingRelatedBlogs = false;
       });
     });
   }
 
   get blogID(): string | null {
     return this.route.snapshot.paramMap.get('id');
-  }
-
-  get relatedBlogsList(): Blog[] {
-    return this.relatedBlogs;
   }
 }
