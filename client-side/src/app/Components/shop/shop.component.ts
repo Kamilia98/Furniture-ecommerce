@@ -8,7 +8,7 @@ import {
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { BehaviorSubject, Observable, combineLatest, forkJoin } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
 
 // Angular Material & CDK
 import { DragDropModule } from '@angular/cdk/drag-drop';
@@ -94,7 +94,7 @@ export class ShopComponent implements OnInit {
   disableAnimation = false;
 
   // Product Data
-  products$!: Observable<Product[]>;
+  products$: Observable<Product[]> = of([]);
   selectedCategories: string[] = [];
   private selectedSortValueSubject = new BehaviorSubject<SortOptions>(
     SortOptions.Default,

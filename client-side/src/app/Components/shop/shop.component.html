@@ -1,5 +1,3 @@
-@let products = (products$ | async) ?? [];
-
 <app-header-banner
   bannerTitle="Shop"
   [bannerPath]="[{ title: 'shop', path: '/shop' }]"
@@ -115,7 +113,7 @@
     class="col-span-12 flex w-full flex-col justify-center gap-5"
     [ngClass]="{ 'lg:col-span-9': showFilters }"
   >
-    @if (!loading && products.length > 0) {
+    @if (!loading && ((products$ | async) ?? []).length > 0) {
       <div
         class="grid h-full w-full grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3"
         [ngClass]="{

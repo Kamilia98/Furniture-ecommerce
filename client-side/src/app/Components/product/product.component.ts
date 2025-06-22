@@ -10,7 +10,13 @@ import { ThumbnailComponent } from '../products-components/thumbnail/thumbnail.c
 import { ProductDescriptionComponent } from '../products-components/product-description/product-description.component';
 import { ButtonComponent } from '../shared/button/button.component';
 import { ProductDetails } from '../../Models/product-details.model';
-import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  OnInit,
+  ElementRef,
+  inject,
+} from '@angular/core';
 import { ProductItemComponent } from '../shared/product-item/product-item.component';
 import { FavoriteService } from '../../Services/favorite.service';
 import { CartService } from '../../Services/cart.service';
@@ -78,14 +84,15 @@ export class ProductComponent implements OnInit {
   btnWidth: string = '150px';
 
   constructor(
-    private cdr: ChangeDetectorRef,
     private productService: ProductService,
     private favoriteService: FavoriteService,
     private cartService: CartService,
     private comparisonService: ComparisonService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {}
+  ) {
+    const elementRef = inject(ElementRef);
+  }
 
   ngOnInit(): void {
     this.btnWidth = window.innerWidth < 640 ? '340px' : '155px';
