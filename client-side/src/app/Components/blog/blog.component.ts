@@ -7,7 +7,17 @@ import {
 } from '@angular/router';
 import { Blog } from '../../Models/blog.model';
 import { BlogService } from '../../Services/blog.service';
-import { Subscription } from 'rxjs';
+import {
+  Subscription,
+  Observable,
+  Subject,
+  of,
+  combineLatest,
+  filter,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs';
 import { BlogSkeletonComponent } from './blog-skeleton/blog-skeleton.component';
 import { CommonModule } from '@angular/common';
 import { HeaderBannerComponent } from '../shared/header-banner/header-banner.component';
@@ -17,6 +27,7 @@ import { RelatedBlogSkeletonComponent } from './related-blog-skeleton/related-bl
 @Component({
   selector: 'app-blog',
   templateUrl: './blog.component.html',
+  standalone: true,
   imports: [
     BlogSkeletonComponent,
     RouterModule,
@@ -27,13 +38,13 @@ import { RelatedBlogSkeletonComponent } from './related-blog-skeleton/related-bl
   ],
 })
 export class BlogComponent implements OnInit, OnDestroy {
-  blogs: Blog[] = [];
-  blog: Blog | undefined;
-  relatedBlogs: Blog[] = [];
+  blog$: Observable<Blog> = of({} as Blog);
+  relatedBlogs$: Observable<Blog[]> = of([]);
   selectedCategory: string = '';
-  private routeSub: Subscription = new Subscription();
   loading: boolean = true;
-  loadingRelatedBlogs: boolean = true; 
+  loadingRelatedBlogs: boolean = true;
+
+  private destroy$ = new Subject<void>();
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -42,42 +53,30 @@ export class BlogComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    this.routeSub = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
-        const blogID = this.route.snapshot.paramMap.get('id');
-        if (blogID) {
-          this.fetchBlogData(blogID);
-        }
-      }
-    });
-
-    const blogID = this.route.snapshot.paramMap.get('id');
-    if (blogID) {
-      this.fetchBlogData(blogID);
-    }
+    this.route.paramMap
+      .pipe(
+        takeUntil(this.destroy$),
+        filter((params) => !!params.get('id')),
+        tap(() => {
+          this.loading = true;
+          this.loadingRelatedBlogs = true;
+        }),
+        switchMap((params) => {
+          const blogID = params.get('id')!;
+          this.blog$ = this.blogService
+            .getPostById(blogID)
+            .pipe(tap(() => (this.loading = false)));
+          this.relatedBlogs$ = this.blogService
+            .getRelatedPosts(blogID)
+            .pipe(tap(() => (this.loadingRelatedBlogs = false)));
+          return of(null);
+        }),
+      )
+      .subscribe();
   }
 
   ngOnDestroy(): void {
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
-  }
-
-  fetchBlogData(blogID: string): void {
-    this.loading = true;
-    this.loadingRelatedBlogs = true;
-
-    this.blogService.getPostById(blogID).subscribe((data) => {
-      this.blog = data;
-      this.blogService.getRelatedPosts(blogID).subscribe((relatedData) => {
-        this.relatedBlogs = relatedData;
-        this.loading = false;
-        this.loadingRelatedBlogs = false;
-      });
-    });
-  }
-
-  get blogID(): string | null {
-    return this.route.snapshot.paramMap.get('id');
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

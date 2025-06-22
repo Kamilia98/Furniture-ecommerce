@@ -1,82 +1,99 @@
-<app-header-banner
-  bannerTitle="{{ blog?.title }}"
-  [bannerPath]="[
-    { title: 'blogs', path: '/blogs' },
-    { title: blog?.title || '', path: '/blog/' + blog?._id },
-  ]"
-></app-header-banner>
+<ng-container *ngIf="blog$ | async as blog">
+  <app-header-banner
+    [bannerTitle]="blog.title"
+    [bannerPath]="[
+      { title: 'blogs', path: '/blogs' },
+      { title: blog.title || 'Blog', path: '/blog/' + blog._id },
+    ]"
+  ></app-header-banner>
 
-<section class="mx-auto flex max-w-[1240px] flex-col gap-8 p-10 lg:flex-row">
-  <!-- Show skeleton loader while the blog is loading -->
-  <div *ngIf="loading" class="w-full lg:w-3xl">
-    <app-blog-skeleton></app-blog-skeleton>
-  </div>
-
-  <!-- Actual Blog Content -->
-  <div *ngIf="!loading && blog" class="w-full lg:w-3xl">
-    <img [src]="blog.img" [alt]="blog.title" class="w-full rounded-lg" />
-
-    <div class="mt-2 flex items-center gap-4 text-xs text-gray md:text-sm">
-      <p class="flex items-center">
-        <img src="/icons/profile.svg" alt="Profile" class="mr-1 h-4 w-4" />
-        {{ blog.user }}
-      </p>
-      <p class="flex items-center">
-        <img src="/icons/calender.svg" alt="Date" class="h-4 w-4" />
-        {{ blog.date | date }}
-      </p>
-      <p class="flex items-center">
-        <img src="/icons/tag.svg" alt="Category" class="mr-1 h-4 w-4" />
-        {{ blog.categories.join(", ") }}
-      </p>
+  <section class="mx-auto flex max-w-[1240px] flex-col gap-8 p-10 lg:flex-row">
+    <!-- Blog Skeleton -->
+    <div *ngIf="loading" class="w-full lg:w-3xl">
+      <app-blog-skeleton></app-blog-skeleton>
     </div>
 
-    <h2 class="mt-4 text-lg font-semibold md:text-xl">{{ blog.title }}</h2>
-    <p class="mt-2 w-full text-sm text-gray-dark md:text-base">
-      {{ blog.content }}
-    </p>
-  </div>
+    <!-- Blog Content -->
+    <div *ngIf="!loading" class="w-full lg:w-3xl">
+      <img
+        [src]="blog.img || '/images/placeholder.jpg'"
+        [alt]="blog.title || 'Blog Image'"
+        class="w-full rounded-lg object-cover"
+      />
 
-  <!-- Related Blogs Section -->
-  <div class="flex flex-col gap-2">
-    <h1 class="p-2 text-[25px] font-semibold text-black">Related Blogs</h1>
-
-    <!-- Show skeleton loader for related blogs -->
-    <div *ngIf="loadingRelatedBlogs" class="flex flex-col gap-2">
-      <div *ngFor="let _ of [1, 2, 3]">
-        <app-related-blog-skeleton></app-related-blog-skeleton>
+      <div
+        class="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray md:text-sm"
+      >
+        <p class="flex items-center">
+          <img src="/icons/profile.svg" alt="Profile" class="mr-1 h-4 w-4" />
+          {{ blog.user || "Unknown Author" }}
+        </p>
+        <p class="flex items-center">
+          <img src="/icons/calender.svg" alt="Date" class="h-4 w-4" />
+          {{ blog.date | date: "mediumDate" }}
+        </p>
+        <p class="flex items-center">
+          <img src="/icons/tag.svg" alt="Category" class="mr-1 h-4 w-4" />
+          {{ blog.categories.join(", ") || "Uncategorized" }}
+        </p>
       </div>
-    </div>
 
-    <!-- Actual Related Blogs -->
+      <h2 class="mt-4 text-lg font-semibold md:text-xl">
+        {{ blog.title }}
+      </h2>
+
+      <p
+        class="mt-2 w-full text-sm whitespace-pre-line text-gray-dark md:text-base"
+      >
+        {{ blog.content }}
+      </p>
+    </div>
+  </section>
+</ng-container>
+
+<!-- Related Blogs -->
+<section class="mx-auto max-w-[1240px] px-10 pb-10">
+  <h1 class="mb-4 text-[25px] font-semibold text-black">Related Blogs</h1>
+
+  <!-- Skeleton Loaders -->
+  <div *ngIf="loadingRelatedBlogs" class="flex flex-col gap-2">
+    <ng-container *ngFor="let _ of [1, 2, 3]">
+      <app-related-blog-skeleton></app-related-blog-skeleton>
+    </ng-container>
+  </div>
+
+  <!-- Related Blogs -->
+  <ng-container *ngIf="relatedBlogs$ | async as relatedBlogs">
     <div
-      *ngIf="relatedBlogs.length > 0 && !loadingRelatedBlogs"
+      *ngIf="relatedBlogs.length > 0; else noRelated"
       class="flex flex-col gap-2"
     >
       <div
         *ngFor="let relatedBlog of relatedBlogs"
-        class="ease flex cursor-pointer items-center gap-4 rounded-lg border border-gray-medium px-4 py-2 text-black duration-200 hover:shadow"
+        class="flex cursor-pointer items-center gap-4 rounded-lg border border-gray-medium px-4 py-2 text-black duration-200 ease-in hover:shadow"
         [routerLink]="['/blog', relatedBlog._id]"
       >
         <img
-          [src]="relatedBlog.img"
-          [alt]="relatedBlog.title"
-          class="h-28 w-30 rounded object-contain"
+          [src]="relatedBlog.img || '/images/placeholder.jpg'"
+          [alt]="relatedBlog.title || 'Related Blog'"
+          class="h-28 w-30 rounded object-cover"
         />
         <div class="flex flex-col items-start gap-1">
-          <h5 class="text-start text-base font-medium">
+          <h5 class="truncate text-start text-base font-medium">
             {{ relatedBlog.title }}
           </h5>
-          <p class="text-sm text-gray">{{ relatedBlog.date | date }}</p>
+          <p class="text-sm text-gray">
+            {{ relatedBlog.date | date: "shortDate" }}
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- No related blogs found message -->
-    <div *ngIf="relatedBlogs.length === 0 && !loadingRelatedBlogs">
+    <!-- Empty State -->
+    <ng-template #noRelated>
       <p class="p-2 text-gray-500">No related blogs found.</p>
-    </div>
-  </div>
+    </ng-template>
+  </ng-container>
 </section>
 
 <app-feature-banner></app-feature-banner>

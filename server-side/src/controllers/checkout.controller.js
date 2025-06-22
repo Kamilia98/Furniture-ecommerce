@@ -19,7 +19,6 @@ const placeOrder = asyncWrapper(async (req, res, next) => {
     if (!cart || cart.products.length === 0) {
       return next(new AppError('Cart is empty', 400, httpStatusText.FAIL));
     }
-    console.log(cart.products);
     const orderItems = cart.products.map((item) => {
       return {
         id: item.id._id,

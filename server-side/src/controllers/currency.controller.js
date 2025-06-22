@@ -5,7 +5,6 @@ const currencyModel = require('../models/settings/currency.model');
 
 const deletCurrency = asyncWrapper(async (req, res, next) => {
   const { id } = req.query;
-  console.log(id);
   const data = await currencyModel.findOneAndUpdate(
     { _id: id },
     { isDeleted: true },
@@ -42,12 +41,10 @@ const updatedCurrency = asyncWrapper(async (req, res, next) => {
     { $set: updates },
     { new: true }
   );
-  console.log(currency);
   const currencies = await currencyModel.find({
     isDeleted: false,
     isActive: true,
   });
-  console.log(currencies);
   res.status(200).json({
     status: httpStatusText.SUCCESS,
     data: {
@@ -55,9 +52,9 @@ const updatedCurrency = asyncWrapper(async (req, res, next) => {
     },
   });
 });
+
 const updatedCurrencyDefault = asyncWrapper(async (req, res, next) => {
   const { id } = req.query;
-  console.log(id);
   if (!id) {
     return next(
       new AppError('Currency ID is required', 400, httpStatusText.FAIL)

@@ -21,7 +21,7 @@ export class FavoriteService {
     private http: HttpClient,
     private authService: AuthService,
     private toast: NgToastService,
-    private modalService: ModalService
+    private modalService: ModalService,
   ) {
     this.authService.isLoggedIn$.subscribe((status) => {
       if (status) this.loadFavorites();
@@ -50,7 +50,7 @@ export class FavoriteService {
       .pipe(
         map((response) => this.mapFavorites(response.data.favourites)),
         tap((favorites) => this.favoritesSubject.next(favorites)),
-        catchError((error) => this.handleFavoriteError(error, []))
+        catchError((error) => this.handleFavoriteError(error, [])),
       );
   }
 
@@ -64,16 +64,13 @@ export class FavoriteService {
         if (!isLoggedIn) {
           this.modalService.show(LoginPromptModalComponent);
           console.error('User is not logged in. Prompting for login.');
-          console.log(id);
           return of(this.favoritesSubject.getValue());
         }
 
         return this.http
-          .post<{ data: { favourites: any[] } }>(
-            `${this.apiUrl}/toggle-favourites`,
-            { id },
-            { headers: this.getAuthHeaders() }
-          )
+          .post<{
+            data: { favourites: any[] };
+          }>(`${this.apiUrl}/toggle-favourites`, { id }, { headers: this.getAuthHeaders() })
           .pipe(
             map((response) => this.mapFavorites(response.data.favourites)),
             tap((favorites) => {
@@ -87,10 +84,10 @@ export class FavoriteService {
               this.showFavoriteToast(id, name);
             }),
             catchError((error) =>
-              this.handleFavoriteError(error, this.favoritesSubject.getValue())
-            )
+              this.handleFavoriteError(error, this.favoritesSubject.getValue()),
+            ),
           );
-      })
+      }),
     );
   }
 
@@ -122,7 +119,7 @@ export class FavoriteService {
   /*** ERROR HANDLING ***/
   private handleFavoriteError(
     error: any,
-    fallbackValue: ProductFavorite[]
+    fallbackValue: ProductFavorite[],
   ): Observable<ProductFavorite[]> {
     console.error('Error updating favorites:', error);
     this.toast.danger('Failed to update favorites. Please try again.');

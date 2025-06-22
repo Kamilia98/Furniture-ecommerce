@@ -82,7 +82,10 @@ export class BlogService {
         `${this.apiUrl}/related?id=${id}`
       )
       .pipe(
-        map((response) => response.data.relatedPosts),
+        map((response) =>{
+          console.log('[BlogService] Related posts response:', response);
+          return response.data.relatedPosts;
+        }),
         tap((relatedPosts) =>
           console.log('[BlogService] Related posts:', relatedPosts)
         ),
