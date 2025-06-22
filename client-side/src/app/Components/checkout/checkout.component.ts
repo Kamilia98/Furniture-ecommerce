@@ -1,5 +1,5 @@
 import { Component, ViewChild, OnDestroy } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from '../../Services/auth.service';
 import { ModalService } from '../../Services/modal.service';
@@ -57,7 +57,6 @@ export function noNumbersValidator(): ValidatorFn {
     FeatureBannerComponent,
     PaymentComponent,
     ButtonComponent,
-    CurrencyPipe,
     StepperComponent,
     InputComponent,
   ],

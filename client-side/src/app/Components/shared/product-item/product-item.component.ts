@@ -6,7 +6,7 @@ import {
   OnInit,
 } from '@angular/core';
 
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { ButtonComponent } from '../button/button.component';
 import { RouterModule } from '@angular/router';
 import {
@@ -26,7 +26,6 @@ import { ComparisonService } from '../../../Services/comparison.service';
   selector: 'app-product-item',
   standalone: true,
   imports: [CommonModule, ButtonComponent, RouterModule],
-  providers: [CurrencyPipe],
   templateUrl: './product-item.component.html',
   animations: [
     trigger('slideInOut', [

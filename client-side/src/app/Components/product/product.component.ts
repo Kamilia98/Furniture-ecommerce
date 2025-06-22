@@ -11,11 +11,8 @@ import { ProductDescriptionComponent } from '../products-components/product-desc
 import { ButtonComponent } from '../shared/button/button.component';
 import { ProductDetails } from '../../Models/product-details.model';
 import {
-  ChangeDetectorRef,
   Component,
   OnInit,
-  ElementRef,
-  inject,
 } from '@angular/core';
 import { ProductItemComponent } from '../shared/product-item/product-item.component';
 import { FavoriteService } from '../../Services/favorite.service';

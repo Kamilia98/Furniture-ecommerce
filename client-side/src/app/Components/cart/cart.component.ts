@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CartTotalsComponent } from './cart-components/cart-totals/cart-totals.component';
 import { FeatureBannerComponent } from '../shared/feature-banner/feature-banner.component';
@@ -22,7 +22,6 @@ import { ProductCart } from '../../Models/productCart.model';
     CartTotalsComponent,
     HeaderBannerComponent,
     FeatureBannerComponent,
-    CurrencyPipe,
     StepperComponent,
   ],
 })
