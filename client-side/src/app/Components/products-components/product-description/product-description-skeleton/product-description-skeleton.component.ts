@@ -100,12 +100,9 @@ import { CommonModule } from '@angular/common';
         --animation-color: #e5e7eb;
       }
     `,
-    `
-      :host {
-        display: block;
-        min-height: 80vh;
-      }
-    `,
   ],
+  host: {
+    class: 'block min-h-80vh',
+  },
 })
 export class ProductDescriptionSkeletonComponent {}

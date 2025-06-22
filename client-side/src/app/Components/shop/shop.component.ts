@@ -1,6 +1,4 @@
-import { ThumbnailComponent } from './../products-components/thumbnail/thumbnail.component';
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
   HostListener,

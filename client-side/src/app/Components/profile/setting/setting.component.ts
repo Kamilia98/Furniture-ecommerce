@@ -19,7 +19,9 @@ import { InputComponent } from '../../shared/input/input.component';
   selector: 'app-setting',
   imports: [ButtonComponent, CommonModule, ReactiveFormsModule, InputComponent],
   templateUrl: './setting.component.html',
-  styleUrl: './setting.component.css',
+  host: {
+    class: 'flex-1',
+  },
 })
 export class SettingComponent {
   user = {

@@ -14,8 +14,10 @@ interface Order {
 @Component({
   selector: 'app-orders',
   templateUrl: './orders.component.html',
-  styleUrls: ['./orders.component.css'],
   imports: [CommonModule, FormsModule],
+  host: {
+    class: 'w-full',
+  },
 })
 export class OrdersComponent implements OnInit {
   orders$!: Observable<Order[]>;
