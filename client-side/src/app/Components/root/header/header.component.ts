@@ -1,15 +1,12 @@
 import {
   Component,
-  HostListener,
   ElementRef,
-  OnInit,
   Output,
   EventEmitter,
 } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SearchComponent } from '../../shop/search/search.component';
 import { UserActionsComponent } from './user-actions/user-actions.component';
 import { NavigationComponent } from './navigation/navigation.component';
 
@@ -25,6 +22,9 @@ import { NavigationComponent } from './navigation/navigation.component';
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
+  host: {
+    '(document:click)': 'onClickOutside($event)',
+  },
 })
 export class HeaderComponent {
   @Output() openFavorites = new EventEmitter<void>();
@@ -40,7 +40,6 @@ export class HeaderComponent {
     this.isActive = !this.isActive;
   }
 
-  @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     if (
       this.isActive &&

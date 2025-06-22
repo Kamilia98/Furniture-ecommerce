@@ -4,7 +4,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   OnInit,
-  HostListener,
 } from '@angular/core';
 
 import { CommonModule, CurrencyPipe } from '@angular/common';
@@ -40,6 +39,10 @@ import { ComparisonService } from '../../../Services/comparison.service';
     ]),
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '(mouseenter)': 'onMouseEnter()',
+    '(mouseleave)': 'onMouseLeave()',
+  },
 })
 export class ProductItemComponent implements OnInit {
   @Input({ required: true }) product!: Product;
@@ -83,7 +86,6 @@ export class ProductItemComponent implements OnInit {
     }
   }
 
-  @HostListener('mouseenter')
   onMouseEnter(): void {
     if (!this.showActions) {
       this.isHovered = true;
@@ -91,7 +93,6 @@ export class ProductItemComponent implements OnInit {
     }
   }
 
-  @HostListener('mouseleave')
   onMouseLeave(): void {
     if (!this.showActions) {
       this.isHovered = false;
