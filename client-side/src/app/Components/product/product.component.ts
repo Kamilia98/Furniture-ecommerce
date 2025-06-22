@@ -90,9 +90,7 @@ export class ProductComponent implements OnInit {
     private comparisonService: ComparisonService,
     private route: ActivatedRoute,
     private router: Router,
-  ) {
-    const elementRef = inject(ElementRef);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.btnWidth = window.innerWidth < 640 ? '340px' : '155px';
