@@ -1,18 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import {
-  ActivatedRoute,
-  Router,
-  NavigationEnd,
-  RouterModule,
-} from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Blog } from '../../Models/blog.model';
 import { BlogService } from '../../Services/blog.service';
 import {
-  Subscription,
   Observable,
   Subject,
   of,
-  combineLatest,
   filter,
   switchMap,
   takeUntil,

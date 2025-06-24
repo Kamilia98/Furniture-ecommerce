@@ -12,16 +12,16 @@ import { environment } from '../environments/environment';
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
   private isLoggedInSubject: BehaviorSubject<boolean>;
-  isLoggedIn$: Observable<boolean>;
   private cartService!: CartService;
+  isLoggedIn$: Observable<boolean>;
 
   constructor(
     private http: HttpClient,
     private router: Router,
-    private injector: Injector
+    private injector: Injector,
   ) {
     this.isLoggedInSubject = new BehaviorSubject<boolean>(
-      this.isAuthenticated()
+      this.isAuthenticated(),
     );
     this.isLoggedIn$ = this.isLoggedInSubject.asObservable();
   }
@@ -57,7 +57,7 @@ export class AuthService {
           this.handleCartMerge();
           this.navigateToDashboard();
         }
-      })
+      }),
     );
   }
 
@@ -125,12 +125,5 @@ export class AuthService {
     if (this.router.url !== targetRoute) {
       this.router.navigate([targetRoute]);
     }
-  }
-
-  private handleError(error: any): Observable<never> {
-    console.error('API Error:', error);
-    return throwError(
-      () => new Error(error?.error?.message || 'An error occurred')
-    );
   }
 }

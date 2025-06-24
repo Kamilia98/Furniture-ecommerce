@@ -1,14 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {
-  RouterOutlet,
-  RouterModule,
-  Router,
-  NavigationEnd,
-} from '@angular/router';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterModule, CommonModule],
+  imports: [RouterOutlet, CommonModule],
   templateUrl: './app.component.html',
 })
 export class AppComponent implements OnInit {
