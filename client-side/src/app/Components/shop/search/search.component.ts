@@ -1,9 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  Output,
-} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -62,11 +57,13 @@ export class SearchComponent {
       )
       .subscribe((results) => {
         this.filteredItems = results;
+        console.log(this.filteredItems);
         this.selectedIndex = -1;
       });
   }
 
   onSearchInput(): void {
+    console.log(this.searchValue);
     this.searchSubject.next(this.searchValue);
   }
 
