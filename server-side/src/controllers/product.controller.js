@@ -421,19 +421,20 @@ const getProductForComparison = asyncWrapper(async (req, res, next) => {
 
 const getSearchProducts = asyncWrapper(async (req, res, next) => {
   const { query } = req.query;
-  if (!query) {
+
+  if (!query || typeof query !== 'string') {
     return next(
       new AppError('Please enter a search keyword!', 400, httpStatusText.FAIL)
     );
   }
 
-  const categoryIds = await getCategoryIds(query);
+  const categoryIds = (await getCategoryIds(query)) || [];
 
   const products = await Product.find({
+    deleted: false,
     $or: [
       { name: { $regex: query, $options: 'i' } },
       { categories: { $in: categoryIds } },
-      { deleted: { $eq: false } },
     ],
   })
     .populate('categories', 'name')
