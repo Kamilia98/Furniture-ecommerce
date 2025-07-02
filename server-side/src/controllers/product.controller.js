@@ -433,6 +433,7 @@ const getSearchProducts = asyncWrapper(async (req, res, next) => {
     $or: [
       { name: { $regex: query, $options: 'i' } },
       { categories: { $in: categoryIds } },
+      { deleted: { $eq: false } },
     ],
   })
     .populate('categories', 'name')
