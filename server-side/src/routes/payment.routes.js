@@ -11,6 +11,23 @@ const verifyToken = require('../middlewares/auth.middleware');
 
 // router.use(limiter);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Payment
+ *   description: Payment processing
+ */
+
+/**
+ * @swagger
+ * /payments/payment:
+ *   post:
+ *     summary: Create a payment intent
+ *     tags: [Payment]
+ *     responses:
+ *       201:
+ *         description: Payment intent created
+ */
 router
   .route('/payment')
   .post(verifyToken, paymentController.createPaymentIntent);
