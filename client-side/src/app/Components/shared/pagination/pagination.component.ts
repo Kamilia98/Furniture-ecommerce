@@ -2,7 +2,10 @@ import {
   Component,
   ElementRef,
   EventEmitter,
+  input,
   Input,
+  model,
+  output,
   Output,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -14,51 +17,51 @@ import { ButtonComponent } from '../button/button.component';
   template: `
     <div class="flex justify-center gap-2 py-5">
       <!-- Previous Button -->
-      @if (currentPage > 1) {
+      @if (currentPage() > 1) {
         <app-button
           type="secondary-fill"
           btnWidth="60px"
-          (click)="goToPage(currentPage - 1)"
+          (click)="goToPage(currentPage() - 1)"
         >
           <
         </app-button>
       }
 
       <!-- Page Numbers -->
-      @if (pagesCount != 1 && currentPage != 1) {
+      @if (pagesCount() != 1 && currentPage() != 1) {
         <app-button
           type="secondary-fill"
           btnWidth="60px"
-          (click)="goToPage(currentPage - 1)"
+          (click)="goToPage(currentPage() - 1)"
         >
-          {{ currentPage - 1 }}
+          {{ currentPage() - 1 }}
         </app-button>
       }
-      @if (pagesCount != 1) {
+      @if (pagesCount() != 1) {
         <app-button
           type="primary-fill"
           btnWidth="60px"
-          (click)="goToPage(currentPage)"
+          (click)="goToPage(currentPage())"
         >
-          {{ currentPage }}
+          {{ currentPage() }}
         </app-button>
       }
-      @if (pagesCount != 1 && pagesCount != currentPage) {
+      @if (pagesCount() != 1 && pagesCount() != currentPage()) {
         <app-button
           type="secondary-fill"
           btnWidth="60px"
-          (click)="goToPage(currentPage + 1)"
+          (click)="goToPage(currentPage() + 1)"
         >
-          {{ currentPage + 1 }}
+          {{ currentPage() + 1 }}
         </app-button>
       }
 
       <!-- Next Button -->
-      @if (currentPage < pagesCount) {
+      @if (currentPage() < pagesCount()) {
         <app-button
           type="secondary-fill"
           btnWidth="60px"
-          (click)="goToPage(currentPage + 1)"
+          (click)="goToPage(currentPage() + 1)"
         >
           >
         </app-button>
@@ -67,13 +70,13 @@ import { ButtonComponent } from '../button/button.component';
   `,
 })
 export class PaginationComponent {
-  @Input() currentPage: number = 1;
-  @Input() pagesCount: number = 1;
   @Input() container!: ElementRef;
-  @Output() currentPageChange = new EventEmitter<number>();
+  pagesCount = input(1);
+  currentPage = model(1,);
+  currentPageChange = output<number>();
 
   goToPage(page: number): void {
-    if (page >= 1 && page <= this.pagesCount) {
+    if (page >= 1 && page <= this.pagesCount()) {
       this.currentPageChange.emit(page);
       if (this.container?.nativeElement) {
         const offset = 100;

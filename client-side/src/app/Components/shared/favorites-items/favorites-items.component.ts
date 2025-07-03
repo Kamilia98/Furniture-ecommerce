@@ -9,7 +9,9 @@ import { ProductFavorite } from '../../../Models/productFavorite.model';
   selector: 'app-favorites-items',
   imports: [ButtonComponent, CommonModule, RouterModule],
   templateUrl: './favorites-items.component.html',
-  styleUrl: './favorites-items.component.css',
+  host: {
+    class: 'flex-1',
+  },
 })
 export class FavoritesItemsComponent implements OnInit {
   favorites$!: Observable<ProductFavorite[]>;

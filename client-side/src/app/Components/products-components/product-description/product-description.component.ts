@@ -12,7 +12,6 @@ import { ProductDescriptionSkeletonComponent } from './product-description-skele
     AccordionComponent,
     ProductDescriptionSkeletonComponent,
   ],
-  providers: [],
   templateUrl: './product-description.component.html',
 })
 export class ProductDescriptionComponent {

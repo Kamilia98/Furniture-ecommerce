@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ButtonComponent } from '../../../shared/button/button.component';
 import { CartService } from '../../../../Services/cart.service';
@@ -10,7 +10,7 @@ import { ProductCart } from '../../../../Models/productCart.model';
   selector: 'app-cart-totals',
   templateUrl: './cart-totals.component.html',
   standalone: true,
-  imports: [CommonModule, ButtonComponent, CurrencyPipe],
+  imports: [CommonModule, ButtonComponent],
 })
 export class CartTotalsComponent {
   subtotal$!: Observable<number>;

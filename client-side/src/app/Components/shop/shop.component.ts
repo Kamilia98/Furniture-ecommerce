@@ -1,9 +1,6 @@
-import { ThumbnailComponent } from './../products-components/thumbnail/thumbnail.component';
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
-  HostListener,
   OnInit,
   Renderer2,
   ViewChild,
@@ -11,21 +8,24 @@ import {
 import { CommonModule, TitleCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { trigger, transition, animate, style } from '@angular/animations';
-import { BehaviorSubject, Observable, combineLatest, forkJoin } from 'rxjs';
+import { BehaviorSubject, Observable, combineLatest, forkJoin, of } from 'rxjs';
 
 // Angular Material & CDK
 import { DragDropModule } from '@angular/cdk/drag-drop';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 // Components
 import { FeatureBannerComponent } from '../shared/feature-banner/feature-banner.component';
 import { HeaderBannerComponent } from '../shared/header-banner/header-banner.component';
 import { DropdownComponent } from '../shared/dropdown/dropdown.component';
 import { FilterOptionComponent } from './filter-option/filter-option.component';
-
+import { ProductItemSkeletonComponent } from '../shared/product-item/product-item-skeleton/product-item-skeleton.component';
 import { ProductItemComponent } from '../shared/product-item/product-item.component';
 import { PaginationComponent } from '../shared/pagination/pagination.component';
+import { SearchComponent } from './search/search.component';
 
 // Services
 import { ProductService } from '../../Services/product.service';
@@ -34,10 +34,6 @@ import { CategoriesService } from '../../Services/categories.service';
 // Models
 import { Product } from '../../Models/product.model';
 import { Category } from '../../Models/category.model';
-import { ProductItemSkeletonComponent } from '../shared/product-item/product-item-skeleton/product-item-skeleton.component';
-import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { SearchComponent } from './search/search.component';
-import { ActivatedRoute, Router } from '@angular/router';
 
 // Enums
 enum SortOptions {
@@ -83,6 +79,10 @@ enum SortOptions {
       ]),
     ]),
   ],
+  host: {
+    '(window:resize)': 'onResize()',
+    '(document:click)': 'onClickOutside($event)',
+  },
 })
 export class ShopComponent implements OnInit {
   @ViewChild('productsContainer') productsContainer!: ElementRef;
@@ -94,7 +94,7 @@ export class ShopComponent implements OnInit {
   disableAnimation = false;
 
   // Product Data
-  products$!: Observable<Product[]>;
+  products$: Observable<Product[]> = of([]);
   selectedCategories: string[] = [];
   private selectedSortValueSubject = new BehaviorSubject<SortOptions>(
     SortOptions.Default,
@@ -285,12 +285,10 @@ export class ShopComponent implements OnInit {
     return window.innerWidth >= 1024;
   }
 
-  @HostListener('window:resize')
   onResize() {
     this.showFilters = this.isLgScreen();
   }
 
-  @HostListener('document:click', ['$event'])
   onClickOutside(event: Event): void {
     if (this.showSortMenu && this.sortMenuRef) {
       const clickedInsideMenu = this.sortMenuRef.nativeElement.contains(

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Product } from '../Models/product.model';
 import { ProductDetails } from '../Models/product-details.model';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, Observable, of, Subject } from 'rxjs';
 import { catchError, tap, take, map, switchMap } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 
@@ -34,7 +34,7 @@ export class ProductService {
     categories: string[] = [],
     sortBy: SortOptions = SortOptions.Default,
     minPrice?: number,
-    maxPrice?: number
+    maxPrice?: number,
   ): Observable<any> {
     console.log('[ProductService] Fetching products with params:', {
       page,
@@ -47,7 +47,7 @@ export class ProductService {
 
     if (minPrice === undefined || maxPrice === undefined) {
       console.log(
-        '[ProductService] Fetching min/max price before proceeding...'
+        '[ProductService] Fetching min/max price before proceeding...',
       );
       return combineLatest([this.getMinPrice(), this.getMaxPrice()]).pipe(
         switchMap(([fetchedMin, fetchedMax]) => {
@@ -61,9 +61,9 @@ export class ProductService {
             categories,
             sortBy,
             minPrice ?? fetchedMin,
-            maxPrice ?? fetchedMax
+            maxPrice ?? fetchedMax,
           );
-        })
+        }),
       );
     }
 
@@ -120,7 +120,7 @@ export class ProductService {
 
           console.log(
             '[ProductService] Transformed product data:',
-            apiProducts
+            apiProducts,
           );
           this.productsSubject.next(apiProducts);
         }),
@@ -128,7 +128,7 @@ export class ProductService {
         catchError((error) => {
           console.error('[ProductService] Error fetching products:', error);
           return of([]);
-        })
+        }),
       );
   }
 
@@ -140,7 +140,7 @@ export class ProductService {
       .get<{ status: string; data: { product: any } }>(`${this.apiUrl}/${id}`)
       .pipe(
         tap((response) =>
-          console.log('[ProductService] Raw product response:', response)
+          console.log('[ProductService] Raw product response:', response),
         ),
         map(({ data }) => ({
           id: data.product._id,
@@ -166,13 +166,12 @@ export class ProductService {
           additionalInformation: data.product.additionalInformation || {},
         })),
         tap((product) =>
-          console.log('[ProductService] Transformed product:', product)
+          console.log('[ProductService] Transformed product:', product),
         ),
-
         catchError((error) => {
           console.error('[ProductService] Error fetching product:', error);
           return of(null as unknown as ProductDetails);
-        })
+        }),
       );
   }
 
@@ -182,13 +181,13 @@ export class ProductService {
       .get<{ data: { minEffectivePrice: number } }>(`${this.apiUrl}/min-price`)
       .pipe(
         tap((response) =>
-          console.log('[ProductService] Min price response:', response)
+          console.log('[ProductService] Min price response:', response),
         ),
         map((response) => response.data?.minEffectivePrice ?? 0),
         catchError((error) => {
           console.error('[ProductService] Error fetching min price:', error);
           return of(0);
-        })
+        }),
       );
   }
 
@@ -198,13 +197,13 @@ export class ProductService {
       .get<{ data: { maxEffectivePrice: number } }>(`${this.apiUrl}/max-price`)
       .pipe(
         tap((response) =>
-          console.log('[ProductService] Max price response:', response)
+          console.log('[ProductService] Max price response:', response),
         ),
         map((response) => response.data?.maxEffectivePrice ?? 0),
         catchError((error) => {
           console.error('[ProductService] Error fetching max price:', error);
           return of(0);
-        })
+        }),
       );
   }
 
@@ -217,15 +216,15 @@ export class ProductService {
       .get<{ data: any[] }>(`${this.apiUrl}/search?query=${query}`)
       .pipe(
         tap((response) =>
-          console.log('[ProductService] Search response:', response)
+          console.log('[ProductService] Search response:', response),
         ),
         map((response) =>
-          response.data.map((p) => ({ id: p._id, value: p.name }))
+          response.data.map((p) => ({ id: p._id, value: p.name })),
         ),
         catchError((error) => {
           console.error('[ProductService] Search error:', error);
           return of([]);
-        })
+        }),
       );
   }
 }

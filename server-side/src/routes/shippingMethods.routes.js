@@ -6,25 +6,9 @@ const allowedTo = require('../middlewares/allowTo.middleware');
 
 router
   .route('/')
-  .get(
-    verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
-    shippingMethod.getShippingMethods
-  )
-  .put(
-    verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
-    shippingMethod.updatedShippingMethod
-  )
-  .delete(
-    verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
-    shippingMethod.deletShippingMethod
-  )
-  .post(
-    verifyToken,
-    allowedTo('ADMIN', 'MANAGER'),
-    shippingMethod.addShippingMethod
-  );
+  .get(verifyToken, shippingMethod.getShippingMethods)
+  .put(verifyToken, shippingMethod.updatedShippingMethod)
+  .delete(verifyToken, shippingMethod.deletShippingMethod)
+  .post(verifyToken, shippingMethod.addShippingMethod);
 
 module.exports = router;

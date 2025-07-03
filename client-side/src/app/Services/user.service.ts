@@ -13,7 +13,10 @@ export class UserService {
 
   private userSubject = new BehaviorSubject<User | null>(null);
   user$ = this.userSubject.asObservable();
-  constructor(private http: HttpClient, private authService: AuthService) {}
+  constructor(
+    private http: HttpClient,
+    private authService: AuthService,
+  ) {}
 
   getUser(): Observable<User> {
     return this.http
@@ -23,7 +26,6 @@ export class UserService {
       .pipe(
         map(({ data: { user } }) => {
           const { email, username, _id, thumbnail } = user;
-          console.log(thumbnail);
           return {
             email,
             name: username,
@@ -31,22 +33,21 @@ export class UserService {
             thumbnail,
           } as User;
         }),
-        tap((u) => this.userSubject.next(u))
+        tap((u) => this.userSubject.next(u)),
       );
   }
   changePassword(password: string) {
     return this.http
-      .put<{ status: string; message: string }>(
-        `${this.apiUrl}/change-password`,
-        { password },
-        { headers: this.getAuthHeaders() }
-      )
+      .put<{
+        status: string;
+        message: string;
+      }>(`${this.apiUrl}/change-password`, { password }, { headers: this.getAuthHeaders() })
       .pipe(
         tap((response) => {
           if (response.status === 'success') {
             console.log('Password changed successfully');
           }
-        })
+        }),
       );
   }
 
@@ -72,7 +73,7 @@ export class UserService {
               this.userSubject.next(updatedUser);
             });
           });
-        })
+        }),
       );
   }
 
@@ -80,7 +81,7 @@ export class UserService {
     return this.http.put<{ message: string }>(
       `${this.apiUrl}/change-img`,
       { thumbnail: imageUrl },
-      { headers: this.getAuthHeaders() }
+      { headers: this.getAuthHeaders() },
     );
   }
 }

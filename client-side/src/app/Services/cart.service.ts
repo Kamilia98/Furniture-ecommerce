@@ -291,7 +291,6 @@ export class CartService {
 
   addProductWithColor(product: Product, quantity: number): void {
     if (this.isLoggedInSubject.getValue()) {
-      console.log('juiyvuyyyyyyyyyyyyyyyyyyy', product.color);
       this.http
         .post(
           this.apiUrl,
@@ -311,7 +310,6 @@ export class CartService {
               const cartProducts = response.data.products.map(
                 (p: ProductCart) => this.mapToProductCart(p),
               );
-              console.log(cartProducts);
               this.cartSubject.next(cartProducts);
               this.cartSubtotalSubject.next(response.data.totalPrice);
 

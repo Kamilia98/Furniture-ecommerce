@@ -1,10 +1,4 @@
-import {
-  Component,
-  ElementRef,
-  EventEmitter,
-  HostListener,
-  Output,
-} from '@angular/core';
+import { Component, ElementRef, EventEmitter, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
@@ -38,6 +32,9 @@ import { ProductService } from '../../../Services/product.service';
       }
     </div>
   `,
+  host: {
+    '(document:click)': 'onClickOutside($event)',
+  },
 })
 export class SearchComponent {
   @Output() onSelect = new EventEmitter<string>();
@@ -60,28 +57,26 @@ export class SearchComponent {
       )
       .subscribe((results) => {
         this.filteredItems = results;
+        console.log(this.filteredItems);
         this.selectedIndex = -1;
       });
   }
 
-  /** Triggers the search with debounce */
   onSearchInput(): void {
+    console.log(this.searchValue);
     this.searchSubject.next(this.searchValue);
   }
 
-  /** Updates input value and emits selected event */
   updateValue(item: any): void {
     this.searchValue = item.value;
     this.toggleDropdown(false);
     this.onSelect.emit(item.id);
   }
 
-  /** Toggles dropdown visibility */
   toggleDropdown(open: boolean): void {
     this.isMenuOpen = open;
   }
 
-  /** Handles arrow key navigation */
   handleKeyDown(event: KeyboardEvent): void {
     if (!this.isMenuOpen || this.filteredItems.length === 0) return;
 
@@ -106,7 +101,6 @@ export class SearchComponent {
     }
   }
 
-  @HostListener('document:click', ['$event'])
   onClickOutside(event: Event) {
     if (
       this.isMenuOpen &&

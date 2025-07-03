@@ -89,24 +89,17 @@ const getRecentPosts = asyncWrapper(async (req, res, next) => {
 // Get related posts by category or tags
 const getRelatedPosts = asyncWrapper(async (req, res, next) => {
   const { id } = req.query;
-  console.log(id);
-
   // Find the current post
   const post = await Post.findById(id);
-
   if (!post)
     return next(new AppError('Post not found.', 404, httpStatusText.FAIL));
-
   // Ensure categories is an array
   const categories = Array.isArray(post.categories) ? post.categories : [];
 
   // Find related posts by category or matching categories
   const relatedPosts = await Post.find({
     _id: { $ne: id },
-    $or: [
-      { category: post.category },
-      { categories: { $in: categories } }, // Use categories here instead of tags
-    ],
+    $or: [{ category: post.category }, { categories: { $in: categories } }],
   })
     .limit(3)
     .select('_id title description img date')

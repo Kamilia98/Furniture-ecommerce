@@ -3,11 +3,11 @@ import { Router } from '@angular/router';
 import { HeaderBannerComponent } from '../shared/header-banner/header-banner.component';
 import { ComparisonService } from '../../Services/comparison.service';
 import { ProductDetails } from '../../Models/product-details.model';
-import { CommonModule, CurrencyPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-comparison',
-  imports: [HeaderBannerComponent, CommonModule, CurrencyPipe],
+  imports: [HeaderBannerComponent, CommonModule],
   templateUrl: './comparison.component.html',
 })
 export class ComparisonComponent implements OnInit {

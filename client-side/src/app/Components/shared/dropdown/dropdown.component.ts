@@ -1,4 +1,11 @@
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -21,21 +28,24 @@ import { CommonModule } from '@angular/common';
     </div>
   `,
 })
-export class DropdownComponent implements OnInit {
+export class DropdownComponent implements OnChanges {
   @Input() items: { id: string; value: string }[] | string[] = [];
   @Output() selectedValueChange = new EventEmitter<{
     id: string;
     value: string;
   }>();
-  normalizedItems!: { id: string; value: string }[];
 
-  ngOnInit(): void {
-    this.normalizedItems = this.items.map((item, index) =>
-      typeof item === 'string' ? { id: String(index), value: item } : item,
-    );
+  normalizedItems: { id: string; value: string }[] = [];
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['items']) {
+      this.normalizedItems = this.items.map((item, index) =>
+        typeof item === 'string' ? { id: String(index), value: item } : item,
+      );
+    }
   }
 
   selectItem(item: { id: string; value: string }) {
-    this.selectedValueChange.emit(item as { id: string; value: string });
+    this.selectedValueChange.emit(item);
   }
 }

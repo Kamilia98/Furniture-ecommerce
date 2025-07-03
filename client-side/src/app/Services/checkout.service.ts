@@ -19,7 +19,7 @@ export class CheckoutService {
   constructor(
     private http: HttpClient,
     private authService: AuthService,
-    private toast: NgToastService
+    private toast: NgToastService,
   ) {}
 
   private getAuthHeaders(): HttpHeaders {
@@ -49,7 +49,7 @@ export class CheckoutService {
         catchError((error) => {
           this.toast.danger('Failed to place order. Please try again.');
           return throwError(() => error);
-        })
+        }),
       );
   }
 
@@ -60,13 +60,13 @@ export class CheckoutService {
         { amount },
         {
           headers: this.getAuthHeaders(),
-        }
+        },
       )
       .pipe(
         catchError((error) => {
           this.toast.danger('Payment processing failed.');
           return throwError(() => error);
-        })
+        }),
       );
   }
 
@@ -128,9 +128,7 @@ export class CheckoutService {
     };
   }
 
-  processOrder(billingValues: any, paymentValues: any) {
-    console.log('payment details>>>>>', { billingValues, paymentValues });
-  }
+  processOrder(billingValues: any, paymentValues: any) {}
 
   private isValidEmail(email: string): boolean {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
