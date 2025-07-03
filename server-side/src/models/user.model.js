@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const UserSchema = new mongoose.Schema(
   {
     username: { type: String, required: true },
@@ -10,33 +10,34 @@ const UserSchema = new mongoose.Schema(
     city: { type: String },
     password: { type: String },
     googleId: { type: String },
-    favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+    favourites: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
     isDeleted: {
       type: Boolean,
       default: false,
     },
     role: {
       type: String,
-      enum: ["USER", "ADMIN","OWNER"],
-      default: "ADMIN",
+
+      enum: ['USER', 'ADMIN', 'OWNER'],
+      default: 'USER',
     },
     thumbnail: {
       type: String,
       default:
-        "https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png",
+        'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png',
     },
     gender: {
       type: String,
-      enum: ["male", "female", "N/A","unknown"],
-      default: "N/A",
+      enum: ['male', 'female', 'N/A', 'unknown'],
+      default: 'N/A',
     },
     resetToken: String,
     resetTokenExpiry: Date,
-  
-      status: {
+
+    status: {
       type: String,
-      enum: ["pending", "active", "inactive"],
-      default: "inactive",
+      enum: ['pending', 'active', 'inactive'],
+      default: 'inactive',
     },
     invitationToken: {
       type: String,
@@ -47,11 +48,11 @@ const UserSchema = new mongoose.Schema(
       select: false,
     },
     permissions: {
-      type: [String], 
-      default: [], 
+      type: [String],
+      default: [],
     },
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model('User', UserSchema);

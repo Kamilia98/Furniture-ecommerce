@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const currency = require('../models/settings/currency.model');
 const ALLOWED_COLORS = [
   { name: 'Black', hex: '#000000' },
   { name: 'White', hex: '#FFFFFF' },
@@ -135,5 +136,4 @@ ProductSchema.pre('save', function (next) {
   });
   next();
 });
-
 module.exports = mongoose.model('Product', ProductSchema);

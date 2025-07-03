@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const rateLimit = require('express-rate-limit');
 require('dotenv').config();
+const helmet = require('helmet');
 
 // Scripts to run
 require('./src/middlewares/passport.middleware');
@@ -47,10 +49,23 @@ const verifyToken = require("./src/middlewares/auth.middleware");
 connectDB();
 
 // Middlewares
-app.use(cors());
+app.use(
+  cors({
+    origin: [process.env.CLIENT_DOMAIN || 'http://localhost:3000'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  })
+);
 app.use(express.json());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: 'draft-8',
+  legacyHeaders: false,
+});
 app.use(express.urlencoded({ extended: true }));
-
+app.use(limiter);
+app.use(helmet());
 app.get('/', (req, res) => {
   res.json('You need furniture? Here’s Furniro!');
 });
