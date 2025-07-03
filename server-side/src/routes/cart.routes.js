@@ -11,10 +11,39 @@ const verifyToken = require('../middlewares/auth.middleware');
 
 // router.use(limiter);
 
-router.route('/').get(verifyToken, cartController.getUserCart); // GET User Cart
+/**
+ * @swagger
+ * tags:
+ *   name: Cart
+ *   description: User cart management
+ */
+
+/**
+ * @swagger
+ * /cart:
+ *   get:
+ *     summary: Get user cart
+ *     tags: [Cart]
+ *     responses:
+ *       200:
+ *         description: User cart details
+ *   post:
+ *     summary: Add items to cart
+ *     tags: [Cart]
+ *     responses:
+ *       201:
+ *         description: Items added to cart
+ *   patch:
+ *     summary: Update user cart
+ *     tags: [Cart]
+ *     responses:
+ *       200:
+ *         description: Cart updated
+ */
+router.route('/').get(verifyToken, cartController.getUserCart);
 router
   .route('/')
-  .post(verifyToken, cartController.addToCart) // Add Items
+  .post(verifyToken, cartController.addToCart)
   .patch(verifyToken, cartController.updateCart);
 
 module.exports = router;

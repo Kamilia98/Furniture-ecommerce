@@ -11,6 +11,23 @@ const verifyToken = require('../middlewares/auth.middleware');
 
 // router.use(limiter);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Checkout
+ *   description: Checkout and order placement
+ */
+
+/**
+ * @swagger
+ * /checkout:
+ *   post:
+ *     summary: Place an order
+ *     tags: [Checkout]
+ *     responses:
+ *       201:
+ *         description: Order placed
+ */
 router.route('/').post(verifyToken, checkoutController.placeOrder);
 
 module.exports = router;

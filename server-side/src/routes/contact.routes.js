@@ -10,6 +10,23 @@ const contactController = require('../controllers/contact.controller');
 
 // router.use(limiter);
 
+/**
+ * @swagger
+ * tags:
+ *   name: Contact
+ *   description: Contact form and messages
+ */
+
+/**
+ * @swagger
+ * /contact/send-message:
+ *   post:
+ *     summary: Send a contact message
+ *     tags: [Contact]
+ *     responses:
+ *       200:
+ *         description: Message sent
+ */
 router.post('/send-message', contactController.sendMessage);
 
 module.exports = router;

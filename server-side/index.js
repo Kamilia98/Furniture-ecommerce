@@ -9,18 +9,17 @@ require('./src/middlewares/passport.middleware');
 
 const passport = require('passport');
 
-/ * * * * Utils * * * * /;
+/* **** Utils **** */
 const httpStatusText = require('./src/utils/httpStatusText');
-/ * * * * End Utils * * * * /;
+/* **** End Utils **** */
 
 const PORT = process.env.PORT || 5000;
 app.use(passport.initialize());
-/ * * * * DB * * * /;
+/* **** DB **** */
 const connectDB = require('./src/config/db');
-/ * * * * End Db * * * * /;
+/* **** End Db **** */
 
-/ * * * * Router imports * * * * /;
-
+/* **** Router imports **** */
 const registerationRouter = require('./src/routes/registration.routes');
 const userRouter = require('./src/routes/user.routes');
 const categoreRouter = require('./src/routes/category.routes');
@@ -37,11 +36,11 @@ const shippingMethods = require('./src/routes/shippingMethods.routes');
 const currency = require('./src/routes/currency.routes');
 const language = require('./src/routes/language.routes');
 const dashBoardRouter = require('./src/routes/dashboard.routes');
-const allowedTo = require("./src/middlewares/allowTo.middleware");
-const verifyToken = require("./src/middlewares/auth.middleware");
-
-
-/ * * * * End Router imports * * * * /;
+const allowedTo = require('./src/middlewares/allowTo.middleware');
+const verifyToken = require('./src/middlewares/auth.middleware');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./src/config/swagger');
+/* **** End Router imports **** */
 
 // Connect to MongoDB
 connectDB();
@@ -52,11 +51,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.get('/', (req, res) => {
-  res.json('You need furniture? Here’s Furniro!');
+  res.json({ message: "You need furniture? Here's Furniro!" });
 });
 
-/ * * * Routes * * * /;
-
+/* **** Routes **** */
 app.use('/auth', registerationRouter);
 app.use('/users', userRouter);
 app.use('/categories', categoreRouter);
@@ -73,8 +71,10 @@ app.use('/dashboard', dashBoardRouter);
 app.use('/shippings', shippingMethods);
 app.use('/currency', currency);
 app.use('/language', language);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+/* **** End Routes **** */
 
-/ * * * Global MiddleWare * * * /;
+/* **** Global MiddleWare **** */
 app.all('*', (req, res, next) => {
   return res.status(404).json({
     status: httpStatusText.ERROR,
